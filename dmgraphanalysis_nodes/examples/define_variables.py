@@ -730,11 +730,9 @@ louvain_path='/home/david/Packages/Louvain_20110526'
 louvain_bin_path=louvain_path + '/bin'
 
 #### Radatools disrectory
-radatools_path ='/home/david/Packages/radatools/radatools-3.2-linux32'
+radatools_path ='/home/david/Packages/radatools/radatools-3.2-linux32/'
 
-radatools_prep_path=radatools_path + '/01-Prepare_Network'
-
-radatools_comm_path=radatools_path + "/02-Find_Communities"
+#radatools_comm_path=radatools_path + "/02-Find_Communities"
 
 #### Graph analysis from Z_list/Z_Louvain (now where Z thresholding is defined)
 
