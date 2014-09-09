@@ -1,0 +1,7 @@
+*.pyc
+*.mat
+*~
+crash*
+*.xls
+*.xlsx
+

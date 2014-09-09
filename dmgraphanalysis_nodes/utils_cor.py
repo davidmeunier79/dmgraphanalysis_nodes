@@ -9,27 +9,27 @@ import sys, os
 from scipy import stats
 #import pandas as pd
 
-import itertools as it
+#import itertools as it
 
-import scipy.io
-import scipy.spatial.distance as dist
-#import math
-import scipy.signal as filt
-import scipy.sparse as sp 
-import scipy.cluster.hierarchy as hie
+#import scipy.io
+#import scipy.spatial.distance as dist
+##import math
+#import scipy.signal as filt
+#import scipy.sparse as sp 
+#import scipy.cluster.hierarchy as hie
 
 
-import time
+#import time
 
-from collections import Counter
+#from collections import Counter
 
-from nipype.utils.filemanip import split_filename as split_f
+#from nipype.utils.filemanip import split_filename as split_f
     
-from dipy.align.aniso2iso import resample
+#from dipy.align.aniso2iso import resample
 
-from sets import Set
+#from sets import Set
 
-from utils_dtype_coord import *
+#from utils_dtype_coord import *
 
 #def return_regressor(spm_mat_file,regressor_name):
 
@@ -1751,23 +1751,6 @@ def regress_filter_normalize_parameters(data_matrix,covariates):
     
 ###################################### Formatting data for external community detection algorithm (radatools) ##############################
         
-    
-#def export_List_net_from_list(Z_List_file,Z_list):
-    
-    
-    #print Z_list.shape
-    
-    ##print "saving file " + Z_List_file
-    
-    #np.savetxt(Z_List_file,Z_list,fmt = '%d %d %d')
-       
-
-#def read_List_net_file(Z_List_file):
-
-    #Z_list = np.loadtxt(Z_List_file,dtype = 'int64')
-    
-    #return Z_list
-    
 ############# modular partition file
     
     

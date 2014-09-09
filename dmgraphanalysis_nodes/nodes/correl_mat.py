@@ -23,7 +23,6 @@ import os
 import nibabel as nib
 
 from dmgraphanalysis_nodes.utils_plot import plot_signals,plot_sep_signals
-from dmgraphanalysis_nodes.utils_cor import mean_select_mask_data
         
 ######################################################################################## ExtractTS ##################################################################################################################
 
@@ -163,6 +162,8 @@ class ExtractTS(BaseInterface):
         return outputs
 
 ############################################################################################### ExtractMeanTS #####################################################################################################
+
+from dmgraphanalysis_nodes.utils_cor import mean_select_mask_data
 
 class ExtractMeanTSInputSpec(BaseInterfaceInputSpec):
     mask_file = File(exists=True, desc='mask file where all voxels belonging to the selected region have index 1', mandatory=True)
