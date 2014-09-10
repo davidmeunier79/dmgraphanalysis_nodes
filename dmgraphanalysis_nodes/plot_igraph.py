@@ -13,7 +13,7 @@ import cairo as ca
 
 import math
 
-from dmgraphanalysis_nodes.utils_igraph import igraph_colors
+from dmgraphanalysis_nodes.utils_igraph import igraph_colors,project2D_np
 
 from dmgraphanalysis_nodes.utils_dtype_coord import where_in_coords,find_index_in_coords
 from dmgraphanalysis_nodes.utils_igraph import add_non_null_labels,return_base_weighted_graph
@@ -1371,6 +1371,7 @@ def plot_3D_igraph_all_modules_coomatrix_rel_coords(community_vect,node_rel_coor
     
 def plot_3D_igraph_single_modules_coomatrix_rel_coords(community_vect,node_rel_coords,coomatrix, node_labels = [],nb_min_nodes_by_module = 100):
     
+    
     import collections
     
     dist_com = collections.Counter(community_vect)
@@ -1382,54 +1383,25 @@ def plot_3D_igraph_single_modules_coomatrix_rel_coords(community_vect,node_rel_c
         
     print community_vect.shape
     print node_rel_coords.shape
-    
     print coomatrix.shape
     
     ########### threshoding the number of dictictly displayed modules with the number of igraph colors
     
     community_vect[community_vect > len(igraph_colors)-1] = len(igraph_colors)-1
-    
-    
-    dist_com = collections.Counter(community_vect)
-    
-    print dist_com
-    
-    ########### extract edge list (with coords belonging to )
-    
+        
     print np.unique(community_vect)
     
     Z_list_all_modules_files = []
     
-    mat = coomatrix.todense()
+    ########### extract edge list (with coords belonging to )
     
-    mat = mat + np.transpose(mat)
+    g_all = ig.Graph(zip(coomatrix.row, coomatrix.col), directed=False, edge_attrs={'weight': coomatrix.data})
     
-    print np.min(mat), np.max(mat)
+    #### node_labels 
+    add_non_null_labels(g_all,node_labels)
     
-    g_all= ig.Graph.Weighted_Adjacency(matrix = mat.tolist(), mode=ig.ADJ_UNDIRECTED, attr="weight",loops = False)
-        
-        
-    ### node_labels 
-    null_degree_index, = np.where(np.array(g_all.degree()) == 0)
+    print g_all
     
-    #print null_degree_index
-    
-    np_labels = np.array(node_labels,dtype = 'string')
-    
-    np_labels[null_degree_index] = ""
-    
-    #print np_labels
-    
-    if len(node_labels) == len(g_all.vs):
-    
-        print "$$$$$$$$$$$$$$$$ Labels $$$$$$$$$$$$$$$$$$$$$$$$"
-        
-        g_all.vs['label'] = np_labels.tolist()
-        
-        g_all.vs['label_size'] = 15
-    
-        g_all.vs['label_dist'] = 2
-        
     for mod_index in np.unique(community_vect):
     
         print "Module index %d has %d nodes"%(mod_index,np.sum(community_vect == mod_index))
@@ -1444,6 +1416,8 @@ def plot_3D_igraph_single_modules_coomatrix_rel_coords(community_vect,node_rel_c
         edge_mod_id = []
         edge_col_intra = []
         
+        print g_sel
+        
         for u,v,w in zip(coomatrix.row,coomatrix.col,coomatrix.data):
             
             if (community_vect[u] == community_vect[v] and community_vect[u] == mod_index):
@@ -1451,9 +1425,6 @@ def plot_3D_igraph_single_modules_coomatrix_rel_coords(community_vect,node_rel_c
                 edge_col_intra.append(igraph_colors[community_vect[u]])
             else: 
             
-                print u,v
-                
-                print g_sel
                 eid = g_sel.get_eid(u,v)
                 
                 edge_mod_id.append(eid)
