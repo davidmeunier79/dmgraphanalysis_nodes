@@ -56,7 +56,6 @@ def export_List_net_from_list(Z_List_file,Z_list):
     
 def read_lol_file(lol_file):
 
-    
     with open(lol_file,'r') as f :
         
         lines = f.readlines()[4:] 
@@ -96,43 +95,42 @@ def read_lol_file(lol_file):
         f.close()
         
     return community_vect
-
     
-#def read_Pajek_corres_nodes(Pajek_net_file):
+def read_Pajek_corres_nodes(Pajek_net_file):
 
-    #with open(Pajek_net_file,'r') as f :
+    with open(Pajek_net_file,'r') as f :
         
-        #lines = f.readlines()
+        lines = f.readlines()
         
-        #line_nb_elements = lines[0]
+        line_nb_elements = lines[0]
         
-        #nb_elements = int(line_nb_elements.split(' ')[1])
+        nb_elements = int(line_nb_elements.split(' ')[1])
         
-        ##print nb_elements
+        #print nb_elements
         
-        #node_corres = np.empty((nb_elements),dtype = 'int')
+        node_corres = np.empty((nb_elements),dtype = 'int')
         
-        #lines = lines[1:(nb_elements+1)]
+        lines = lines[1:(nb_elements+1)]
         
-        ##print lines
+        #print lines
         
-        #for i,line in enumerate(lines):
-            ##print line
+        for i,line in enumerate(lines):
+            #print line
             
-            #new_index,old_index = line.split(' ')
+            new_index,old_index = line.split(' ')
             
-            ##print i+1, new_index, old_index
+            #print i+1, new_index, old_index
             
-            ##node_corres[i] = old_index
+            #node_corres[i] = old_index
             
-            #if (i+1) == int(new_index) :
-                #node_corres[i] = int(old_index)-1
-            #else:
-                #print "Warning, incompatible indexes {} {}".format(new_index,i+1)
+            if (i+1) == int(new_index) :
+                node_corres[i] = int(old_index)-1
+            else:
+                print "Warning, incompatible indexes {} {}".format(new_index,i+1)
             
-        #f.close()
+        f.close()
         
-    #return node_corres
+    return node_corres
     
 ####### from modified Pajek file, read coords
 

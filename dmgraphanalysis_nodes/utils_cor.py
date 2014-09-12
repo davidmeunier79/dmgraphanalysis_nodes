@@ -7,14 +7,18 @@ import sys, os
 
 
 from scipy import stats
+import numpy as np
+
 #import pandas as pd
 
-#import itertools as it
+import itertools as it
 
 #import scipy.io
 #import scipy.spatial.distance as dist
 ##import math
-#import scipy.signal as filt
+
+import scipy.signal as filt
+
 #import scipy.sparse as sp 
 #import scipy.cluster.hierarchy as hie
 
@@ -29,7 +33,7 @@ from scipy import stats
 
 #from sets import Set
 
-#from utils_dtype_coord import *
+from utils_dtype_coord import *
 
 #def return_regressor(spm_mat_file,regressor_name):
 
@@ -1450,74 +1454,35 @@ def regress_filter_normalize_parameters(data_matrix,covariates):
     
 ###################################### coclassification matrix 
 
-##def return_coclass_mat(community_vect,corres_coords,gm_mask_coords):
+def return_coclass_mat(community_vect,corres_coords,gm_mask_coords):
 
-    ##if (corres_coords.shape[0] != community_vect.shape[0]):
-        ##print "warning, length of corres_coords and community_vect are imcompatible {} {}".format(corres_coords.shape[0],community_vect.shape[0])
+    print corres_coords.shape[0],community_vect.shape[0]
     
-    ##where_in_corres = return_where_in_corres(corres_coords.tolist(),gm_mask_coords.tolist())
+    if (corres_coords.shape[0] != community_vect.shape[0]):
+        print "warning, length of corres_coords and community_vect are imcompatible {} {}".format(corres_coords.shape[0],community_vect.shape[0])
     
-    ##print where_in_corres
+    where_in_gm = where_in_coords(corres_coords,gm_mask_coords)
     
-    ##if (where_in_corres.shape[0] != gm_mask_coords.shape[0]):
-        ##print "warning, length of where_in_corres and gm_mask_coords are imcompatible {} {}".format(where_in_corres.shape[0],gm_mask_coords.shape[0])
+    print where_in_gm
     
+    print np.min(where_in_gm),np.max(where_in_gm),where_in_gm.shape
     
-    ##coclass_mat = np.zeros((gm_mask_coords.shape[0],gm_mask_coords.shape[0]),dtype = int)
+    if (where_in_gm.shape[0] != community_vect.shape[0]):
+        print "warning, length of where_in_gm and community_vect are imcompatible {} {}".format(where_in_gm.shape[0],community_vect.shape[0])
+    
+    coclass_mat = np.zeros((gm_mask_coords.shape[0],gm_mask_coords.shape[0]),dtype = int)
         
-    ##for i,j in it.combinations(range(coclass_mat.shape[0]),2):
+    possible_edge_mat = np.zeros((gm_mask_coords.shape[0],gm_mask_coords.shape[0]),dtype = int)
     
-        ##if not (np.isnan(where_in_corres[i]) or np.isnan(where_in_corres[j])):
+    for i,j in it.combinations(range(where_in_gm.shape[0]),2):
+    
+        coclass_mat[where_in_gm[i],where_in_gm[j]] = np.int(community_vect[i] == community_vect[j])
+        coclass_mat[where_in_gm[j],where_in_gm[i]] = np.int(community_vect[i] == community_vect[j])
         
-            ##coclass_mat[i,j] = np.int(community_vect[where_in_corres[i]] == community_vect[where_in_corres[j]])
+        possible_edge_mat[where_in_gm[i],where_in_gm[j]] = 1
+        possible_edge_mat[where_in_gm[j],where_in_gm[i]] = 1
         
-    ##return coclass_mat
-    
-    
-#def return_coclass_mat(community_vect,corres_coords,gm_mask_coords):
-
-    #print corres_coords.shape[0],community_vect.shape[0]
-    
-    #if (corres_coords.shape[0] != community_vect.shape[0]):
-        #print "warning, length of corres_coords and community_vect are imcompatible {} {}".format(corres_coords.shape[0],community_vect.shape[0])
-    
-    ##print corres_coords
-    
-    ##print gm_mask_coords
-    
-    #where_in_gm = where_in_coords(corres_coords,gm_mask_coords)
-    
-    #print where_in_gm
-    
-    ##0/0
-    #print np.min(where_in_gm),np.max(where_in_gm),where_in_gm.shape
-    
-    
-    
-    
-    ##find_in_corres = find_index_in_coords(gm_mask_coords,corres_coords)
-    
-    ##print find_in_corres
-    
-    #if (where_in_gm.shape[0] != community_vect.shape[0]):
-        #print "warning, length of where_in_gm and community_vect are imcompatible {} {}".format(where_in_gm.shape[0],community_vect.shape[0])
-    
-    #coclass_mat = np.zeros((gm_mask_coords.shape[0],gm_mask_coords.shape[0]),dtype = int)
-        
-    #possible_edge_mat = np.zeros((gm_mask_coords.shape[0],gm_mask_coords.shape[0]),dtype = int)
-    ##print np.equal(community_vect,community_vect).shape
-    
-    ##print coclass_mat[where_in_gm][:,where_in_gm].shape
-    
-    #for i,j in it.combinations(range(where_in_gm.shape[0]),2):
-    
-        #coclass_mat[where_in_gm[i],where_in_gm[j]] = np.int(community_vect[i] == community_vect[j])
-        #coclass_mat[where_in_gm[j],where_in_gm[i]] = np.int(community_vect[i] == community_vect[j])
-        
-        #possible_edge_mat[where_in_gm[i],where_in_gm[j]] = 1
-        #possible_edge_mat[where_in_gm[j],where_in_gm[i]] = 1
-        
-    #return coclass_mat,possible_edge_mat
+    return coclass_mat,possible_edge_mat
     
     
 

@@ -1604,6 +1604,72 @@ igraph_colors = generate_igraph_colors(nb_igraph_colors)
 RGB_colors = generate_RGB_colors(nb_igraph_colors)
 #igraph_colors = ['red','blue','green','yellow','brown','purple','orange','black']
 
+
+def add_vertex_colors(g_all,community_vect,list_colors = igraph_colors):
+    
+    vertex_col = []
+    vertex_label_col = []
+    
+    for i,v in enumerate(g_all.vs):
+        mod_index = community_vect[i]
+        if (mod_index != len(list_colors)-1):
+            vertex_col.append(list_colors[mod_index])
+            vertex_label_col.append(list_colors[mod_index])
+        else:
+            vertex_col.append("lightgrey")
+            vertex_label_col.append(list_colors[mod_index])
+    
+    g_all.vs['color'] = vertex_col
+    g_all.vs['label_color'] = vertex_label_col
+    
+def  create_module_edge_list(coomatrix,community_vect,list_colors = igraph_colors):
+    
+    ########### threshoding the number of dictictly displayed modules with the number of igraph colors
+    
+    community_vect[community_vect > len(igraph_colors)-1] = len(igraph_colors)-1
+    
+    ########### extract edge list (with coords belonging to )
+    
+    print np.unique(community_vect)
+    
+    edge_col_inter = []
+    edge_list_inter = []
+    edge_weights_inter = []
+    
+    edge_col_intra = []
+    edge_list_intra = []
+    edge_weights_intra = []
+    
+    for u,v,w in zip(coomatrix.row,coomatrix.col,coomatrix.data):
+        
+        if (community_vect[u] == community_vect[v]):
+            
+            edge_list_intra.append((u,v))
+            edge_weights_intra.append(w)
+            edge_col_intra.append(igraph_colors[community_vect[u]])
+        else:
+            
+            edge_list_inter.append((u,v))
+            edge_weights_inter.append(w)
+            edge_col_inter.append("lightgrey")
+            
+            
+    edge_list = edge_list_inter + edge_list_intra
+    
+    edge_weights = edge_weights_inter + edge_weights_intra 
+    
+    edge_col = edge_col_inter + edge_col_intra
+    
+    
+    g_all= ig.Graph(edge_list)
+    
+    g_all.es["weight"] = edge_weights
+    
+    g_all.es['color'] = edge_col
+    #print g_all
+    
+    return g_all
+    
 ######################################## igraph 3D #######################################
      
 def project2D_np(node_coords, angle_alpha = 0.0, angle_beta = 0.0):

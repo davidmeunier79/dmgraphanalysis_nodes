@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+Support function to handle coordinates as list of single elements
+specially convenient for use of 'in' with lists
+"""
+
 import numpy as np
 
 coord_dt = np.dtype([('x', int), ('y', int), ('z', int)])

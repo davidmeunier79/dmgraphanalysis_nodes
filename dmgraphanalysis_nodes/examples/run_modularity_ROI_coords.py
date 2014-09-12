@@ -31,10 +31,10 @@ def create_inforsource():
     infosource = pe.Node(interface=IdentityInterface(fields=['subject_num', 'cond']),name="infosource")
     
     ### all subjects in one go
-    #infosource.iterables = [('subject_num', subject_nums),('cond',epi_cond)]
+    infosource.iterables = [('subject_num', subject_nums),('cond',epi_cond)]
     
     ## testing
-    infosource.iterables = [('subject_num', ['S08']),('cond',['Odor_Hit-WWW'])]
+    #infosource.iterables = [('subject_num', ['S08']),('cond',['Odor_Hit-WWW'])]
     
     return infosource
     
@@ -154,7 +154,7 @@ def create_wei_sig_modularity_workflow():
     plot_igraph_modules_rada = pe.Node(interface = PlotIGraphModules(),name='plot_igraph_modules_rada')
     
     #Function(input_names=['rada_lol_file','Pajek_net_file','coords_file'],output_names = ['Z_list_single_modules_files,Z_list_all_modules_files'],function = plot_igraph_modules_conf_cor_mat_rada),name='plot_igraph_modules_rada')
-    #plot_igraph_modules_rada.inputs.gm_mask_coords_file = coord_rois_file
+    plot_igraph_modules_rada.inputs.labels_file = ROI_coords_labels_file
 
     main_workflow.connect(prep_rada, 'Pajek_net_file',plot_igraph_modules_rada,'Pajek_net_file')
     main_workflow.connect(community_rada, 'rada_lol_file',plot_igraph_modules_rada,'rada_lol_file')

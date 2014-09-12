@@ -27,11 +27,11 @@ def create_inforsource():
     infosource = pe.Node(interface=IdentityInterface(fields=['subject_num', 'cond']),name="infosource")
     
     ### all subjects in one go
-    #infosource.iterables = [('subject_num', subject_nums),('cond',epi_cond)]
+    infosource.iterables = [('subject_num', subject_nums),('cond',epi_cond)]
     
     ## test
     #infosource.iterables = [('subject_num', ['S02']),('cond',epi_cond)]
-    infosource.iterables = [('subject_num', ['S08']),('cond',['Odor_Hit-WWW'])]
+    #infosource.iterables = [('subject_num', ['S02']),('cond',['Odor_Hit-WWW'])]
     
     return infosource
     
