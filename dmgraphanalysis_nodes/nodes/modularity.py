@@ -89,6 +89,86 @@ class ComputeNetList(BaseInterface):
     
         return outputs
     
+######################################################################################## ComputeIntNetList ##################################################################################################################
+
+from dmgraphanalysis_nodes.utils_net import return_int_net_list
+from dmgraphanalysis_nodes.utils_net import export_List_net_from_list,export_Louvain_net_from_list
+
+class ComputeIntNetListInputSpec(BaseInterfaceInputSpec):
+    
+    int_mat_file = File(exists=True, desc='Integer matrix', mandatory=True)
+    
+    #coords_file = File(exists=True, desc='Corresponding coordiantes', mandatory=True)
+    
+    threshold = traits.Int(exists = True, desc = "Interger Value (optional) for thresholding", mandatory = False) 
+    
+class ComputeIntNetListOutputSpec(TraitedSpec):
+    
+    net_List_file = File(exists=True, desc="net list for radatools")
+    
+    #net_Louvain_file = File(exists=True, desc="net list for Louvain")
+    
+class ComputeIntNetList(BaseInterface):
+    
+    """
+    Format integer matrix to a list format i j weight 
+    Option for thresholding 
+    """
+
+    input_spec = ComputeIntNetListInputSpec
+    output_spec = ComputeIntNetListOutputSpec
+
+    def _run_interface(self, runtime):
+                
+        int_mat_file = self.inputs.int_mat_file
+        #coords_file = self.inputs.coords_file
+        threshold = self.inputs.threshold
+        
+        
+        print "loading int_mat_file"
+        
+        int_mat = np.load(int_mat_file)
+        
+        #print 'load coords'
+        
+        #coords = np.array(np.loadtxt(coords_file),dtype = int)
+        
+        ## compute int_list 
+        
+        if not isdefined(threshold):
+            
+            threshold = 0
+        
+        
+        int_list = return_int_net_list(int_mat,threshold)
+            
+        ## int correl_mat as list of edges
+        
+        print "saving int_list as list of edges"
+        
+        net_List_file = os.path.abspath('int_List.txt')
+        
+        export_List_net_from_list(net_List_file,int_list)
+        
+        #### int correl_mat as Louvain format
+        #print "saving int_list as Louvain format"
+        
+        #net_Louvain_file = os.path.abspath('int_Louvain.txt')
+        
+        #export_Louvain_net_from_list(net_Louvain_file,int_list,coords)
+        
+        return runtime
+        
+        
+    def _list_outputs(self):
+        
+        outputs = self._outputs().get()
+        
+        outputs["net_List_file"] = os.path.abspath("int_List.txt")
+        #outputs["net_Louvain_file"] = os.path.abspath("int_Louvain.txt")
+    
+        return outputs
+    
 ######################################################################################## PrepRada ##################################################################################################################
 
 from dmgraphanalysis_nodes.utils_net import return_net_list
@@ -270,7 +350,7 @@ from dmgraphanalysis_nodes.utils_net import read_lol_file,read_Pajek_corres_node
 #,compute_label_mat
 #from dmgraphanalysis_nodes.utils_cor import return_mod_mask_corres
 
-from dmgraphanalysis_nodes.plot_igraph import plot_3D_igraph_all_modules
+from dmgraphanalysis_nodes.plot_igraph import plot_3D_igraph_all_modules,plot_3D_igraph_single_modules
 #from dmgraphanalysis_nodes.plot_igraph import plot_3D_igraph_single_modules_coomatrix_rel_coords
 
 import csv
@@ -284,7 +364,7 @@ class PlotIGraphModulesInputSpec(BaseInterfaceInputSpec):
     
 class PlotIGraphModulesOutputSpec(TraitedSpec):
     
-    #Z_list_single_modules_files = traits.List(File(exists=True), desc="graphical representation in space of each module independantly")
+    Z_list_single_modules_files = traits.List(File(exists=True), desc="graphical representation in space of each module independantly")
     
     Z_list_all_modules_files = traits.List(File(exists=True), desc="graphical representation in space from different point of view of all modules together")
     
@@ -340,8 +420,10 @@ class PlotIGraphModules(BaseInterface):
             
             print 'extracting node coords'
             
-            with open(coords_file, 'Ur') as f:
-                coords_list = list(tuple(map(float,rec))[0:2] for rec in csv.reader(f, delimiter=' '))
+            #with open(coords_file, 'Ur') as f:
+                #coords_list = list(tuple(map(int,rec))[0:2] for rec in csv.reader(f, delimiter=' '))
+            
+            
             
             coords = np.array(np.loadtxt(coords_file),dtype = 'int64')
             print coords.shape
@@ -369,10 +451,10 @@ class PlotIGraphModules(BaseInterface):
         
         print "plotting conf_cor_mat_modules_file with igraph"
         
-        #Z_list_single_modules_files = plot_3D_igraph_single_modules_coomatrix_rel_coords(community_vect,node_coords,Z_list,nb_min_nodes_by_module = 5)
+        Z_list_single_modules_files = plot_3D_igraph_single_modules(community_vect,Z_list,node_coords,node_labels,nb_min_nodes_by_module = 3)
         Z_list_all_modules_files = plot_3D_igraph_all_modules(community_vect,Z_list,node_coords,node_labels)
         
-        #self.Z_list_single_modules_files = Z_list_single_modules_files
+        self.Z_list_single_modules_files = Z_list_single_modules_files
         self.Z_list_all_modules_files = Z_list_all_modules_files
         
         return runtime
@@ -381,7 +463,7 @@ class PlotIGraphModules(BaseInterface):
         
         outputs = self._outputs().get()
         
-        #outputs["Z_list_single_modules_files"] = self.Z_list_single_modules_files
+        outputs["Z_list_single_modules_files"] = self.Z_list_single_modules_files
         outputs["Z_list_all_modules_files"] =self.Z_list_all_modules_files 
         
         return outputs

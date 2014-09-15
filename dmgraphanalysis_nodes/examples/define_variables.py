@@ -780,9 +780,9 @@ else:
 ## hierarchical clustering method for reordering coclass matrices
 method_hie = 'ward'
 
-coclass_analysis_name = "Coclass_" + model_name + "_rada_" + cond
+#coclass_analysis_name = "Coclass_" + model_name + "_rada_" + cond
 #coclass_analysis_name = "Coclass_" + model_name + "_diff_cond_" + cond
-#coclass_analysis_name = "Coclass_" + model_name + "_diff_event_" + cond
+coclass_analysis_name = "Coclass_" + model_name + "_diff_event_" + cond
 
 #coclass_analysis_name = "Coclass_" + model_name + "_rada_filter_" + cond
 #coclass_analysis_name = "Coclass_" + model_name + "_rada_filter_diff_cond_" + cond

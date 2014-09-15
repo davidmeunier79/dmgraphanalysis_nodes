@@ -662,39 +662,7 @@ def regress_filter_normalize_parameters(data_matrix,covariates):
     #print "Sparse Weighted correlation thresholding computation took " + str(t3-t2) + "s"
     
     #return net_list
-    
-#def return_int_net_list(int_mat):
-
-    #t2 = time.time()
-    
-    #x_sig,y_sig = np.where(int_mat != 0)
-    
-    #net_list = np.array(np.column_stack((x_sig + 1,y_sig + 1,int_mat[x_sig,y_sig])),dtype = 'int64')
-    
-    #print net_list.shape
-    
-    #t3 = time.time()
-    
-    #print "Sparse Weighted correlation thresholding computation took " + str(t3-t2) + "s"
-    
-    #return net_list
-    
-#def return_thr_int_net_list(int_mat,min_int):
-
-    #t2 = time.time()
-    
-    #x_sig,y_sig = np.where(int_mat > min_int)
-    
-    #net_list = np.array(np.column_stack((x_sig + 1,y_sig + 1,int_mat[x_sig,y_sig])),dtype = 'int64')
-    
-    #print net_list.shape
-    
-    #t3 = time.time()
-    
-    #print "Sparse Weighted correlation thresholding computation took " + str(t3-t2) + "s"
-    
-    #return net_list
-    
+        
 ######################## weighted correlation matrix
     
 #def compute_weighted_cor_mat_non_zeros(ts_mat,regressor_vect):

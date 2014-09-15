@@ -8,7 +8,9 @@ sys.path.append('../irm_analysis')
 
 from  define_variables import *
 
-from dmgraphanalysis_nodes.nodes.coclass import PrepareCoclass,PlotCoclass,PlotIGraphCoclass
+from dmgraphanalysis_nodes.nodes.coclass import PrepareCoclass,PlotCoclass,PlotIGraphCoclass,DiffMatrices,PlotIGraphConjCoclass
+from dmgraphanalysis_nodes.nodes.modularity import ComputeIntNetList, PrepRada, CommRada, PlotIGraphModules
+
 
 #from dmgraphanalysis.modularity import prep_radatools,community_radatools,export_lol_mask_file
 #from dmgraphanalysis.modularity import plot_igraph_modules_coclass_rada,plot_igraph_modules_coclass_rada_forced_colors
@@ -120,7 +122,7 @@ def create_datasource_rada_cond_by_event():
     
 ######################################### Full analysis
     
-def run_rada_coclass_by_cond():
+def run_coclass_by_cond():
     
     #pairwise_subj_indexes = [pair for pair in it.combinations(['P06','P07','A08'],2)]
     
@@ -131,9 +133,9 @@ def run_rada_coclass_by_cond():
     
     infosource = pe.Node(interface=IdentityInterface(fields=['cond']),name="infosource")
     
-    infosource.iterables = [('cond', ['Odor_Hit-WWW'])]
+    #infosource.iterables = [('cond', ['Odor_Hit-WWW'])]
     #infosource.iterables = [('cond', ['Rec_Hit-WWW'])]
-    #infosource.iterables = [('cond', epi_cond)]
+    infosource.iterables = [('cond', epi_cond)]
     
     #### Data source
     #datasource = create_datasource_rada_by_cond_memory_signif_conf()
@@ -166,17 +168,9 @@ def run_rada_coclass_by_cond():
     main_workflow.connect(prepare_coclass, 'norm_coclass_matrix_file',plot_norm_coclass,'coclass_matrix_file')
     
     
-    
-    
-    
-    
-    
     plot_igraph_norm_coclass= pe.Node(interface = PlotIGraphCoclass(),name='plot_igraph_norm_coclass')
-    
-    #Function(input_names=['coclass_matrix_file','gm_mask_coords_file','threshold','labels_file'],output_names = ['plot_igraph_3D_sum_norm_coclass_matrix_file',],function = plot_igraph_coclass_matrix_labels
     plot_igraph_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
     plot_igraph_norm_coclass.inputs.threshold = 50
-    #plot_igraph_norm_coclass.inputs.threshold = 100
     plot_igraph_norm_coclass.inputs.labels_file = ROI_coords_labels_file
     
     main_workflow.connect(prepare_coclass, 'norm_coclass_matrix_file',plot_igraph_norm_coclass,'coclass_matrix_file')
@@ -201,260 +195,208 @@ def run_rada_coclass_by_cond():
     
     ########### serie 
     
-    #### compute Z_list from coclass matrix
-    #compute_list_norm_coclass = pe.Node(Function(input_names=['coclass_matrix_file','threshold'],output_names = ['net_list_file'],function = norm_coclass_to_net_list_thr),name='compute_list_norm_coclass')
-    #compute_list_norm_coclass.inputs.threshold = 50
-    
-    #main_workflow.connect(prepare_coclass,'norm_coclass_matrix_file',compute_list_norm_coclass,'coclass_matrix_file')
+    if 'rada' in split_coclass_analysis_name:
+        
+        ### compute Z_list from coclass matrix
+        compute_list_norm_coclass = pe.Node(interface = ComputeIntNetList(),name='compute_list_norm_coclass')
+        compute_list_norm_coclass.inputs.threshold = 50
+        
+        main_workflow.connect(prepare_coclass,'norm_coclass_matrix_file',compute_list_norm_coclass, 'int_mat_file')
+        
+        
+        #################################################### radatools ################################################################
 
-    #### prepare Z_list for radatools processing  
-    #prep_rada_norm_coclass = pe.Node(Function(input_names=['List_net_file','radatools_prep_path'],output_names = ['Pajek_net_file'],function = prep_radatools),name='prep_rada_norm_coclass')
-    #prep_rada_norm_coclass.inputs.radatools_prep_path = radatools_prep_path
-    
-    #main_workflow.connect(compute_list_norm_coclass, 'net_list_file', prep_rada_norm_coclass, 'List_net_file')
-    
-    #### compute community with radatools
-    #community_rada_norm_coclass = pe.Node(Function(input_names=['Pajek_net_file','optim_seq','radatools_comm_path'],output_names = ['rada_lol_file','rada_log_file'],function = community_radatools),name='community_rada_norm_coclass')
-    #community_rada_norm_coclass.inputs.optim_seq = "WN trfr 100"
-    ##community_rada_norm_coclass.inputs.optim_seq = "WN rfr 1"
-    #community_rada_norm_coclass.inputs.radatools_comm_path = radatools_comm_path
-    
-    #main_workflow.connect( prep_rada_norm_coclass, 'Pajek_net_file',community_rada_norm_coclass,'Pajek_net_file')
-    
-    #plot_igraph_modules_rada_norm_coclass = pe.Node(Function(input_names=['rada_lol_file','Pajek_net_file','gm_mask_coords_file','labels_file'],output_names = ['coclass_all_modules_file'],function = plot_igraph_modules_coclass_rada),name='plot_igraph_modules_rada_norm_coclass')
-    #plot_igraph_modules_rada_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
-    #plot_igraph_modules_rada_norm_coclass.inputs.labels_file = ROI_coords_labels_file
-    
-    #main_workflow.connect(prep_rada_norm_coclass, 'Pajek_net_file',plot_igraph_modules_rada_norm_coclass,'Pajek_net_file')
-    #main_workflow.connect(community_rada_norm_coclass, 'rada_lol_file',plot_igraph_modules_rada_norm_coclass,'rada_lol_file')
-    
-    
-    
+        ### prepare net_list for radatools processing  
+        prep_rada = pe.Node(interface = PrepRada(),name='prep_rada')
+        prep_rada.inputs.radatools_path = radatools_path
+        
+        main_workflow.connect(compute_list_norm_coclass, 'net_List_file', prep_rada, 'net_List_file')
+        
+        ### compute community with radatools
+        community_rada = pe.Node(interface = CommRada(), name='community_rada')
+        community_rada.inputs.optim_seq = radatools_optim
+        community_rada.inputs.radatools_path = radatools_path
+        
+        main_workflow.connect( prep_rada, 'Pajek_net_file',community_rada,'Pajek_net_file')
+        
+        
+        
+        #### plot_igraph_modules_rada_norm_coclass
+        
+        plot_igraph_modules_rada_norm_coclass = pe.Node(interface = PlotIGraphModules(),name='plot_igraph_modules_rada_norm_coclass')
+        
+        #Function(input_names=['rada_lol_file','Pajek_net_file','coords_file'],output_names = ['Z_list_single_modules_files,Z_list_all_modules_files'],function = plot_igraph_modules_conf_cor_mat_rada),name='plot_igraph_modules_rada_norm_coclass')
+        plot_igraph_modules_rada_norm_coclass.inputs.labels_file = ROI_coords_labels_file
+        plot_igraph_modules_rada_norm_coclass.inputs.coords_file = ROI_coords_MNI_coords_file
+        
+        main_workflow.connect(prep_rada, 'Pajek_net_file',plot_igraph_modules_rada_norm_coclass,'Pajek_net_file')
+        main_workflow.connect(community_rada, 'rada_lol_file',plot_igraph_modules_rada_norm_coclass,'rada_lol_file')
+        
+        
     #### Run workflow
-    main_workflow.write_graph('G_coclass_rada_by_cond_group_graph.dot',graph2use='flat', format = 'svg')    
+    main_workflow.write_graph('G_coclass_by_cond_group_graph.dot',graph2use='flat', format = 'svg')    
     main_workflow.config['execution'] = {'remove_unnecessary_outputs':'false'}
     
     main_workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 8})
     #main_workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 4})
     
-#def run_coclass_diff_cond():
+def run_coclass_diff_cond():
 
-    #main_workflow = Workflow(name= coclass_analysis_name)
-    #main_workflow.base_dir = nipype_analyses_path
+    main_workflow = Workflow(name= coclass_analysis_name)
+    main_workflow.base_dir = nipype_analyses_path
     
-    ##### infosource 
-    #infosource = pe.Node(interface=IdentityInterface(fields=['event']),name="infosource")
+    #### infosource 
+    infosource = pe.Node(interface=IdentityInterface(fields=['event']),name="infosource")
     
-    ##infosource.iterables = [('event', ['Odor'])]
-    #infosource.iterables = [('event', ['Odor','Rec','Recall'])]
+    #infosource.iterables = [('event', ['Odor'])]
+    infosource.iterables = [('event', ['Odor','Rec','Recall'])]
     
-    ##### Data source
-    ##datasource = create_datasource_rada_by_cond_signif_conf()
-    #datasource = create_datasource_rada_event_by_cond()
+    #### Data source
+    #datasource = create_datasource_rada_by_cond_signif_conf()
+    datasource = create_datasource_rada_event_by_cond()
     
-    #main_workflow.connect(infosource,'event',datasource,'event')
+    main_workflow.connect(infosource,'event',datasource,'event')
     
     ####################################### compute sum coclass and group based coclass matrices  #####################################################
     
-    ##### prepare_nbs_stats_rada
+    ##### prepare_coclass
+    prepare_coclass1 = pe.Node(interface = PrepareCoclass(),name='prepare_coclass1')
     
-    #prepare_coclass1 = pe.Node(Function(input_names=['mod_files','coords_files','node_corres_files','gm_mask_coords_file'],output_names = ['group_coclass_matrix_file','sum_coclass_matrix_file','sum_possible_edge_matrix_file','norm_coclass_matrix_file'],function = prepare_nbs_stats_rada),name='prepare_coclass1')
-    #prepare_coclass1.inputs.gm_mask_coords_file = ROI_coords_np_coords_file
+    #Function(input_names=['mod_files','coords_files','node_corres_files','gm_mask_coords_file'],output_names = ['group_coclass_matrix_file','sum_coclass_matrix_file','sum_possible_edge_matrix_file','norm_coclass_matrix_file'],function = prepare_nbs_stats_rada),name='prepare_coclass1')
+    prepare_coclass1.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
      
-    #main_workflow.connect(datasource, 'mod_files1',prepare_coclass1,'mod_files')
-    #main_workflow.connect(datasource, 'node_corres_files1',prepare_coclass1,'node_corres_files')
-    #main_workflow.connect(datasource, 'coords_files1',prepare_coclass1,'coords_files')
+    main_workflow.connect(datasource, 'mod_files1',prepare_coclass1,'mod_files')
+    main_workflow.connect(datasource, 'node_corres_files1',prepare_coclass1,'node_corres_files')
+    main_workflow.connect(datasource, 'coords_files1',prepare_coclass1,'coords_files')
     
     
-    #prepare_coclass2 = pe.Node(Function(input_names=['mod_files','coords_files','node_corres_files','gm_mask_coords_file'],output_names = ['group_coclass_matrix_file','sum_coclass_matrix_file','sum_possible_edge_matrix_file','norm_coclass_matrix_file'],function = prepare_nbs_stats_rada),name='prepare_coclass2')
-    #prepare_coclass2.inputs.gm_mask_coords_file = ROI_coords_np_coords_file
+    prepare_coclass2 = pe.Node(interface = PrepareCoclass(),name='prepare_coclass2')
+    
+    #Function(input_names=['mod_files','coords_files','node_corres_files','gm_mask_coords_file'],output_names = ['group_coclass_matrix_file','sum_coclass_matrix_file','sum_possible_edge_matrix_file','norm_coclass_matrix_file'],function = prepare_nbs_stats_rada),name='prepare_coclass2')
+    prepare_coclass2.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
      
-    #main_workflow.connect(datasource, 'mod_files2',prepare_coclass2,'mod_files')
-    #main_workflow.connect(datasource, 'node_corres_files2',prepare_coclass2,'node_corres_files')
-    #main_workflow.connect(datasource, 'coords_files2',prepare_coclass2,'coords_files')
+    main_workflow.connect(datasource, 'mod_files2',prepare_coclass2,'mod_files')
+    main_workflow.connect(datasource, 'node_corres_files2',prepare_coclass2,'node_corres_files')
+    main_workflow.connect(datasource, 'coords_files2',prepare_coclass2,'coords_files')
     
     ######### norm coclass
     
-    #### substract matrix
-    #diff_norm_coclass = pe.Node(Function(input_names=['mat_file1','mat_file2'],output_names = ['diff_mat_file'],function = diff_matrix),name='diff_coclass')
+    ### substract matrix
+    diff_norm_coclass = pe.Node(interface = DiffMatrices(),name='diff_coclass')
+    #Function(input_names=['mat_file1','mat_file2'],output_names = ['diff_mat_file'],function = diff_matrix),name='diff_coclass')
     
-    #main_workflow.connect(prepare_coclass1,'norm_coclass_matrix_file',diff_norm_coclass,'mat_file1')
-    #main_workflow.connect(prepare_coclass2,'norm_coclass_matrix_file',diff_norm_coclass,'mat_file2')
+    main_workflow.connect(prepare_coclass1,'norm_coclass_matrix_file',diff_norm_coclass,'mat_file1')
+    main_workflow.connect(prepare_coclass2,'norm_coclass_matrix_file',diff_norm_coclass,'mat_file2')
     
-    #### plot diff matrix
-    #plot_diff_norm_coclass= pe.Node(Function(input_names=['coclass_matrix_file','labels_file','list_value_range'],output_names = ['plot_hist_coclass_matrix_file','plot_coclass_matrix_file'],function = plot_coclass_matrix_labels_range),name='plot_filtered_norm_coclass')
-    #plot_diff_norm_coclass.inputs.labels_file = ROI_coords_labels_file
-    #plot_diff_norm_coclass.inputs.list_value_range = [-50,50]
+    ### plot diff matrix
+    plot_diff_norm_coclass= pe.Node(interface = PlotCoclass(),name='plot_diff_norm_coclass')
     
-    #main_workflow.connect(diff_norm_coclass, 'diff_mat_file',plot_diff_norm_coclass,'coclass_matrix_file')
+    #Function(input_names=['coclass_matrix_file','labels_file','list_value_range'],output_names = ['plot_hist_coclass_matrix_file','plot_coclass_matrix_file'],function = plot_coclass_matrix_labels_range),name='plot_filtered_norm_coclass')
+    plot_diff_norm_coclass.inputs.labels_file = ROI_coords_labels_file
+    plot_diff_norm_coclass.inputs.list_value_range = [-50,50]
     
-    ########## plot conj pos neg
+    main_workflow.connect(diff_norm_coclass, 'diff_mat_file',plot_diff_norm_coclass,'coclass_matrix_file')
     
-    #### plot graph with colored edges
-    #plot_igraph_conj_norm_coclass= pe.Node(Function(input_names=['coclass_matrix_file1','coclass_matrix_file2','gm_mask_coords_file','threshold','labels_file'],output_names = ['plot_igraph_conj_coclass_matrix_file'],function = plot_igraph_conj_coclass_matrix),name='plot_igraph_conj_norm_coclass')
+    ######### plot conj pos neg
     
-    #plot_igraph_conj_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
-    ##plot_igraph_filtered_pos_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
-    #plot_igraph_conj_norm_coclass.inputs.threshold = 50
-    #plot_igraph_conj_norm_coclass.inputs.labels_file = ROI_coords_labels_file
+    ### plot graph with colored edges
+    plot_igraph_conj_norm_coclass= pe.Node(interface = PlotIGraphConjCoclass(),name='plot_igraph_conj_norm_coclass')
     
-    #main_workflow.connect(prepare_coclass1,'norm_coclass_matrix_file',plot_igraph_conj_norm_coclass,'coclass_matrix_file1')
-    #main_workflow.connect(prepare_coclass2,'norm_coclass_matrix_file',plot_igraph_conj_norm_coclass,'coclass_matrix_file2')
+    #Function(input_names=['coclass_matrix_file1','coclass_matrix_file2','gm_mask_coords_file','threshold','labels_file'],output_names = ['plot_igraph_conj_coclass_matrix_file'],function = plot_igraph_conj_coclass_matrix),name='plot_igraph_conj_norm_coclass')
     
+    plot_igraph_conj_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
+    #plot_igraph_filtered_pos_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
+    plot_igraph_conj_norm_coclass.inputs.threshold = 50
+    plot_igraph_conj_norm_coclass.inputs.labels_file = ROI_coords_labels_file
     
-    ############# pos neg diff_matrix
-    
-    ##### differentiate pos and neg matrices
-    ##pos_neg_diff_norm_coclass = pe.Node(Function(input_names=['diff_mat_file','threshold'],output_names = ['bin_pos_mat_file','bin_neg_mat_file'],function = pos_neg_thr_matrix),name='pos_neg_diff_norm_coclass')
-    ##pos_neg_diff_norm_coclass.inputs.threshold = 25
-    
-    ##main_workflow.connect(diff_norm_coclass, 'diff_mat_file',pos_neg_diff_norm_coclass,'diff_mat_file')
-    
-    ##### plot graph with colored edges
-    ##plot_igraph_filtered_pos_norm_coclass= pe.Node(Function(input_names=['coclass_matrix_file','gm_mask_coords_file','threshold','labels_file','filtered_file','bin_mat_file','edge_color'],output_names = ['plot_igraph_coclass_matrix_file'],function = plot_igraph_filtered_coclass_matrix_labels_bin_mat_color),name='plot_igraph_filtered_pos_norm_coclass')
-    
-    ##plot_igraph_filtered_pos_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_np_coords_file
-    ###plot_igraph_filtered_pos_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
-    ##plot_igraph_filtered_pos_norm_coclass.inputs.threshold = 50
-    ##plot_igraph_filtered_pos_norm_coclass.inputs.labels_file = ROI_coords_labels_file
-    ##plot_igraph_filtered_pos_norm_coclass.inputs.filtered_file = ROI_coords_filter_file
-    
-    ##plot_igraph_filtered_pos_norm_coclass.inputs.edge_color = 'Blue'
-    
-    ##main_workflow.connect(prepare_coclass1,'norm_coclass_matrix_file',plot_igraph_filtered_pos_norm_coclass,'coclass_matrix_file')
-    ##main_workflow.connect(pos_neg_diff_norm_coclass,'bin_pos_mat_file',plot_igraph_filtered_pos_norm_coclass,'bin_mat_file')
+    main_workflow.connect(prepare_coclass1,'norm_coclass_matrix_file',plot_igraph_conj_norm_coclass,'coclass_matrix_file1')
+    main_workflow.connect(prepare_coclass2,'norm_coclass_matrix_file',plot_igraph_conj_norm_coclass,'coclass_matrix_file2')
     
     
-    ##plot_igraph_filtered_neg_norm_coclass= pe.Node(Function(input_names=['coclass_matrix_file','gm_mask_coords_file','threshold','labels_file','filtered_file','bin_mat_file','edge_color'],output_names = ['plot_igraph_coclass_matrix_file'],function = plot_igraph_filtered_coclass_matrix_labels_bin_mat_color),name='plot_igraph_filtered_neg_norm_coclass')
+    #### Run workflow 
+    main_workflow.config['execution'] = {'remove_unnecessary_outputs':'false'}
+    
+    main_workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 8})
+    #main_workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 4})
     
     
-    ##plot_igraph_filtered_neg_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_np_coords_file
-    ###plot_igraph_filtered_neg_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
-    ##plot_igraph_filtered_neg_norm_coclass.inputs.threshold = 50
-    ##plot_igraph_filtered_neg_norm_coclass.inputs.labels_file = ROI_coords_labels_file
-    ##plot_igraph_filtered_neg_norm_coclass.inputs.filtered_file = ROI_coords_filter_file
-    
-    ##plot_igraph_filtered_neg_norm_coclass.inputs.edge_color = 'Red'
-    
-    ##main_workflow.connect(prepare_coclass2,'norm_coclass_matrix_file',plot_igraph_filtered_neg_norm_coclass,'coclass_matrix_file')
-    ##main_workflow.connect(pos_neg_diff_norm_coclass,'bin_neg_mat_file',plot_igraph_filtered_neg_norm_coclass,'bin_mat_file')
-    
-    
-    ##### Run workflow 
-    #main_workflow.config['execution'] = {'remove_unnecessary_outputs':'false'}
-    
-    #main_workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 8})
-    ##main_workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 4})
-    
-    
-#def run_coclass_diff_event():
+def run_coclass_diff_event():
 
-    #main_workflow = Workflow(name= coclass_analysis_name)
-    #main_workflow.base_dir = nipype_analyses_path
+    main_workflow = Workflow(name= coclass_analysis_name)
+    main_workflow.base_dir = nipype_analyses_path
     
-    ##### infosource 
-    #infosource = pe.Node(interface=IdentityInterface(fields=['cond']),name="infosource")
+    #### infosource 
+    infosource = pe.Node(interface=IdentityInterface(fields=['cond']),name="infosource")
     
-    ##infosource.iterables = [('event', ['Odor'])]
-    #infosource.iterables = [('cond', ['Hit-WWW','Hit-What'])]
+    #infosource.iterables = [('event', ['Odor'])]
+    infosource.iterables = [('cond', ['Hit-WWW','Hit-What'])]
     
-    ##### Data source
-    ##datasource = create_datasource_rada_by_cond_signif_conf()
-    #datasource = create_datasource_rada_cond_by_event()
+    #### Data source
+    #datasource = create_datasource_rada_by_cond_signif_conf()
+    datasource = create_datasource_rada_cond_by_event()
     
-    #main_workflow.connect(infosource,'cond',datasource,'cond')
+    main_workflow.connect(infosource,'cond',datasource,'cond')
     
     ####################################### compute sum coclass and group based coclass matrices  #####################################################
     
-    ##### prepare_nbs_stats_rada
+    ##### prepare_coclass
+    prepare_coclass1 = pe.Node(interface = PrepareCoclass(),name='prepare_coclass1')
     
-    #prepare_coclass1 = pe.Node(Function(input_names=['mod_files','coords_files','node_corres_files','gm_mask_coords_file'],output_names = ['group_coclass_matrix_file','sum_coclass_matrix_file','sum_possible_edge_matrix_file','norm_coclass_matrix_file'],function = prepare_nbs_stats_rada),name='prepare_coclass1')
-    #prepare_coclass1.inputs.gm_mask_coords_file = ROI_coords_np_coords_file
+    #Function(input_names=['mod_files','coords_files','node_corres_files','gm_mask_coords_file'],output_names = ['group_coclass_matrix_file','sum_coclass_matrix_file','sum_possible_edge_matrix_file','norm_coclass_matrix_file'],function = prepare_nbs_stats_rada),name='prepare_coclass1')
+    prepare_coclass1.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
      
-    #main_workflow.connect(datasource, 'mod_files1',prepare_coclass1,'mod_files')
-    #main_workflow.connect(datasource, 'node_corres_files1',prepare_coclass1,'node_corres_files')
-    #main_workflow.connect(datasource, 'coords_files1',prepare_coclass1,'coords_files')
+    main_workflow.connect(datasource, 'mod_files1',prepare_coclass1,'mod_files')
+    main_workflow.connect(datasource, 'node_corres_files1',prepare_coclass1,'node_corres_files')
+    main_workflow.connect(datasource, 'coords_files1',prepare_coclass1,'coords_files')
     
     
-    #prepare_coclass2 = pe.Node(Function(input_names=['mod_files','coords_files','node_corres_files','gm_mask_coords_file'],output_names = ['group_coclass_matrix_file','sum_coclass_matrix_file','sum_possible_edge_matrix_file','norm_coclass_matrix_file'],function = prepare_nbs_stats_rada),name='prepare_coclass2')
-    #prepare_coclass2.inputs.gm_mask_coords_file = ROI_coords_np_coords_file
+    prepare_coclass2 = pe.Node(interface = PrepareCoclass(),name='prepare_coclass2')
+    
+    #Function(input_names=['mod_files','coords_files','node_corres_files','gm_mask_coords_file'],output_names = ['group_coclass_matrix_file','sum_coclass_matrix_file','sum_possible_edge_matrix_file','norm_coclass_matrix_file'],function = prepare_nbs_stats_rada),name='prepare_coclass2')
+    prepare_coclass2.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
      
-    #main_workflow.connect(datasource, 'mod_files2',prepare_coclass2,'mod_files')
-    #main_workflow.connect(datasource, 'node_corres_files2',prepare_coclass2,'node_corres_files')
-    #main_workflow.connect(datasource, 'coords_files2',prepare_coclass2,'coords_files')
+    main_workflow.connect(datasource, 'mod_files2',prepare_coclass2,'mod_files')
+    main_workflow.connect(datasource, 'node_corres_files2',prepare_coclass2,'node_corres_files')
+    main_workflow.connect(datasource, 'coords_files2',prepare_coclass2,'coords_files')
     
     ######### norm coclass
     
-    #### substract matrix
-    #diff_norm_coclass = pe.Node(Function(input_names=['mat_file1','mat_file2'],output_names = ['diff_mat_file'],function = diff_matrix),name='diff_coclass')
+    ### substract matrix
+    diff_norm_coclass = pe.Node(interface = DiffMatrices(),name='diff_coclass')
+    #Function(input_names=['mat_file1','mat_file2'],output_names = ['diff_mat_file'],function = diff_matrix),name='diff_coclass')
     
-    #main_workflow.connect(prepare_coclass1,'norm_coclass_matrix_file',diff_norm_coclass,'mat_file1')
-    #main_workflow.connect(prepare_coclass2,'norm_coclass_matrix_file',diff_norm_coclass,'mat_file2')
+    main_workflow.connect(prepare_coclass1,'norm_coclass_matrix_file',diff_norm_coclass,'mat_file1')
+    main_workflow.connect(prepare_coclass2,'norm_coclass_matrix_file',diff_norm_coclass,'mat_file2')
     
-    #### plot diff matrix
-    #plot_diff_norm_coclass= pe.Node(Function(input_names=['coclass_matrix_file','labels_file','list_value_range'],output_names = ['plot_hist_coclass_matrix_file','plot_coclass_matrix_file'],function = plot_coclass_matrix_labels_range),name='plot_filtered_norm_coclass')
-    #plot_diff_norm_coclass.inputs.labels_file = ROI_coords_labels_file
-    #plot_diff_norm_coclass.inputs.list_value_range = [-50,50]
+    ### plot diff matrix
+    plot_diff_norm_coclass= pe.Node(interface = PlotCoclass(),name='plot_diff_norm_coclass')
     
-    #main_workflow.connect(diff_norm_coclass, 'diff_mat_file',plot_diff_norm_coclass,'coclass_matrix_file')
+    #Function(input_names=['coclass_matrix_file','labels_file','list_value_range'],output_names = ['plot_hist_coclass_matrix_file','plot_coclass_matrix_file'],function = plot_coclass_matrix_labels_range),name='plot_filtered_norm_coclass')
+    plot_diff_norm_coclass.inputs.labels_file = ROI_coords_labels_file
+    plot_diff_norm_coclass.inputs.list_value_range = [-50,50]
     
-    ########## plot conj pos neg
+    main_workflow.connect(diff_norm_coclass, 'diff_mat_file',plot_diff_norm_coclass,'coclass_matrix_file')
     
-    #### plot graph with colored edges
-    #plot_igraph_conj_norm_coclass= pe.Node(Function(input_names=['coclass_matrix_file1','coclass_matrix_file2','gm_mask_coords_file','threshold','labels_file'],output_names = ['plot_igraph_conj_coclass_matrix_file'],function = plot_igraph_conj_coclass_matrix),name='plot_igraph_conj_norm_coclass')
+    ######### plot conj pos neg
     
-    #plot_igraph_conj_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
-    ##plot_igraph_filtered_pos_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
-    #plot_igraph_conj_norm_coclass.inputs.threshold = 50
-    #plot_igraph_conj_norm_coclass.inputs.labels_file = ROI_coords_labels_file
+    ### plot graph with colored edges
+    plot_igraph_conj_norm_coclass= pe.Node(interface = PlotIGraphConjCoclass(),name='plot_igraph_conj_norm_coclass')
     
-    #main_workflow.connect(prepare_coclass1,'norm_coclass_matrix_file',plot_igraph_conj_norm_coclass,'coclass_matrix_file1')
-    #main_workflow.connect(prepare_coclass2,'norm_coclass_matrix_file',plot_igraph_conj_norm_coclass,'coclass_matrix_file2')
+    #Function(input_names=['coclass_matrix_file1','coclass_matrix_file2','gm_mask_coords_file','threshold','labels_file'],output_names = ['plot_igraph_conj_coclass_matrix_file'],function = plot_igraph_conj_coclass_matrix),name='plot_igraph_conj_norm_coclass')
     
+    plot_igraph_conj_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
+    #plot_igraph_filtered_pos_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
+    plot_igraph_conj_norm_coclass.inputs.threshold = 50
+    plot_igraph_conj_norm_coclass.inputs.labels_file = ROI_coords_labels_file
     
-    ############# pos neg diff_matrix
+    main_workflow.connect(prepare_coclass1,'norm_coclass_matrix_file',plot_igraph_conj_norm_coclass,'coclass_matrix_file1')
+    main_workflow.connect(prepare_coclass2,'norm_coclass_matrix_file',plot_igraph_conj_norm_coclass,'coclass_matrix_file2')
     
-    ##### differentiate pos and neg matrices
-    ##pos_neg_diff_norm_coclass = pe.Node(Function(input_names=['diff_mat_file','threshold'],output_names = ['bin_pos_mat_file','bin_neg_mat_file'],function = pos_neg_thr_matrix),name='pos_neg_diff_norm_coclass')
-    ##pos_neg_diff_norm_coclass.inputs.threshold = 25
+    #### Run workflow 
+    main_workflow.config['execution'] = {'remove_unnecessary_outputs':'false'}
     
-    ##main_workflow.connect(diff_norm_coclass, 'diff_mat_file',pos_neg_diff_norm_coclass,'diff_mat_file')
-    
-    ##### plot graph with colored edges
-    ##plot_igraph_filtered_pos_norm_coclass= pe.Node(Function(input_names=['coclass_matrix_file','gm_mask_coords_file','threshold','labels_file','filtered_file','bin_mat_file','edge_color'],output_names = ['plot_igraph_coclass_matrix_file'],function = plot_igraph_filtered_coclass_matrix_labels_bin_mat_color),name='plot_igraph_filtered_pos_norm_coclass')
-    
-    ##plot_igraph_filtered_pos_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_np_coords_file
-    ###plot_igraph_filtered_pos_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
-    ##plot_igraph_filtered_pos_norm_coclass.inputs.threshold = 50
-    ##plot_igraph_filtered_pos_norm_coclass.inputs.labels_file = ROI_coords_labels_file
-    ##plot_igraph_filtered_pos_norm_coclass.inputs.filtered_file = ROI_coords_filter_file
-    
-    ##plot_igraph_filtered_pos_norm_coclass.inputs.edge_color = 'Blue'
-    
-    ##main_workflow.connect(prepare_coclass1,'norm_coclass_matrix_file',plot_igraph_filtered_pos_norm_coclass,'coclass_matrix_file')
-    ##main_workflow.connect(pos_neg_diff_norm_coclass,'bin_pos_mat_file',plot_igraph_filtered_pos_norm_coclass,'bin_mat_file')
-    
-    
-    ##plot_igraph_filtered_neg_norm_coclass= pe.Node(Function(input_names=['coclass_matrix_file','gm_mask_coords_file','threshold','labels_file','filtered_file','bin_mat_file','edge_color'],output_names = ['plot_igraph_coclass_matrix_file'],function = plot_igraph_filtered_coclass_matrix_labels_bin_mat_color),name='plot_igraph_filtered_neg_norm_coclass')
-    
-    
-    ##plot_igraph_filtered_neg_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_np_coords_file
-    ###plot_igraph_filtered_neg_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
-    ##plot_igraph_filtered_neg_norm_coclass.inputs.threshold = 50
-    ##plot_igraph_filtered_neg_norm_coclass.inputs.labels_file = ROI_coords_labels_file
-    ##plot_igraph_filtered_neg_norm_coclass.inputs.filtered_file = ROI_coords_filter_file
-    
-    ##plot_igraph_filtered_neg_norm_coclass.inputs.edge_color = 'Red'
-    
-    ##main_workflow.connect(prepare_coclass2,'norm_coclass_matrix_file',plot_igraph_filtered_neg_norm_coclass,'coclass_matrix_file')
-    ##main_workflow.connect(pos_neg_diff_norm_coclass,'bin_neg_mat_file',plot_igraph_filtered_neg_norm_coclass,'bin_mat_file')
-    
-    
-    ##### Run workflow 
-    #main_workflow.config['execution'] = {'remove_unnecessary_outputs':'false'}
-    
-    #main_workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 8})
-    ##main_workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 4})
+    main_workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 8})
+    #main_workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 4})
     
     
     
@@ -769,23 +711,29 @@ if __name__ =='__main__':
     print split_coclass_analysis_name
     
     if 'forceorder' in split_coclass_analysis_name:
-        run_reorder_rada_coclass_by_cond()
+        
+        print "To reimplement for dmgraphanalysis_nodes"
+        
+        #run_reorder_rada_coclass_by_cond()
+        
     elif 'forcecoclassmod' in split_coclass_analysis_name:
         
-        print "run forcecoclassmod"
-        run_forcecoclassmod_coclass_by_cond()
+        #print "run forcecoclassmod"
+        #run_forcecoclassmod_coclass_by_cond()
         
-    elif 'filter' in split_coclass_analysis_name:
+        print "To reimplement for dmgraphanalysis_nodes"
         
-        if 'diff' in split_coclass_analysis_name and 'cond' in split_coclass_analysis_name:
+    #elif 'filter' in split_coclass_analysis_name:
+        
+        #if 'diff' in split_coclass_analysis_name and 'cond' in split_coclass_analysis_name:
                     
-            print "run filter diff_cond"
-            run_filter_coclass_diff_cond()
+            #print "run filter diff_cond"
+            #run_filter_coclass_diff_cond()
             
-        else:
+        #else:
             
-            print "run filter"
-            run_filter_coclass_by_cond()
+            #print "run filter"
+            #run_filter_coclass_by_cond()
         
         
         
@@ -803,7 +751,7 @@ if __name__ =='__main__':
                 run_coclass_diff_event()
             
         else:
-            print "run rada"
-            run_rada_coclass_by_cond()
+            print "run coclass by cond"
+            run_coclass_by_cond()
         
         

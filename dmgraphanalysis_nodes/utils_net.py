@@ -30,6 +30,22 @@ def return_net_list(Z_cor_mat):
     
     return net_list
     
+def return_int_net_list(int_mat,min_int = 0):
+
+    t2 = time.time()
+    
+    x_sig,y_sig = np.where(int_mat > min_int)
+    
+    net_list = np.array(np.column_stack((x_sig + 1,y_sig + 1,int_mat[x_sig,y_sig])),dtype = 'int64')
+    
+    print net_list.shape
+    
+    t3 = time.time()
+    
+    print "Sparse Weighted correlation thresholding computation took " + str(t3-t2) + "s"
+    
+    return net_list
+    
 ##################################### Formatting data for external community detection algorithm (radatools) ##############################
         
 def export_List_net_from_list(Z_List_file,Z_list):
@@ -42,6 +58,7 @@ def export_List_net_from_list(Z_List_file,Z_list):
     np.savetxt(Z_List_file,Z_list,fmt = '%d %d %d')
        
 
+    
 #def read_List_net_file(Z_List_file):
 
     #Z_list = np.loadtxt(Z_List_file,dtype = 'int64')

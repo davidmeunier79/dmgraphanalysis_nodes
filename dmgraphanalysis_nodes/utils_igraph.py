@@ -1763,10 +1763,12 @@ def add_non_null_labels(g, labels = []):
     
     np_labels = np.array(labels,dtype = 'string')
     
+    print np_labels
+    
     np_labels[null_degree_index] = ""
     
     print np_labels
-    
+        
     if len(labels) == len(g.vs):
     
         g.vs['label'] = np_labels.tolist()
