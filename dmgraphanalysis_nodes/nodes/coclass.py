@@ -380,7 +380,9 @@ class PlotIGraphCoclass(BaseInterface):
         
         print coclass_matrix
         
-        self.plot_igraph_3D_coclass_matrix_file = plot_3D_igraph_int_mat(coclass_matrix,coords = gm_mask_coords,labels = labels)
+        plot_igraph_3D_coclass_matrix_file = os.path.abspath("plot_3D_signif_coclass_mat.eps")
+        
+        plot_3D_igraph_int_mat(plot_igraph_3D_coclass_matrix_file,coclass_matrix,coords = gm_mask_coords,labels = labels)
         
         return runtime
         
@@ -388,7 +390,7 @@ class PlotIGraphCoclass(BaseInterface):
         
         outputs = self._outputs().get()
         
-        outputs["plot_igraph_3D_coclass_matrix_file"] = self.plot_igraph_3D_coclass_matrix_file
+        outputs["plot_igraph_3D_coclass_matrix_file"] = os.path.abspath("plot_3D_signif_coclass_mat.eps")
         
         return outputs
         

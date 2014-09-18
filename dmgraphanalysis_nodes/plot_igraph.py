@@ -68,7 +68,167 @@ def plot_3D_igraph_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]
     #ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = vertex_degree,    edge_width = 0.01, edge_curved = True)
     ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D , vertex_size = vertex_degree,    edge_curved = False)
     
-    return plot_nbs_adj_mat_file
+    
+def plot_3D_igraph_signed_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]),labels = [], edge_colors = ['Gray','Blue','Red']):
+    
+    
+    
+    #def plot_igraph_3D_signed_bin_label_mat(int_matrix,coords,plot_nbs_adj_mat_file,labels = []):
+        
+        #layout2D = project2D_np(coords)
+        
+        ##print layout2D
+            
+        #mod_list = int_matrix.tolist()
+        
+        ##print mod_list
+        
+        #g= ig.Graph.Weighted_Adjacency(mod_list,mode=ig.ADJ_MAX)
+        
+        #print len(labels),len(g.vs)
+        
+        #print g.degree()
+        
+        #null_degree_index, = np.where(np.array(g.degree()) == 0)
+        
+        #print null_degree_index
+        
+        #np_labels = np.array(labels,dtype = 'string')
+        
+        #np_labels[null_degree_index] = ""
+        
+        #print np_labels
+        
+        #if len(labels) == len(g.vs):
+        
+            #g.vs['label'] = np_labels.tolist()
+            
+            #g.vs['label_size'] = 15
+        
+        #print len(g.es)
+        
+        #if len(g.es) > 0 :
+            
+            ##print g.es['weight']
+            
+            #edge_col = []
+            
+            #for w in g.es['weight']:
+                
+                ##(e0,e1) = e.tuple
+                
+                ##print int(e.weight)
+                
+                ##comp_index = int(e.weight)
+                
+                #if int(w) == -1:
+                    #edge_col.append('green')
+                #elif int(w) == -2:
+                    #edge_col.append('cyan')
+                #elif int(w) == -3:
+                    #edge_col.append('blue')
+                #elif int(w) == -4:
+                    #edge_col.append('darkblue')
+                    
+                #elif int(w) == 1:
+                    #edge_col.append('yellow')
+                #elif int(w) == 2:
+                    #edge_col.append('orange')
+                #elif int(w) == 3:
+                    #edge_col.append('darkorange')
+                #elif int(w) == 4:
+                    #edge_col.append('red')
+                    
+            
+            ##g_all.es['names'] = edge_list_names
+            ##g_all.vs['names'] = node_list_names
+            
+            #g.es['color'] = edge_col
+            
+            #ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = 0.2,    edge_width =  1)
+            
+        #else:
+            #ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = 0.2,    edge_width =  0.01)
+        ##print vertex_degree
+        
+        ##g.es['sign'] = np.sign(g)
+        
+        ##
+        ####print g
+        ##ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = vertex_degree,    edge_width = np.array(g.es['weight']), edge_curved = True)
+        ##ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = vertex_degree,    edge_width = 0.01, edge_curved = True)
+        
+    
+    g = return_base_weighted_graph(int_matrix)
+    
+    print labels
+    
+    if len(labels) == len(g.vs):
+    
+        add_non_null_labels(g,labels)
+        
+    
+    vertex_degree = np.array(g.degree())*0.2
+    
+    
+    
+    if coords.shape[0] != len(g.vs):
+    
+        layout2D = g.layout_fruchterman_reingold()
+    
+    else:
+    
+        layout2D = project2D_np(coords).tolist()
+        
+        
+        
+        
+    print len(g.es)
+    
+    if len(g.es) > 0 :
+        
+        #print g.es['weight']
+        
+        edge_col = []
+        
+        for w in g.es['weight']:
+            
+            #(e0,e1) = e.tuple
+            
+            #print int(e.weight)
+            
+            #comp_index = int(e.weight)
+            
+            if int(w) == -1:
+                edge_col.append('green')
+            elif int(w) == -2:
+                edge_col.append('cyan')
+            elif int(w) == -3:
+                edge_col.append('blue')
+            elif int(w) == -4:
+                edge_col.append('darkblue')
+                
+            elif int(w) == 1:
+                edge_col.append('yellow')
+            elif int(w) == 2:
+                edge_col.append('orange')
+            elif int(w) == 3:
+                edge_col.append('darkorange')
+            elif int(w) == 4:
+                edge_col.append('red')
+                
+        
+        #g_all.es['names'] = edge_list_names
+        #g_all.vs['names'] = node_list_names
+        
+        g.es['color'] = edge_col
+        
+        ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D , vertex_size = 0.2,    edge_width =  1)
+        
+    else:
+        ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D , vertex_size = 0.2,    edge_width =  0.01)
+
+    
     
     #def plot_igraph_3D_int_mat(int_matrix,coords,plot_nbs_adj_mat_file):
         
@@ -155,91 +315,6 @@ def plot_3D_igraph_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]
         
         
         
-        
-    #def plot_igraph_3D_signed_bin_label_mat(int_matrix,coords,plot_nbs_adj_mat_file,labels = []):
-        
-        #layout2D = project2D_np(coords)
-        
-        ##print layout2D
-            
-        #mod_list = int_matrix.tolist()
-        
-        ##print mod_list
-        
-        #g= ig.Graph.Weighted_Adjacency(mod_list,mode=ig.ADJ_MAX)
-        
-        #print len(labels),len(g.vs)
-        
-        #print g.degree()
-        
-        #null_degree_index, = np.where(np.array(g.degree()) == 0)
-        
-        #print null_degree_index
-        
-        #np_labels = np.array(labels,dtype = 'string')
-        
-        #np_labels[null_degree_index] = ""
-        
-        #print np_labels
-        
-        #if len(labels) == len(g.vs):
-        
-            #g.vs['label'] = np_labels.tolist()
-            
-            #g.vs['label_size'] = 15
-        
-        #print len(g.es)
-        
-        #if len(g.es) > 0 :
-            
-            ##print g.es['weight']
-            
-            #edge_col = []
-            
-            #for w in g.es['weight']:
-                
-                ##(e0,e1) = e.tuple
-                
-                ##print int(e.weight)
-                
-                ##comp_index = int(e.weight)
-                
-                #if int(w) == -1:
-                    #edge_col.append('green')
-                #elif int(w) == -2:
-                    #edge_col.append('cyan')
-                #elif int(w) == -3:
-                    #edge_col.append('blue')
-                #elif int(w) == -4:
-                    #edge_col.append('darkblue')
-                    
-                #elif int(w) == 1:
-                    #edge_col.append('yellow')
-                #elif int(w) == 2:
-                    #edge_col.append('orange')
-                #elif int(w) == 3:
-                    #edge_col.append('darkorange')
-                #elif int(w) == 4:
-                    #edge_col.append('red')
-                    
-            
-            ##g_all.es['names'] = edge_list_names
-            ##g_all.vs['names'] = node_list_names
-            
-            #g.es['color'] = edge_col
-            
-            #ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = 0.2,    edge_width =  1)
-            
-        #else:
-            #ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = 0.2,    edge_width =  0.01)
-        ##print vertex_degree
-        
-        ##g.es['sign'] = np.sign(g)
-        
-        ##
-        ####print g
-        ##ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = vertex_degree,    edge_width = np.array(g.es['weight']), edge_curved = True)
-        ##ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = vertex_degree,    edge_width = 0.01, edge_curved = True)
         
         
         

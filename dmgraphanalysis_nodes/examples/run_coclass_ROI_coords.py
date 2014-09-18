@@ -11,6 +11,7 @@ from  define_variables import *
 from dmgraphanalysis_nodes.nodes.coclass import PrepareCoclass,PlotCoclass,PlotIGraphCoclass,DiffMatrices,PlotIGraphConjCoclass
 from dmgraphanalysis_nodes.nodes.modularity import ComputeIntNetList, PrepRada, CommRada, PlotIGraphModules
 
+from dmgraphanalysis_nodes.nodes.graph_stats import StatsPairBinomial,PlotIGraphSignedIntMat
 
 #from dmgraphanalysis.modularity import prep_radatools,community_radatools,export_lol_mask_file
 #from dmgraphanalysis.modularity import plot_igraph_modules_coclass_rada,plot_igraph_modules_coclass_rada_forced_colors
@@ -279,38 +280,68 @@ def run_coclass_diff_cond():
     main_workflow.connect(datasource, 'node_corres_files2',prepare_coclass2,'node_corres_files')
     main_workflow.connect(datasource, 'coords_files2',prepare_coclass2,'coords_files')
     
-    ######### norm coclass
+    ########## norm coclass
     
-    ### substract matrix
-    diff_norm_coclass = pe.Node(interface = DiffMatrices(),name='diff_coclass')
-    #Function(input_names=['mat_file1','mat_file2'],output_names = ['diff_mat_file'],function = diff_matrix),name='diff_coclass')
+    #### substract matrix
+    #diff_norm_coclass = pe.Node(interface = DiffMatrices(),name='diff_coclass')
+    ##Function(input_names=['mat_file1','mat_file2'],output_names = ['diff_mat_file'],function = diff_matrix),name='diff_coclass')
     
-    main_workflow.connect(prepare_coclass1,'norm_coclass_matrix_file',diff_norm_coclass,'mat_file1')
-    main_workflow.connect(prepare_coclass2,'norm_coclass_matrix_file',diff_norm_coclass,'mat_file2')
+    #main_workflow.connect(prepare_coclass1,'norm_coclass_matrix_file',diff_norm_coclass,'mat_file1')
+    #main_workflow.connect(prepare_coclass2,'norm_coclass_matrix_file',diff_norm_coclass,'mat_file2')
     
-    ### plot diff matrix
-    plot_diff_norm_coclass= pe.Node(interface = PlotCoclass(),name='plot_diff_norm_coclass')
+    #### plot diff matrix
+    #plot_diff_norm_coclass= pe.Node(interface = PlotCoclass(),name='plot_diff_norm_coclass')
     
-    #Function(input_names=['coclass_matrix_file','labels_file','list_value_range'],output_names = ['plot_hist_coclass_matrix_file','plot_coclass_matrix_file'],function = plot_coclass_matrix_labels_range),name='plot_filtered_norm_coclass')
-    plot_diff_norm_coclass.inputs.labels_file = ROI_coords_labels_file
-    plot_diff_norm_coclass.inputs.list_value_range = [-50,50]
+    ##Function(input_names=['coclass_matrix_file','labels_file','list_value_range'],output_names = ['plot_hist_coclass_matrix_file','plot_coclass_matrix_file'],function = plot_coclass_matrix_labels_range),name='plot_filtered_norm_coclass')
+    #plot_diff_norm_coclass.inputs.labels_file = ROI_coords_labels_file
+    #plot_diff_norm_coclass.inputs.list_value_range = [-50,50]
     
-    main_workflow.connect(diff_norm_coclass, 'diff_mat_file',plot_diff_norm_coclass,'coclass_matrix_file')
+    #main_workflow.connect(diff_norm_coclass, 'diff_mat_file',plot_diff_norm_coclass,'coclass_matrix_file')
     
-    ######### plot conj pos neg
+    ########## plot conj pos neg
     
-    ### plot graph with colored edges
-    plot_igraph_conj_norm_coclass= pe.Node(interface = PlotIGraphConjCoclass(),name='plot_igraph_conj_norm_coclass')
+    #### plot graph with colored edges
+    #plot_igraph_conj_norm_coclass= pe.Node(interface = PlotIGraphConjCoclass(),name='plot_igraph_conj_norm_coclass')
     
-    #Function(input_names=['coclass_matrix_file1','coclass_matrix_file2','gm_mask_coords_file','threshold','labels_file'],output_names = ['plot_igraph_conj_coclass_matrix_file'],function = plot_igraph_conj_coclass_matrix),name='plot_igraph_conj_norm_coclass')
+    ##Function(input_names=['coclass_matrix_file1','coclass_matrix_file2','gm_mask_coords_file','threshold','labels_file'],output_names = ['plot_igraph_conj_coclass_matrix_file'],function = plot_igraph_conj_coclass_matrix),name='plot_igraph_conj_norm_coclass')
     
-    plot_igraph_conj_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
-    #plot_igraph_filtered_pos_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
-    plot_igraph_conj_norm_coclass.inputs.threshold = 50
-    plot_igraph_conj_norm_coclass.inputs.labels_file = ROI_coords_labels_file
+    #plot_igraph_conj_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
+    ##plot_igraph_filtered_pos_norm_coclass.inputs.gm_mask_coords_file = ROI_coords_MNI_coords_file
+    #plot_igraph_conj_norm_coclass.inputs.threshold = 50
+    #plot_igraph_conj_norm_coclass.inputs.labels_file = ROI_coords_labels_file
     
-    main_workflow.connect(prepare_coclass1,'norm_coclass_matrix_file',plot_igraph_conj_norm_coclass,'coclass_matrix_file1')
-    main_workflow.connect(prepare_coclass2,'norm_coclass_matrix_file',plot_igraph_conj_norm_coclass,'coclass_matrix_file2')
+    #main_workflow.connect(prepare_coclass1,'norm_coclass_matrix_file',plot_igraph_conj_norm_coclass,'coclass_matrix_file1')
+    #main_workflow.connect(prepare_coclass2,'norm_coclass_matrix_file',plot_igraph_conj_norm_coclass,'coclass_matrix_file2')
+    
+    
+    ####################################################################################### Stats computation on coclass matrices ############################################
+    
+    
+    
+    ########## pairwise stats FDR (binomial test)
+    pairwise_stats_fdr = pe.Node(interface = StatsPairBinomial(),name='pairwise_stats_fdr')
+    #Function(input_names=['group_coclass_matrix_file1','group_coclass_matrix_file2','conf_interval_binom_fdr'],output_names = ['signif_signed_adj_fdr_mat_file'],function = compute_pairwise_binom_stats_fdr),name='pairwise_stats_fdr')
+    pairwise_stats_fdr.inputs.conf_interval_binom_fdr = conf_interval_binom_fdr
+    
+    main_workflow.connect(prepare_coclass1, 'group_coclass_matrix_file',pairwise_stats_fdr,'group_coclass_matrix_file1')
+    main_workflow.connect(prepare_coclass2, 'group_coclass_matrix_file',pairwise_stats_fdr,'group_coclass_matrix_file2')
+    
+    plot_pairwise_stats = pe.Node(interface = PlotIGraphSignedIntMat(),name='plot_pairwise_stats')
+    
+    #Function(input_names=['signed_bin_mat_file','coords_file','labels_file'],output_names = ['plot_3D_bin_mat_file','heatmap_bin_mat_file'],function = plot_signed_bin_mat_labels),name='plot_pairwise_stats')
+    plot_pairwise_stats.inputs.coords_file = ROI_coords_MNI_coords_file
+    plot_pairwise_stats.inputs.labels_file = ROI_coords_labels_file
+    
+    main_workflow.connect(pairwise_stats_fdr,'signif_signed_adj_fdr_mat_file',plot_pairwise_stats,'signed_int_mat_file')
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     #### Run workflow 
