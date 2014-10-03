@@ -26,6 +26,8 @@ from dmgraphanalysis_nodes.utils_plot import plot_signals,plot_sep_signals
         
 ######################################################################################## ExtractTS ##################################################################################################################
 
+from dmgraphanalysis_nodes.utils_cor import mean_select_indexed_mask_data
+
 class ExtractTSInputSpec(BaseInterfaceInputSpec):
     indexed_rois_file = File(exists=True, desc='indexed mask where all voxels belonging to the same ROI have the same value (! starting from 1)', mandatory=True)
     
@@ -82,52 +84,8 @@ class ExtractTS(BaseInterface):
         #print "orig_ts shape:"
         #print orig_ts.shape
             
-        ### extrating ts by averaging the time series of all voxel with the same index
-        sequence_roi_index = np.array(np.unique(indexed_mask_rois_data),dtype = int)
+        mean_masked_ts,subj_coord_rois = mean_select_indexed_mask_data(orig_ts,indexed_mask_rois_data,coord_rois,min_BOLD_intensity = 50)
         
-        if sequence_roi_index[0] == -1.0:
-            sequence_roi_index = sequence_roi_index[1:]
-        
-        #print "sequence_roi_index:"
-        #print sequence_roi_index
-        
-        if sequence_roi_index.shape[0] != coord_rois.shape[0]:
-            print "Warning, indexes in template_ROI are incompatible with ROI coords"
-            return
-        
-        mean_masked_ts = []
-        subj_coord_rois = []
-        
-        for roi_index in sequence_roi_index:
-        #for roi_index in sequence_roi_index[0:1]:
-            
-            #print "Roi index " + str(roi_index)
-            
-            index_roi_x,index_roi_y,index_roi_z = np.where(indexed_mask_rois_data == roi_index)
-            
-            #print index_roi_x,index_roi_y,index_roi_z
-            
-            all_voxel_roi_ts = orig_ts[index_roi_x,index_roi_y,index_roi_z,:]
-            
-            #print "all_voxel_roi_ts shape: "
-            #print all_voxel_roi_ts.shape
-            
-            mean_roi_ts = np.mean(all_voxel_roi_ts,axis = 0)
-            
-            ### testing if mean_roi_ts if higher than minimal BOLD intensity
-            
-            if sum(mean_roi_ts > min_BOLD_intensity) == mean_roi_ts.shape[0]:
-                
-                #print "Roi selected: " + str(roi_index)
-                #print "coord_rois shape: "
-                #print coord_rois.shape
-                
-                subj_coord_rois.append(coord_rois[roi_index,])
-                mean_masked_ts.append(mean_roi_ts)
-            else:
-                print "ROI " + str(roi_index) + " was not selected"
-                
-            
         mean_masked_ts = np.array(mean_masked_ts,dtype = 'f')
         subj_coord_rois = np.array(subj_coord_rois,dtype = 'float')
         

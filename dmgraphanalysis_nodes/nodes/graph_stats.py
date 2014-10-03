@@ -88,6 +88,130 @@ class StatsPairBinomial(BaseInterface):
         
         return outputs
 
+############################################################################################### StatsPairTTest #####################################################################################################
+
+import dmgraphanalysis_nodes.utils_stats as stats
+        
+class StatsPairTTestInputSpec(BaseInterfaceInputSpec):
+    
+    group_cormat_file1 = File(exists=True,  desc='file of group 1 cormat matrices in npy format', mandatory=True)
+    group_cormat_file2 = File(exists=True,  desc='file of group 2 cormat matrices in npy format', mandatory=True)
+    
+    t_test_thresh_fdr = traits.Float(0.05, usedefault = True, desc='Alpha value used as FDR implementation', mandatory=False)
+    
+class StatsPairTTestOutputSpec(TraitedSpec):
+    
+    signif_signed_adj_fdr_mat_file = File(exists=True, desc="int matrix with corresponding codes to significance")
+    
+class StatsPairTTest(BaseInterface):
+    
+    """
+    Plot cormatification matrix with igraph
+    - labels are optional, 
+    - threshold is optional (default, 50 = half the group)
+    - coordinates are optional, if no coordiantes are specified, representation in topological (Fruchterman-Reingold) space
+    """
+    input_spec = StatsPairTTestInputSpec
+    output_spec = StatsPairTTestOutputSpec
+
+    def _run_interface(self, runtime):
+                
+        print 'in plot_cormat'
+        
+        group_cormat_file1 = self.inputs.group_cormat_file1
+        group_cormat_file2 = self.inputs.group_cormat_file2
+        t_test_thresh_fdr = self.inputs.t_test_thresh_fdr
+            
+
+#def compute_pairwise_ttest_stats_fdr(group_cormat_file1,group_cormat_file2,t_test_thresh_fdr):
+    
+    #import numpy as np
+    #import os
+
+    #import dmgraphanalysis.utils_stats as stats
+    
+    
+    #print "loading group_cormat1"
+    
+    #group_cormat1 = np.array(np.load(group_cormat_file1),dtype = float)
+    #print group_cormat1.shape
+    
+    
+    #print "loading group_cormat2"
+    
+    #group_cormat2 = np.array(np.load(group_cormat_file2),dtype = float)
+    #print group_cormat2.shape
+    
+    
+    #print "compute NBS stats"
+    
+    
+    ## check input matrices
+    #Ix,Jx,nx = group_cormat1.shape
+    #Iy,Jy,ny = group_cormat2.shape
+    
+    #assert Ix == Iy
+    #assert Jx == Jy
+    #assert Ix == Jx
+    #assert Iy == Jy
+    
+    #signif_signed_adj_mat  = stats.compute_pairwise_ttest_rel_fdr(group_cormat1,group_cormat2,t_test_thresh_fdr)
+    
+    #print 'save pairwise signed stat file'
+    
+    #signif_signed_adj_fdr_mat_file  = os.path.abspath('signif_signed_adj_fdr_'+ str(t_test_thresh_fdr) +'.npy')
+    #np.save(signif_signed_adj_fdr_mat_file,signif_signed_adj_mat)
+    
+    #return signif_signed_adj_fdr_mat_file
+    
+    
+    
+    
+        print "loading group_cormat1"
+        
+        group_cormat1 = np.array(np.load(group_cormat_file1),dtype = float)
+        print group_cormat1.shape
+        
+        
+        print "loading group_cormat2"
+        
+        group_cormat2 = np.array(np.load(group_cormat_file2),dtype = float)
+        print group_cormat2.shape
+        
+        
+        print "compute NBS stats"
+        
+        
+        # check input matrices
+        Ix,Jx,nx = group_cormat1.shape
+        Iy,Jy,ny = group_cormat2.shape
+        
+        assert Ix == Iy
+        assert Jx == Jy
+        assert Ix == Jx
+        assert Iy == Jy
+        
+        signif_signed_adj_mat  = stats.compute_pairwise_ttest_rel_fdr(group_cormat1,group_cormat2,t_test_thresh_fdr)
+        
+        print 'save pairwise signed stat file'
+        
+        signif_signed_adj_fdr_mat_file  = os.path.abspath('signif_signed_adj_fdr_'+ str(t_test_thresh_fdr) +'.npy')
+        np.save(signif_signed_adj_fdr_mat_file,signif_signed_adj_mat)
+        
+        #return signif_signed_adj_fdr_mat_file
+
+            
+        return runtime
+        
+    def _list_outputs(self):
+        
+        outputs = self._outputs().get()
+        
+        outputs["signif_signed_adj_fdr_mat_file"] = os.path.abspath('signif_signed_adj_fdr_'+ str(self.inputs.t_test_thresh_fdr) +'.npy')
+        
+        return outputs
+
+        
 ############################################################################################### PlotIGraphSignedIntMat #####################################################################################################
 
 from dmgraphanalysis_nodes.plot_igraph import plot_3D_igraph_signed_int_mat
@@ -176,6 +300,141 @@ class PlotIGraphSignedIntMat(BaseInterface):
         
         
         
+############################################################################################### PrepareCormat #####################################################################################################
+
+from dmgraphanalysis_nodes.utils_cor import return_corres_correl_mat
+#,return_hierachical_order
+        
+class PrepareCormatInputSpec(BaseInterfaceInputSpec):
+    
+    cor_mat_files = traits.List(File(exists=True), desc='list of all correlation matrice files (in npy format) for each subject', mandatory=True)
+    
+    coords_files = traits.List(File(exists=True), desc='list of all coordinates in numpy space files (in txt format) for each subject (after removal of non void data)', mandatory=True)
+    
+    gm_mask_coords_file = File(exists=True, desc='Coordinates in numpy space, corresponding to all possible nodes in the original space', mandatory=True)
+    
+    
+class PrepareCormatOutputSpec(TraitedSpec):
+    
+    group_cormat_file = File(exists=True, desc="all cormat matrices of the group in .npy (pickle format)")
+    
+    avg_cormat_file = File(exists=True, desc="average of cormat matrix of the group in .npy (pickle format)")
+    
+    group_vect_file = File(exists=True, desc="degree (?) by nodes * indiv of the group in .npy (pickle format)")
+    
+    
+class PrepareCormat(BaseInterface):
+    
+    """
+    Extract mean time series from a labelled mask in Nifti Format where the voxels of interest have values 1
+    """
+    input_spec = PrepareCormatInputSpec
+    output_spec = PrepareCormatOutputSpec
+
+    def _run_interface(self, runtime):
+                
+        print 'in prepare_coclass'
+        cor_mat_files = self.inputs.cor_mat_files
+        coords_files = self.inputs.coords_files
+        gm_mask_coords_file = self.inputs.gm_mask_coords_file
+        
+        
+    #import numpy as np
+    #import os
+
+    ##import nibabel as nib
+        print 'loading gm mask corres'
+        
+        gm_mask_coords = np.loadtxt(gm_mask_coords_file)
+        
+        print gm_mask_coords.shape
+            
+        #### read matrix from the first group
+        #print Z_cor_mat_files
+        
+        sum_cormat = np.zeros((gm_mask_coords.shape[0],gm_mask_coords.shape[0]),dtype = float)
+        print sum_cormat.shape
+        
+                
+        group_cormat = np.zeros((gm_mask_coords.shape[0],gm_mask_coords.shape[0],len(cor_mat_files)),dtype = float)
+        print group_cormat.shape
+        
+        
+        group_vect = np.zeros((gm_mask_coords.shape[0],len(cor_mat_files)),dtype = float)
+        print group_vect.shape
+        
+        if len(cor_mat_files) != len(coords_files):
+            print "warning, length of cor_mat_files, coords_files are imcompatible {} {} {}".format(len(cor_mat_files),len(coords_files))
+        
+        for index_file in range(len(cor_mat_files)):
+            
+            print cor_mat_files[index_file]
+            
+            if os.path.exists(cor_mat_files[index_file]) and os.path.exists(coords_files[index_file]):
+            
+                Z_cor_mat = np.load(cor_mat_files[index_file])
+                print Z_cor_mat.shape
+                
+                
+                coords = np.loadtxt(coords_files[index_file])
+                print coords.shape
+                
+                
+                
+                corres_cor_mat,possible_edge_mat = return_corres_correl_mat(Z_cor_mat,coords,gm_mask_coords)
+                
+                print corres_cor_mat.shape
+                print group_cormat.shape
+                
+                sum_cormat += corres_cor_mat
+                
+                group_cormat[:,:,index_file] = corres_cor_mat
+                
+                group_vect[:,index_file] = np.sum(corres_cor_mat,axis = 0)
+                
+                
+            else:
+                print "Warning, one or more files between " + cor_mat_files[index_file] + ', ' + coords_files[index_file] + " do not exists"
+            
+            
+        group_cormat_file= os.path.abspath('group_cormat.npy')
+        
+        np.save(group_cormat_file,group_cormat)
+        
+            
+        group_vect_file= os.path.abspath('group_vect.npy')
+        
+        np.save(group_vect_file,group_vect)
+        
+            
+        print 'saving cor_mat matrix'
+        
+        avg_cormat_file = os.path.abspath('avg_cormat.npy')
+        
+        if (len(cor_mat_files) != 0):
+        
+                avg_cormat = sum_cormat /len(cor_mat_files)
+                
+                np.save(avg_cormat_file,avg_cormat)
+        
+        
+        return runtime
+        
+    def _list_outputs(self):
+        
+        outputs = self._outputs().get()
+        
+        outputs["group_cormat_file"] =os.path.abspath('group_cormat.npy')
+        
+        outputs["avg_cormat_file"] = os.path.abspath('avg_cormat.npy')
+        
+        outputs["group_vect_file"] = os.path.abspath('group_vect.npy')
+        
+        return outputs
+        
+        
+        
+        
         
 #def prepare_nbs_stats_cor_mat_filter(cor_mat_files,coords_files,gm_mask_coords_file,filtered_nodes_file):
     
@@ -209,12 +468,12 @@ class PlotIGraphSignedIntMat(BaseInterface):
     ##### read matrix from the first group
     ##print Z_cor_mat_files
     
-    #sum_cor_mat_matrix = np.zeros((index_filtered_nodes.shape[0],index_filtered_nodes.shape[0]),dtype = float)
-    #print sum_cor_mat_matrix.shape
+    #sum_cormat = np.zeros((index_filtered_nodes.shape[0],index_filtered_nodes.shape[0]),dtype = float)
+    #print sum_cormat.shape
     
             
-    #group_cor_mat_matrix = np.zeros((index_filtered_nodes.shape[0],index_filtered_nodes.shape[0],len(cor_mat_files)),dtype = float)
-    #print group_cor_mat_matrix.shape
+    #group_cormat = np.zeros((index_filtered_nodes.shape[0],index_filtered_nodes.shape[0],len(cor_mat_files)),dtype = float)
+    #print group_cormat.shape
     
     
     #group_vect = np.zeros((index_filtered_nodes.shape[0],len(cor_mat_files)),dtype = float)
@@ -248,11 +507,11 @@ class PlotIGraphSignedIntMat(BaseInterface):
             #print filtered_corres_cor_mat
             ##print filtered_corres_cor_mat.shape
             
-            #print group_cor_mat_matrix.shape
+            #print group_cormat.shape
             
-            #sum_cor_mat_matrix += filtered_corres_cor_mat
+            #sum_cormat += filtered_corres_cor_mat
             
-            #group_cor_mat_matrix[:,:,index_file] = filtered_corres_cor_mat
+            #group_cormat[:,:,index_file] = filtered_corres_cor_mat
             
             #group_vect[:,index_file] = np.sum(filtered_corres_cor_mat,axis = 0)
             
@@ -261,9 +520,9 @@ class PlotIGraphSignedIntMat(BaseInterface):
             #print "Warning, one or more files between " + cor_mat_files[index_file] + ', ' + coords_files[index_file] + " do not exists"
         
         
-    #group_cor_mat_matrix_file= os.path.abspath('group_cor_mat_matrix.npy')
+    #group_cormat_file= os.path.abspath('group_cormat.npy')
     
-    #np.save(group_cor_mat_matrix_file,group_cor_mat_matrix)
+    #np.save(group_cormat_file,group_cormat)
     
         
     #group_vect_file= os.path.abspath('group_vect.npy')
@@ -273,15 +532,15 @@ class PlotIGraphSignedIntMat(BaseInterface):
         
     #print 'saving cor_mat matrix'
     
-    #avg_cor_mat_matrix_file = os.path.abspath('avg_cor_mat_matrix.npy')
+    #avg_cormat_file = os.path.abspath('avg_cormat.npy')
     
     #if (len(cor_mat_files) != 0):
     
-            #avg_cor_mat_matrix = sum_cor_mat_matrix /len(cor_mat_files)
+            #avg_cormat = sum_cormat /len(cor_mat_files)
             
-            #np.save(avg_cor_mat_matrix_file,avg_cor_mat_matrix)
+            #np.save(avg_cormat_file,avg_cormat)
     
-    #return group_cor_mat_matrix_file,avg_cor_mat_matrix_file,group_vect_file
+    #return group_cormat_file,avg_cormat_file,group_vect_file
         
         
         
@@ -305,12 +564,12 @@ class PlotIGraphSignedIntMat(BaseInterface):
     ##### read matrix from the first group
     ##print Z_cor_mat_files
     
-    #sum_cor_mat_matrix = np.zeros((gm_mask_coords.shape[0],gm_mask_coords.shape[0]),dtype = float)
-    #print sum_cor_mat_matrix.shape
+    #sum_cormat = np.zeros((gm_mask_coords.shape[0],gm_mask_coords.shape[0]),dtype = float)
+    #print sum_cormat.shape
     
             
-    #group_cor_mat_matrix = np.zeros((gm_mask_coords.shape[0],gm_mask_coords.shape[0],len(cor_mat_files)),dtype = float)
-    #print group_cor_mat_matrix.shape
+    #group_cormat = np.zeros((gm_mask_coords.shape[0],gm_mask_coords.shape[0],len(cor_mat_files)),dtype = float)
+    #print group_cormat.shape
     
     
     #group_vect = np.zeros((gm_mask_coords.shape[0],len(cor_mat_files)),dtype = float)
@@ -337,11 +596,11 @@ class PlotIGraphSignedIntMat(BaseInterface):
             #corres_cor_mat,possible_edge_mat = return_corres_correl_mat(Z_cor_mat,coords,gm_mask_coords)
             
             #print corres_cor_mat.shape
-            #print group_cor_mat_matrix.shape
+            #print group_cormat.shape
             
-            #sum_cor_mat_matrix += corres_cor_mat
+            #sum_cormat += corres_cor_mat
             
-            #group_cor_mat_matrix[:,:,index_file] = corres_cor_mat
+            #group_cormat[:,:,index_file] = corres_cor_mat
             
             #group_vect[:,index_file] = np.sum(corres_cor_mat,axis = 0)
             
@@ -350,9 +609,9 @@ class PlotIGraphSignedIntMat(BaseInterface):
             #print "Warning, one or more files between " + cor_mat_files[index_file] + ', ' + coords_files[index_file] + " do not exists"
         
         
-    #group_cor_mat_matrix_file= os.path.abspath('group_cor_mat_matrix.npy')
+    #group_cormat_file= os.path.abspath('group_cormat.npy')
     
-    #np.save(group_cor_mat_matrix_file,group_cor_mat_matrix)
+    #np.save(group_cormat_file,group_cormat)
     
         
     #group_vect_file= os.path.abspath('group_vect.npy')
@@ -362,18 +621,18 @@ class PlotIGraphSignedIntMat(BaseInterface):
         
     #print 'saving cor_mat matrix'
     
-    #avg_cor_mat_matrix_file = os.path.abspath('avg_cor_mat_matrix.npy')
+    #avg_cormat_file = os.path.abspath('avg_cormat.npy')
     
     #if (len(cor_mat_files) != 0):
     
-            #avg_cor_mat_matrix = sum_cor_mat_matrix /len(cor_mat_files)
+            #avg_cormat = sum_cormat /len(cor_mat_files)
             
-            #np.save(avg_cor_mat_matrix_file,avg_cor_mat_matrix)
+            #np.save(avg_cormat_file,avg_cormat)
     
-    #return group_cor_mat_matrix_file,avg_cor_mat_matrix_file,group_vect_file
+    #return group_cormat_file,avg_cormat_file,group_vect_file
         
         
-#def return_diff_group_mat(group_cormat_matrix_file1,group_cormat_matrix_file2):
+#def return_diff_group_mat(group_cormat_file1,group_cormat_file2):
 
 
     #import numpy as np
@@ -384,31 +643,31 @@ class PlotIGraphSignedIntMat(BaseInterface):
     #from dmgraphanalysis.utils_cor import return_corres_correl_mat
     ##from dmgraphanalysis.utils_cor import read_Pajek_corres_nodes,read_lol_file
     
-    #print 'loading group_cormat_matrix_file1 corres'
+    #print 'loading group_cormat_file1 corres'
     
-    #group_cormat_matrix1 = np.load(group_cormat_matrix_file1)
+    #group_cormat1 = np.load(group_cormat_file1)
     
-    #print group_cormat_matrix1.shape
+    #print group_cormat1.shape
     
-    #print 'loading group_cormat_matrix_file2 corres'
+    #print 'loading group_cormat_file2 corres'
     
-    #group_cormat_matrix2 = np.load(group_cormat_matrix_file2)
+    #group_cormat2 = np.load(group_cormat_file2)
     
-    #print group_cormat_matrix2.shape
+    #print group_cormat2.shape
     
-    #assert group_cormat_matrix1.shape == group_cormat_matrix2.shape
+    #assert group_cormat1.shape == group_cormat2.shape
     
     #print 'computing difference between matrices group'
     
-    #diff_group_cormat_matrix = group_cormat_matrix1 - group_cormat_matrix2
+    #diff_group_cormat = group_cormat1 - group_cormat2
     
-    #print diff_group_cormat_matrix.shape    
+    #print diff_group_cormat.shape    
         
-    #diff_group_cormat_matrix_file = os.path.abspath('diff_group_cor_mat_matrix.npy')
+    #diff_group_cormat_file = os.path.abspath('diff_group_cormat.npy')
     
-    #np.save(diff_group_cormat_matrix_file,diff_group_cormat_matrix)
+    #np.save(diff_group_cormat_file,diff_group_cormat)
         
-    #return diff_group_cormat_matrix_file
+    #return diff_group_cormat_file
         
         
 ########################################################################################################################################################################################################
@@ -851,47 +1110,6 @@ class PlotIGraphSignedIntMat(BaseInterface):
     
 ##################################### stats (using utils_stats)
 
-#def compute_pairwise_ttest_stats_fdr(group_cormat_matrix_file1,group_cormat_matrix_file2,t_test_thresh_fdr):
-    
-    #import numpy as np
-    #import os
-
-    #import dmgraphanalysis.utils_stats as stats
-    
-    
-    #print "loading group_cormat_matrix1"
-    
-    #group_cormat_matrix1 = np.array(np.load(group_cormat_matrix_file1),dtype = float)
-    #print group_cormat_matrix1.shape
-    
-    
-    #print "loading group_cormat_matrix2"
-    
-    #group_cormat_matrix2 = np.array(np.load(group_cormat_matrix_file2),dtype = float)
-    #print group_cormat_matrix2.shape
-    
-    
-    #print "compute NBS stats"
-    
-    
-    ## check input matrices
-    #Ix,Jx,nx = group_cormat_matrix1.shape
-    #Iy,Jy,ny = group_cormat_matrix2.shape
-    
-    #assert Ix == Iy
-    #assert Jx == Jy
-    #assert Ix == Jx
-    #assert Iy == Jy
-    
-    #signif_signed_adj_mat  = stats.compute_pairwise_ttest_rel_fdr(group_cormat_matrix1,group_cormat_matrix2,t_test_thresh_fdr)
-    
-    #print 'save pairwise signed stat file'
-    
-    #signif_signed_adj_fdr_mat_file  = os.path.abspath('signif_signed_adj_fdr_'+ str(t_test_thresh_fdr) +'.npy')
-    #np.save(signif_signed_adj_fdr_mat_file,signif_signed_adj_mat)
-    
-    #return signif_signed_adj_fdr_mat_file
-    
     
 #def compute_nodewise_ttest_stats_fdr(group_vect_file1,group_vect_file2,t_test_thresh_fdr):
 
@@ -943,23 +1161,23 @@ class PlotIGraphSignedIntMat(BaseInterface):
     
     ############################################################## correl with behav_score score ###############################################
     
-#def compute_pairwise_correl_stats_fdr(group_cormat_matrix_file,behav_score,correl_thresh_fdr):
+#def compute_pairwise_correl_stats_fdr(group_cormat_file,behav_score,correl_thresh_fdr):
 
     #import numpy as np
     #import os
 
     #import dmgraphanalysis.utils_stats as stats
     
-    #print "loading group_cormat_matrix1"
+    #print "loading group_cormat1"
     
-    #group_cormat_matrix = np.array(np.load(group_cormat_matrix_file),dtype = float)
-    #print group_cormat_matrix.shape
+    #group_cormat = np.array(np.load(group_cormat_file),dtype = float)
+    #print group_cormat.shape
     
-    #assert group_cormat_matrix.shape[2] == len(behav_score)
+    #assert group_cormat.shape[2] == len(behav_score)
     
     
     
-    #signif_signed_adj_mat  = stats.compute_pairwise_correl_fdr(group_cormat_matrix,behav_score,correl_thresh_fdr)
+    #signif_signed_adj_mat  = stats.compute_pairwise_correl_fdr(group_cormat,behav_score,correl_thresh_fdr)
     
     #print 'save pairwise signed stat file'
     

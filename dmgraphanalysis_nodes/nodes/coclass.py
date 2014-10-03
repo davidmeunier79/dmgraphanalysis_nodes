@@ -372,13 +372,17 @@ class PlotIGraphCoclass(BaseInterface):
         else :
             gm_mask_coords = np.array([])
             
-        print 'plotting igraph'
+            
+        print 'thresholding coclass'
         
         coclass_matrix[coclass_matrix <= threshold] = 0
         
         coclass_matrix[coclass_matrix > threshold] = 1
         
         print coclass_matrix
+        
+        print 'plotting igraph'
+        
         
         plot_igraph_3D_coclass_matrix_file = os.path.abspath("plot_3D_signif_coclass_mat.eps")
         

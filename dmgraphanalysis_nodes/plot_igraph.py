@@ -19,7 +19,7 @@ from dmgraphanalysis_nodes.utils_dtype_coord import where_in_coords,find_index_i
 from dmgraphanalysis_nodes.utils_igraph import add_non_null_labels,return_base_weighted_graph
 
 
-def plot_3D_igraph_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]),labels = [], edge_colors = ['Gray','Blue','Red']):
+def plot_3D_igraph_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]),labels = [], edge_colors = ['Gray','Blue','Red'], node_col_labels = np.array([]),nodes_sizes = np.array([])):
     
     g = return_base_weighted_graph(int_matrix)
     
@@ -30,8 +30,6 @@ def plot_3D_igraph_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]
         add_non_null_labels(g,labels)
         
     
-    vertex_degree = np.array(g.degree())*0.2
-    
     print np.unique(int_matrix)
     
     for i,index in enumerate(np.unique(int_matrix)[1:]):
@@ -40,20 +38,73 @@ def plot_3D_igraph_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]
         
         print len(colored_egde_list),np.sum(int_matrix == index)
         
-        for e in colored_egde_list:
+        #for e in colored_egde_list:
         
-            print e.tuple
+            #print e.tuple
             
-            print int_matrix[e.tuple[0],e.tuple[1]]        
+            #print int_matrix[e.tuple[0],e.tuple[1]]        
         
         colored_egde_list["color"] = edge_colors[i]
     
         print i,index,len(colored_egde_list)
         
+    print g.es['color']
+    
+    if node_col_labels.size == len(g.vs) and nodes_sizes.size == len(g.vs):
         
+        for i,v in enumerate(g.vs):
+            
+            if node_col_labels[i] != 0:
+                
+                print node_col_labels[i]
+                
+                v["color"] = edge_colors[node_col_labels[i]-1]
+                
+                v["size"] = nodes_sizes[i]
+                
+            else:
+            
+                
+                v["color"] = "Black"
+                
+                v["size"] = 0.1
+            
+                
+        print g.vs["size"]
+        
+        print g.vs["color"]
+        
+    else:
+        
+        vertex_degree = np.array(g.degree())*0.2
     
+            
+            #for i,index in enumerate(np.unique(node_col_labels)[1:]):
+                
+                
+            #if (mod_index == cur_mod_index):
+                #vertex_col.append(igraph_colors[mod_index])
+            #else:
+                #vertex_col.append("black")
+        
+        #g_sel.vs['color'] = vertex_col
+        
+        
+        
+        #for i,index in enumerate(np.unique(node_col_labels)[1:]):
     
-    
+            #colored_node_list = g.vs.select(weight_eq = index)
+            
+            #print len(colored_node_list),np.sum(int_matrix == index)
+            
+            ##for e in colored_egde_list:
+            
+                ##print e.tuple
+                
+                ##print int_matrix[e.tuple[0],e.tuple[1]]        
+            
+            #colored_node_list["color"] = node_colors[i]
+        
     if coords.shape[0] != len(g.vs):
     
         layout2D = g.layout_fruchterman_reingold()
@@ -66,98 +117,10 @@ def plot_3D_igraph_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]
     ###print g
     #ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = vertex_degree,    edge_width = np.array(g.es['weight']), edge_curved = True)
     #ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = vertex_degree,    edge_width = 0.01, edge_curved = True)
-    ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D , vertex_size = vertex_degree,    edge_curved = False)
+    ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D , edge_curved = False)
     
     
 def plot_3D_igraph_signed_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]),labels = [], edge_colors = ['Gray','Blue','Red']):
-    
-    
-    
-    #def plot_igraph_3D_signed_bin_label_mat(int_matrix,coords,plot_nbs_adj_mat_file,labels = []):
-        
-        #layout2D = project2D_np(coords)
-        
-        ##print layout2D
-            
-        #mod_list = int_matrix.tolist()
-        
-        ##print mod_list
-        
-        #g= ig.Graph.Weighted_Adjacency(mod_list,mode=ig.ADJ_MAX)
-        
-        #print len(labels),len(g.vs)
-        
-        #print g.degree()
-        
-        #null_degree_index, = np.where(np.array(g.degree()) == 0)
-        
-        #print null_degree_index
-        
-        #np_labels = np.array(labels,dtype = 'string')
-        
-        #np_labels[null_degree_index] = ""
-        
-        #print np_labels
-        
-        #if len(labels) == len(g.vs):
-        
-            #g.vs['label'] = np_labels.tolist()
-            
-            #g.vs['label_size'] = 15
-        
-        #print len(g.es)
-        
-        #if len(g.es) > 0 :
-            
-            ##print g.es['weight']
-            
-            #edge_col = []
-            
-            #for w in g.es['weight']:
-                
-                ##(e0,e1) = e.tuple
-                
-                ##print int(e.weight)
-                
-                ##comp_index = int(e.weight)
-                
-                #if int(w) == -1:
-                    #edge_col.append('green')
-                #elif int(w) == -2:
-                    #edge_col.append('cyan')
-                #elif int(w) == -3:
-                    #edge_col.append('blue')
-                #elif int(w) == -4:
-                    #edge_col.append('darkblue')
-                    
-                #elif int(w) == 1:
-                    #edge_col.append('yellow')
-                #elif int(w) == 2:
-                    #edge_col.append('orange')
-                #elif int(w) == 3:
-                    #edge_col.append('darkorange')
-                #elif int(w) == 4:
-                    #edge_col.append('red')
-                    
-            
-            ##g_all.es['names'] = edge_list_names
-            ##g_all.vs['names'] = node_list_names
-            
-            #g.es['color'] = edge_col
-            
-            #ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = 0.2,    edge_width =  1)
-            
-        #else:
-            #ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = 0.2,    edge_width =  0.01)
-        ##print vertex_degree
-        
-        ##g.es['sign'] = np.sign(g)
-        
-        ##
-        ####print g
-        ##ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = vertex_degree,    edge_width = np.array(g.es['weight']), edge_curved = True)
-        ##ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = vertex_degree,    edge_width = 0.01, edge_curved = True)
-        
     
     g = return_base_weighted_graph(int_matrix)
     
@@ -1329,9 +1292,9 @@ def plot_3D_igraph_signed_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.a
     
 ################################# using relative coords directly 
 
-from dmgraphanalysis_nodes.utils_igraph import add_non_null_labels,add_vertex_colors,create_module_edge_list
+from dmgraphanalysis_nodes.utils_igraph import add_non_null_labels,add_vertex_colors,create_module_edge_list,add_node_shapes
 
-def plot_3D_igraph_all_modules(community_vect,Z_list,node_coords = np.array([]),node_labels = [], layout = ''):
+def plot_3D_igraph_all_modules(community_vect,Z_list,node_coords = np.array([]),node_labels = [], layout = '', node_roles = np.array([])):
 
     if (community_vect.shape[0] != Z_list.shape[0] or community_vect.shape[0] != Z_list.shape[1]):
         print "Warning, community_vect {} != Z_list {}".format(community_vect.shape[0], Z_list.shape)
@@ -1343,28 +1306,42 @@ def plot_3D_igraph_all_modules(community_vect,Z_list,node_coords = np.array([]),
     
     add_vertex_colors(g_all,community_vect,list_colors = igraph_colors)
     
-    if len(node_labels) != 0:
+    print g_all.vs['color']
+    print g_all
     
+    print np.where(np.array(node_labels,dtype = "string") == "aHippo_R2")
+    
+    print Z_list.todense()[6,19]
+    
+    
+    #print np.where(np.array(node_labels,dtype = "string") == "PHC_FusG_R2")
+    
+    #print Z_list.todense()[19,:]
+    
+    if len(node_labels) != 0:
         print "non void labels found"
-        
         add_non_null_labels(g_all,node_labels)
-        
     else :
         print "empty labels"
         
+    if node_roles.size != 0:
+    
+        #print node_roles
+        add_node_shapes(g_all,node_roles)
+        
+        print g_all.vs["shape"]
+                        
     if layout == 'FR':
     
         print "plotting with Fruchterman-Reingold layout"
     
-        layout2D = g.layout_fruchterman_reingold()
+        g_all['layout'] = g_all.layout_fruchterman_reingold()
     
-        g_all['layout'] = layout2D.tolist()
-    
+        print g_all.vs['label']
         
         Z_list_all_modules_file = os.path.abspath("All_modules_FR.eps")
 
-        #ig.plot(g_all, Z_list_all_modules_file, vertex_size = 5,    edge_width = 1, edge_curved = False)
-        ig.plot(g_all, Z_list_all_modules_file, vertex_size = 1,    edge_width = 0.1, edge_curved = False)
+        ig.plot(g_all, Z_list_all_modules_file, edge_width = 0.1, edge_curved = False)
         
         return [Z_list_all_modules_file]
     
@@ -1395,8 +1372,7 @@ def plot_3D_igraph_all_modules(community_vect,Z_list,node_coords = np.array([]),
                 
                 g_all['layout'] = layout2D.tolist()
             
-                #ig.plot(g_all, Z_list_all_modules_file, vertex_size = 5,    edge_width = 1, edge_curved = False)
-                ig.plot(g_all, Z_list_all_modules_file, vertex_size = 1,    edge_width = 0.1, edge_curved = False)
+                ig.plot(g_all, Z_list_all_modules_file,edge_width = 0.1, edge_curved = False)
                 
             return Z_list_all_modules_files
                     
