@@ -670,12 +670,14 @@ cond = "All"
 
 ## cube of side = 3 voxels
 #neighbourhood = 1
+
 ## cube of side = 5 voxels
 neighbourhood = 2
 
 ROI_coords_dir = os.path.join(nipype_analyses_path,"ReseauALS-conj_corPos-OdorRecall")
 
-ROI_coords_labels_file = os.path.join(ROI_coords_dir,"Labels_Network"+cond+".txt")
+#ROI_coords_labels_file = os.path.join(ROI_coords_dir,"Labels_Network"+cond+".txt")
+ROI_coords_labels_file = os.path.join(ROI_coords_dir,"Labels_Network"+cond+"_jane2.txt")
 
 ROI_coords_MNI_coords_file = os.path.join(ROI_coords_dir,"Coord_Network"+cond+".txt")
 
