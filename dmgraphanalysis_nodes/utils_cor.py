@@ -23,7 +23,7 @@ import scipy.signal as filt
 #import scipy.cluster.hierarchy as hie
 
 
-#import time
+import time
 
 #from collections import Counter
 
@@ -538,55 +538,55 @@ def regress_filter_normalize_parameters(data_matrix,covariates):
     
     #return Z_cor_mat
     
-#def return_conf_cor_mat(ts_mat,regressor_vect,conf_interval_prob):
+def return_conf_cor_mat(ts_mat,regressor_vect,conf_interval_prob):
     
-    #t1 = time.time()
+    t1 = time.time()
     
-    #if ts_mat.shape[0] != len(regressor_vect):
-        #"Warning, incompatible regressor length {} {}".format(ts_mat.shape[0], len(regressor_vect))
-        #return
+    if ts_mat.shape[0] != len(regressor_vect):
+        "Warning, incompatible regressor length {} {}".format(ts_mat.shape[0], len(regressor_vect))
+        return
 
     
-    #keep = regressor_vect > 0.0
-    #w = regressor_vect[keep]
-    #ts_mat = ts_mat[keep,:]
+    keep = regressor_vect > 0.0
+    w = regressor_vect[keep]
+    ts_mat = ts_mat[keep,:]
     
-    #### confidence interval for variance computation
-    #norm = stats.norm.ppf(1-conf_interval_prob/2)
-    ##deg_freedom = w.sum()-3
-    #deg_freedom = w.sum()/w.max()-3
-    ##deg_freedom = w.shape[0]-3
+    ### confidence interval for variance computation
+    norm = stats.norm.ppf(1-conf_interval_prob/2)
+    #deg_freedom = w.sum()-3
+    deg_freedom = w.sum()/w.max()-3
+    #deg_freedom = w.shape[0]-3
     
-    #print regressor_vect.shape[0],w.shape[0],w.sum(),w.sum()/w.max()
-    #s, n = ts_mat.shape
+    print regressor_vect.shape[0],w.shape[0],w.sum(),w.sum()/w.max()
+    s, n = ts_mat.shape
     
-    #Z_cor_mat = np.zeros((n,n),dtype = float)
-    #cor_mat = np.zeros((n,n),dtype = float)
-    #conf_cor_mat = np.zeros((n,n),dtype = float)
+    Z_cor_mat = np.zeros((n,n),dtype = float)
+    cor_mat = np.zeros((n,n),dtype = float)
+    conf_cor_mat = np.zeros((n,n),dtype = float)
     
-    #ts_mat2 = ts_mat*np.sqrt(w)[:,np.newaxis]
+    ts_mat2 = ts_mat*np.sqrt(w)[:,np.newaxis]
     
-    #for i,j in it.combinations(range(n), 2):
+    for i,j in it.combinations(range(n), 2):
     
-        #s1 = ts_mat2[:,i]
-        #s2 = ts_mat2[:,j]
+        s1 = ts_mat2[:,i]
+        s2 = ts_mat2[:,j]
         
-        #cor_mat[i,j] = (s1*s2).sum()/np.sqrt((s1*s1).sum() *(s2*s2).sum())
-        #Z_cor_mat[i,j] = np.arctanh(cor_mat[i,j])
+        cor_mat[i,j] = (s1*s2).sum()/np.sqrt((s1*s1).sum() *(s2*s2).sum())
+        Z_cor_mat[i,j] = np.arctanh(cor_mat[i,j])
         
-        #if cor_mat[i,j] > 0:
-            #conf_cor_mat[i,j] = cor_mat[i,j] - np.tanh(Z_cor_mat[i,j] - norm/np.sqrt(deg_freedom))
-        #else:
-            #conf_cor_mat[i,j] = - cor_mat[i,j] + np.tanh(Z_cor_mat[i,j] + norm/np.sqrt(deg_freedom))
+        if cor_mat[i,j] > 0:
+            conf_cor_mat[i,j] = cor_mat[i,j] - np.tanh(Z_cor_mat[i,j] - norm/np.sqrt(deg_freedom))
+        else:
+            conf_cor_mat[i,j] = - cor_mat[i,j] + np.tanh(Z_cor_mat[i,j] + norm/np.sqrt(deg_freedom))
             
         
-        ##print i,j,cor_mat[i,j],conf_cor_mat[i,j]
+        #print i,j,cor_mat[i,j],conf_cor_mat[i,j]
         
-    #t2 = time.time()
+    t2 = time.time()
     
-    #print "Weighted correlation computation took " + str(t2-t1) + "s"
+    print "Weighted correlation computation took " + str(t2-t1) + "s"
     
-    #return cor_mat,Z_cor_mat,conf_cor_mat
+    return cor_mat,Z_cor_mat,conf_cor_mat
     
     
 #def return_var_cor_mat(ts_mat,regressor_vect):

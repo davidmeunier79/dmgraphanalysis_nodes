@@ -4,51 +4,51 @@ import pylab as pl
     
 import numpy as np
 
-#def plot_cormat(plot_file, cor_mat,list_labels,label_size =2):
+def plot_cormat(plot_file, cor_mat,list_labels = [],label_size =2):
     
-    #fig1 = plt.figure()
-    #ax = fig1.add_subplot(1,1,1)
+    fig1 = plt.figure()
+    ax = fig1.add_subplot(1,1,1)
     
-    #im = ax.matshow(cor_mat,interpolation="none")
-    ##plt.axis('off')
+    im = ax.matshow(cor_mat,interpolation="none")
+    #plt.axis('off')
     
-    #[i.set_visible(False) for i in ax.spines.itervalues()]
+    [i.set_visible(False) for i in ax.spines.itervalues()]
     
-    ##im.set_cmap('binary')
-    #im.set_cmap('spectral')
-    #### add labels
+    #im.set_cmap('binary')
+    im.set_cmap('spectral')
+    ### add labels
     
-    #if len(list_labels) != 0:
+    if len(list_labels) != 0:
         
-        #if len(list_labels) == cor_mat.shape[0]:
+        if len(list_labels) == cor_mat.shape[0]:
             
-            #plt.xticks(range(len(list_labels)), list_labels,rotation='vertical', fontsize=label_size)
-            #plt.yticks(range(len(list_labels)), list_labels, fontsize=label_size)
+            plt.xticks(range(len(list_labels)), list_labels,rotation='vertical', fontsize=label_size)
+            plt.yticks(range(len(list_labels)), list_labels, fontsize=label_size)
             
-            #plt.subplots_adjust(top = 0.8)
-        #else:
-            #print "Warning in utils_plot.plot_cormat, incompatible number of labels %d and matrix shape %d" %(len(list_labels),cor_mat.shape[0])
+            plt.subplots_adjust(top = 0.8)
+        else:
+            print "Warning in utils_plot.plot_cormat, incompatible number of labels %d and matrix shape %d" %(len(list_labels),cor_mat.shape[0])
             
         
-    #plt.tick_params(axis='both',          # changes apply to the x-axis
-        #which='both',      # both major and minor ticks are affected
-        #bottom='off',      # ticks along the bottom edge are off
-        #top='off',         # ticks along the top edge are off
-        #left = 'off',
-        #right = 'off'
-        #)
-    ##ax.set_xticklabels(['']+labels)
-    ##plt.setp(ax.get_xticklabels(), rotation='vertical', fontsize=3)
+    plt.tick_params(axis='both',          # changes apply to the x-axis
+        which='both',      # both major and minor ticks are affected
+        bottom='off',      # ticks along the bottom edge are off
+        top='off',         # ticks along the top edge are off
+        left = 'off',
+        right = 'off'
+        )
+    #ax.set_xticklabels(['']+labels)
+    #plt.setp(ax.get_xticklabels(), rotation='vertical', fontsize=3)
     
-    #fig1.colorbar(im)
+    fig1.colorbar(im)
     
-    #fig1.savefig(plot_file)
+    fig1.savefig(plot_file)
     
-    #plt.close(fig1)
-    ##fig1.close()
-    #del fig1
+    plt.close(fig1)
+    #fig1.close()
+    del fig1
     
-def plot_ranged_cormat(plot_file, cor_mat,list_labels, fix_full_range,label_size = 2):
+def plot_ranged_cormat(plot_file, cor_mat,list_labels = [], fix_full_range = [-1.0,1.0],label_size = 2):
     
     fig1 = plt.figure(frameon=False)
     ax = fig1.add_subplot(1,1,1)
@@ -59,7 +59,8 @@ def plot_ranged_cormat(plot_file, cor_mat,list_labels, fix_full_range,label_size
     [i.set_visible(False) for i in ax.spines.itervalues()]
     
     #im.set_cmap('binary')
-    im.set_cmap('spectral')
+    #im.set_cmap('spectral')
+    im.set_cmap('jet')
     
     ### add labels
     
@@ -141,19 +142,19 @@ def plot_int_mat(plot_file, cor_mat,list_labels, fix_full_range,label_size = 2):
     #fig1.close()
     del fig1
     
-#def plot_hist(plot_hist_file,data,nb_bins = 100):
+def plot_hist(plot_hist_file,data,nb_bins = 100):
     
-    ##fig2 = figure.Figure()
-    #fig2 = plt.figure()
-    #ax = fig2.add_subplot(1,1,1)
-    #y, x = np.histogram(data, bins = nb_bins)
-    #ax.plot(x[:-1],y)
-    ##ax.bar(x[:-1],y, width = y[1]-y[0])
-    #fig2.savefig(plot_hist_file)
+    #fig2 = figure.Figure()
+    fig2 = plt.figure()
+    ax = fig2.add_subplot(1,1,1)
+    y, x = np.histogram(data, bins = nb_bins)
+    ax.plot(x[:-1],y)
+    #ax.bar(x[:-1],y, width = y[1]-y[0])
+    fig2.savefig(plot_hist_file)
     
-    #plt.close(fig2)
-    ##fig2.close()
-    #del fig2
+    plt.close(fig2)
+    #fig2.close()
+    del fig2
     
 def plot_signals(plot_signals_file,signals_matrix,colors = ['blue']):
     

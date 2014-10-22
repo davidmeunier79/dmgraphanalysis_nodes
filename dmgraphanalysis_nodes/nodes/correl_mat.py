@@ -608,9 +608,9 @@ class MergeRuns(BaseInterface):
 
         ################################################################################# ComputeConfCorMat ######################################################################################################################
  
-from dmgraphanalysis.utils_cor import return_conf_cor_mat
+from dmgraphanalysis_nodes.utils_cor import return_conf_cor_mat
 
-from dmgraphanalysis.utils_plot import plot_hist,plot_cormat
+from dmgraphanalysis_nodes.utils_plot import plot_hist,plot_cormat
         
 class ComputeConfCorMatInputSpec(BaseInterfaceInputSpec):
     
@@ -621,6 +621,8 @@ class ComputeConfCorMatInputSpec(BaseInterfaceInputSpec):
     conf_interval_prob = traits.Float(0.05, usedefault = True, desc='Confidence interval', mandatory=True)
     
     plot_mat = traits.Bool(True, usedefault = True, desc='Confidence interval', mandatory=False)
+    
+    labels_file = File(exists=True, desc='Name of the nodes (used only if plot = true)', mandatory=False)
     
 class ComputeConfCorMatOutputSpec(TraitedSpec):
     
@@ -647,7 +649,7 @@ class ComputeConfCorMat(BaseInterface):
         conf_interval_prob = self.inputs.conf_interval_prob
             
         plot_mat = self.inputs.plot_mat
-        
+        labels_file = self.inputs.labels_file
         
         print 'load resid data'
         
@@ -699,7 +701,17 @@ class ComputeConfCorMat(BaseInterface):
         
         
         if plot_mat == True:
+            
+            if isdefined(labels_file):
+                    
+                print 'extracting node labels'
+                    
+                labels = [line.strip() for line in open(labels_file)]
+                print labels
                 
+            else:
+                labels = []
+            
             ############# cor_mat
             
             #### heatmap 
@@ -708,7 +720,7 @@ class ComputeConfCorMat(BaseInterface):
             
             plot_heatmap_cor_mat_file =  os.path.abspath('heatmap_cor_mat.eps')
             
-            plot_cormat(plot_heatmap_cor_mat_file,cor_mat,list_labels = [])
+            plot_cormat(plot_heatmap_cor_mat_file,cor_mat,list_labels = labels)
             
             #### histogram 
             
@@ -728,7 +740,7 @@ class ComputeConfCorMat(BaseInterface):
             
             plot_heatmap_Z_cor_mat_file =  os.path.abspath('heatmap_Z_cor_mat.eps')
             
-            plot_cormat(plot_heatmap_Z_cor_mat_file,Z_cor_mat,list_labels = [])
+            plot_cormat(plot_heatmap_Z_cor_mat_file,Z_cor_mat,list_labels = labels)
             
             #### histogram 
             
@@ -746,7 +758,7 @@ class ComputeConfCorMat(BaseInterface):
             
             plot_heatmap_conf_cor_mat_file =  os.path.abspath('heatmap_conf_cor_mat.eps')
             
-            plot_cormat(plot_heatmap_conf_cor_mat_file,conf_cor_mat,list_labels = [])
+            plot_cormat(plot_heatmap_conf_cor_mat_file,conf_cor_mat,list_labels = labels)
             
             #### histogram 
             

@@ -99,6 +99,8 @@ class StatsPairTTestInputSpec(BaseInterfaceInputSpec):
     
     t_test_thresh_fdr = traits.Float(0.05, usedefault = True, desc='Alpha value used as FDR implementation', mandatory=False)
     
+    paired = traits.Bool(True,usedefault = True, desc='Ttest is paired or not', mandatory=False)
+    
 class StatsPairTTestOutputSpec(TraitedSpec):
     
     signif_signed_adj_fdr_mat_file = File(exists=True, desc="int matrix with corresponding codes to significance")
@@ -106,10 +108,10 @@ class StatsPairTTestOutputSpec(TraitedSpec):
 class StatsPairTTest(BaseInterface):
     
     """
-    Plot cormatification matrix with igraph
-    - labels are optional, 
-    - threshold is optional (default, 50 = half the group)
-    - coordinates are optional, if no coordiantes are specified, representation in topological (Fruchterman-Reingold) space
+    Compute ttest stats between 2 group of matrix 
+    - matrix are arranged in group_cormat, with order (Nx,Ny,Nsubj). Nx = Ny (each matricx is square)
+    - t_test_thresh_fdr is optional (default, 0.05)
+    - paired in indicate if ttest is pairde or not. If paired, both group have the same number of samples
     """
     input_spec = StatsPairTTestInputSpec
     output_spec = StatsPairTTestOutputSpec
@@ -122,51 +124,7 @@ class StatsPairTTest(BaseInterface):
         group_cormat_file2 = self.inputs.group_cormat_file2
         t_test_thresh_fdr = self.inputs.t_test_thresh_fdr
             
-
-#def compute_pairwise_ttest_stats_fdr(group_cormat_file1,group_cormat_file2,t_test_thresh_fdr):
-    
-    #import numpy as np
-    #import os
-
-    #import dmgraphanalysis.utils_stats as stats
-    
-    
-    #print "loading group_cormat1"
-    
-    #group_cormat1 = np.array(np.load(group_cormat_file1),dtype = float)
-    #print group_cormat1.shape
-    
-    
-    #print "loading group_cormat2"
-    
-    #group_cormat2 = np.array(np.load(group_cormat_file2),dtype = float)
-    #print group_cormat2.shape
-    
-    
-    #print "compute NBS stats"
-    
-    
-    ## check input matrices
-    #Ix,Jx,nx = group_cormat1.shape
-    #Iy,Jy,ny = group_cormat2.shape
-    
-    #assert Ix == Iy
-    #assert Jx == Jy
-    #assert Ix == Jx
-    #assert Iy == Jy
-    
-    #signif_signed_adj_mat  = stats.compute_pairwise_ttest_rel_fdr(group_cormat1,group_cormat2,t_test_thresh_fdr)
-    
-    #print 'save pairwise signed stat file'
-    
-    #signif_signed_adj_fdr_mat_file  = os.path.abspath('signif_signed_adj_fdr_'+ str(t_test_thresh_fdr) +'.npy')
-    #np.save(signif_signed_adj_fdr_mat_file,signif_signed_adj_mat)
-    
-    #return signif_signed_adj_fdr_mat_file
-    
-    
-    
-    
+        paired = self.inputs.paired
         print "loading group_cormat1"
         
         group_cormat1 = np.array(np.load(group_cormat_file1),dtype = float)
@@ -191,7 +149,7 @@ class StatsPairTTest(BaseInterface):
         assert Ix == Jx
         assert Iy == Jy
         
-        signif_signed_adj_mat  = stats.compute_pairwise_ttest_rel_fdr(group_cormat1,group_cormat2,t_test_thresh_fdr)
+        signif_signed_adj_mat  = stats.compute_pairwise_ttest_fdr(group_cormat1,group_cormat2,t_test_thresh_fdr,paired)
         
         print 'save pairwise signed stat file'
         
