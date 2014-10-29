@@ -462,12 +462,17 @@ resliced_grey_matter_HO_img_file = os.path.join(nipype_analyses_path,peak_activa
 resliced_ventricule_HO_img_file = os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "rHarvard-Oxford-ventricule.nii")
 
 
+info_template_file  =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "info-Harvard-Oxford-reorg.txt")
+
+
 #### indexed_mask
 ROI_coords_labelled_mask_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"All_labelled_ROI-neigh_"+str(neighbourhood)+".nii")
-    
 ROI_coords_MNI_coords_file = os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"Correlations1_Coordinates.txt")
-
 ROI_coords_labels_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"Correlations1_Names.txt")
+
+ROI_coords_labelled_mask_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"All_labelled_ROI2-neigh_"+str(neighbourhood)+".nii")
+ROI_coords_MNI_coords_file = os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"Correlations2_Coordinates.txt")
+ROI_coords_labels_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"Correlations2_Names.txt")
 
 ##### saving ROI coords as textfile
 #### ijk coords
@@ -483,9 +488,7 @@ ROI_coords_labels_file =  os.path.join(nipype_analyses_path,peak_activation_mask
 #info_rois_file  =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "info-" + ROI_mask_prefix + ".txt")
 
 
-#info_template_file  =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "info-Harvard-Oxford-reorg.txt")
-
-cor_mat_analysis_name = "Correl_analyses-filtered-ROI_coords-amplitude_noA26"
+cor_mat_analysis_name = "Correl_analyses-filtered-ROI_coords2-amplitude_noA26"
 
 conf_interval_prob = 0.05
     

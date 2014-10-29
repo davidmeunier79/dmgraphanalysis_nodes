@@ -260,10 +260,109 @@ def gather_correl_values():
             
             df_all_Z_cor_values = pd.DataFrame(np_all_Z_cor_values,columns = labels_pairs,index = behav_subject_ids_noA26)
             
-            df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values_" + sess + '_' + cond +'.txt')
+            df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values2_" + sess + '_' + cond +'.txt')
             
             df_all_Z_cor_values.to_csv(df_all_Z_cor_values_file)
             
+def gather_correl_values_by_pair():
+
+    import numpy as np
+    import pandas as pd
+    
+    import nibabel as nib
+    
+    print "Loading labels"
+    
+    labels = [line.strip() for line in open(ROI_coords_labels_file)]
+    
+    np_labels = np.array(labels, dtype = 'str')
+    
+    print labels
+    
+    upper_tri_indexes = np.triu_indices(np_labels.shape[0],k=1)
+    
+    print upper_tri_indexes
+    
+    print np_labels[upper_tri_indexes[0]]
+    
+    labels_pairs = ["_".join((pair_lab[0],pair_lab[1])) for pair_lab in zip(np_labels[upper_tri_indexes[0]],np_labels[upper_tri_indexes[1]]) ]
+    
+    print labels_pairs
+    
+    all_Z_cor_values = []
+    
+    sess_cond_names = []
+    
+    
+    for sess in funct_sessions_jp:
+    
+        print sess
+    
+        sess_Z_cor_values = []
+        for cond in condition_odors:
+        
+            print cond
+            
+            sess_cond_names.append(sess + '_' + cond)
+            
+            cond_Z_cor_values = []
+             
+            for subject_num in behav_subject_ids_noA26:
+                
+                print subject_num
+                
+                Z_cor_mat_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"_cond_" + cond + "_session_" + sess + "_subject_num_" + subject_num,"compute_conf_cor_mat","Z_cor_mat.npy" )
+                    
+                print Z_cor_mat_file
+                
+                Z_cor_mat = np.load(Z_cor_mat_file)
+                
+                print Z_cor_mat
+                print Z_cor_mat.shape
+                
+                vect_Z_cor_mat = Z_cor_mat[upper_tri_indexes]
+                
+                print vect_Z_cor_mat
+                
+                cond_Z_cor_values.append(vect_Z_cor_mat)
+                
+            sess_Z_cor_values.append(cond_Z_cor_values)
+        all_Z_cor_values.append(sess_Z_cor_values)
+        
+    np_all_Z_cor_values = np.array(all_Z_cor_values,dtype = 'f')
+    
+    print np_all_Z_cor_values.shape
+    
+    print sess_cond_names
+    
+    for i,label in enumerate(labels_pairs):
+    
+    
+        print labels
+        
+        print np_all_Z_cor_values[1,0,:,i]
+        
+        pair_data = np.reshape(np_all_Z_cor_values[:,:,:,i],(-1,np_all_Z_cor_values.shape[2]))
+        
+        print pair_data[2,:]
+        
+        print pair_data.shape
+        
+            
+        df_all_Z_cor_values = pd.DataFrame(np.transpose(pair_data),columns = sess_cond_names,index = behav_subject_ids_noA26)
+        
+        df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values2_" + label +'.txt')
+        
+        df_all_Z_cor_values.to_csv(df_all_Z_cor_values_file)
+        
+              
+    
+    
+    
+    print labels_pairs
+    
+    
+    
 if __name__ =='__main__':
     
     #if not (os.path.isfile(indexed_mask_rois_file) or os.path.isfile(coord_rois_file)) :
@@ -272,21 +371,22 @@ if __name__ =='__main__':
             
     #print indexed_mask_rois_file,coord_rois_file
 
-    ##### compute preprocessing for weighted correlation matrices
-    #main_workflow = create_correl_mat_by_session_workflow()
+    #### compute preprocessing for weighted correlation matrices
+    main_workflow = create_correl_mat_by_session_workflow()
     
-    ###main_workflow.write_graph(cor_mat_analysis_name + '_graph.dot',graph2use='flat', format = 'svg')
-    #main_workflow.config['execution'] = {'remove_unnecessary_outputs':'false'}
+    ##main_workflow.write_graph(cor_mat_analysis_name + '_graph.dot',graph2use='flat', format = 'svg')
+    main_workflow.config['execution'] = {'remove_unnecessary_outputs':'false'}
     
-    ################################ Attention, il ne semble pas que ca marche avec le multiprocess - semble de venir de l'utilisation des MapNodes avec Rpy..... ############################
-    ################################################ Ca bouffe toute la mémoire !!!!!!!!!!!!!!!!! ######################################################################
-    ##################################################################### Utilisé le run sequentiel de preferences ############################
+    ############################### Attention, il ne semble pas que ca marche avec le multiprocess - semble de venir de l'utilisation des MapNodes avec Rpy..... ############################
+    ############################################### Ca bouffe toute la mémoire !!!!!!!!!!!!!!!!! ######################################################################
+    #################################################################### Utilisé le run sequentiel de preferences ############################
     
-    ##main_workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 8})
+    #main_workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 8})
     
-    #main_workflow.run()
+    main_workflow.run()
         
     
     gather_correl_values()
+    gather_correl_values_by_pair()
     
     
