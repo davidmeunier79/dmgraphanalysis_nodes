@@ -9,7 +9,7 @@ import sys, os
 sys.path.append('../irm_analysis')
 
 from  define_variables import *
-from utils_dtype_coord import *
+from dmgraphanalysis_nodes.utils_dtype_coord import *
     
 import glob
 
@@ -841,10 +841,8 @@ def compute_recombined_HO_template(img_header,img_affine,img_shape):
 ########################################### Activation peaks ROI template (computed once before the pipeline) ################################################
 
 
-def compute_labelled_mask_from_HO_sub():
+def compute_labelled_mask_from_HO_sub(resliced_full_HO_img_file,info_template_file,export_dir):
 
-    from define_variables  import resliced_full_HO_img_file,info_template_file
-    
     labeled_mask = nib.load(resliced_full_HO_img_file)
     
     print labeled_mask
@@ -858,8 +856,7 @@ def compute_labelled_mask_from_HO_sub():
     
     useful_indexes = range(2,6) + range(7,10) + range(11,18)
     
-    #print useful_indexes
-    
+    print useful_indexes
     
     ROI_mask_data = np.zeros(shape = labeled_mask_data.shape,dtype = labeled_mask_data.dtype)
     
@@ -874,7 +871,7 @@ def compute_labelled_mask_from_HO_sub():
     print np.unique(ROI_mask_data)
     
     
-    ROI_mask_file = os.path.abspath("ROI_mask.nii")
+    ROI_mask_file = os.path.join(export_dir,"ROI_mask.nii")
     
     nib.save(nib.Nifti1Image(np.array(ROI_mask_data,dtype = int),labeled_mask_affine,labeled_mask_header),ROI_mask_file)
 
@@ -889,7 +886,19 @@ def compute_labelled_mask_from_HO_sub():
     
     print useful_labels
     
+    ##export each ROI in a single file (mask)
+    for label_index in useful_indexes:
     
+        roi_mask = (labeled_mask_data == label_index)
+    
+        single_ROI_mask = nib.Nifti1Image(np.array(roi_mask,dtype = int),labeled_mask_affine,labeled_mask_header)
+        
+        print np_labels[label_index - 1]
+        
+        single_ROI_mask_file = os.path.join(export_dir,"ROI_mask_HO_" + np_labels[label_index - 1] + ".nii")
+        
+        nib.save(single_ROI_mask,single_ROI_mask_file)
+        
     return useful_labels,useful_indexes,labeled_mask
     
 def compute_labelled_mask_from_ROI_coords(neighbourhood = 1):
@@ -1531,6 +1540,12 @@ def compute_labelled_mask_from_HO_and_merged_thr_spm_mask():
     return indexed_mask_rois_file,coord_rois_file
     
     
+def compute_labelled_mask_from_HO_sub_jp():
+
+    from define_variables_jp import resliced_full_HO_img_file,info_template_file,nipype_analyses_path,peak_activation_mask_analysis_name
+    
+    compute_labelled_mask_from_HO_sub(resliced_full_HO_img_file,info_template_file,export_dir = os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name))
+    
 if __name__ =='__main__':
     
     ### compute labeled_mask from ROI coords
@@ -1539,10 +1554,16 @@ if __name__ =='__main__':
     ### compute labeled_mask from HO template
     #compute_labelled_mask_from_HO()
     
+    ### export HO and single files 
+    compute_labelled_mask_from_HO_sub_jp()
+    
     ### compute labeled_mask from HO template + one contrast img
     #compute_labelled_mask_from_HO_and_spm_contrast_img()   
     
     ### compute labeled_mask from HO template + several spm thr mask
-    compute_labelled_mask_from_HO_and_merged_thr_spm_mask()
+    #compute_labelled_mask_from_HO_and_merged_thr_spm_mask()
+    
+    
+    
     
     

@@ -16,11 +16,8 @@ from  define_variables_jp import *
 
 #from compute_peak_labelled_mask import compute_labelled_mask_from_HO,compute_labelled_mask_from_HO_and_merged_spm_mask
     
+#from dmgraphanalysis_nodes.labelled_mask import compute_labelled_mask_from_ROI_coords_files,merge_coord_and_label_files
 
-from dmgraphanalysis_nodes.labelled_mask import compute_labelled_mask_from_ROI_coords_files,merge_coord_and_label_files
-
-import pyplotbrain as ppb
-import pyqtgraph as pg
 import numpy as np
 
     
@@ -28,18 +25,10 @@ def compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,MNI_co
     """
     Compute labeled mask by specifying MNI coordinates and labels 'at hand'
     #"""
-    #from define_variables import resliced_full_HO_img_file,peak_activation_mask_analysis_name
-    
-    #from define_variables import ROI_coords_mask_dir,ROI_coords_labelled_mask_file,ROI_coords_labels_file
-    
-    #from labelled_mask import remove_close_peaks_neigh_in_binary_template
     
     from nipype.utils.filemanip import split_filename as split_f
     
-    
-    
-    
-    from utils import check_np_dimension
+    from dmgraphanalysis_nodes.utils import check_np_dimension
     
     import itertools as iter
     
@@ -117,9 +106,9 @@ def compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,MNI_co
     #path, fname, ext = '','',''
     path, fname, ext = split_f(MNI_coords_file)
     
-    ROI_coords_labelled_mask_file = os.path.join(path,"All_labelled_ROI-neigh_"+str(neighbourhood)+".nii")
+    ROI_coords_labelled_mask_file = os.path.join(path,"All_labelled_ROI2-neigh_"+str(neighbourhood)+".nii")
     
-    ROI_coords_np_coords_file = os.path.join(path,"All_ROI_np_coords.txt")
+    ROI_coords_np_coords_file = os.path.join(path,"All_ROI_np_coords2.txt")
     
     ###save ROI_coords_labelled_mask
     nib.save(nib.Nifti1Image(ROI_coords_labelled_mask,orig_image.get_affine(),orig_image.get_header()),ROI_coords_labelled_mask_file)
@@ -134,6 +123,9 @@ def compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,MNI_co
     
     
 def pyplotbrain_display_ROI_coords(ROI_coords_MNI_coords_file,ROI_coords_orig_constrast_file):
+
+    import pyplotbrain as ppb
+    import pyqtgraph as pg
 
     ROI_coords_MNI_coords = np.array(np.loadtxt(ROI_coords_MNI_coords_file),dtype = 'int')
     
