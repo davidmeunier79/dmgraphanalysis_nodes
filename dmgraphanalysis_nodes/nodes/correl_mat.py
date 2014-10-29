@@ -14,8 +14,8 @@ Definition of Nodes for computing correlation matrices
 from nipype.interfaces.base import BaseInterface, \
     BaseInterfaceInputSpec, traits, File, TraitedSpec, isdefined
     
-from nipype.utils.filemanip import split_filename
-
+from nipype.utils.filemanip import split_filename as split_f
+    
 import nibabel as nb
 import numpy as np
 import os
@@ -653,6 +653,8 @@ class ComputeConfCorMat(BaseInterface):
         
         print 'load resid data'
         
+        path, fname, ext = split_f(ts_file)
+        
         data_matrix = np.load(ts_file)
         
         print data_matrix.shape
@@ -683,19 +685,19 @@ class ComputeConfCorMat(BaseInterface):
         ### 
         print "saving cor_mat as npy"
         
-        cor_mat_file = os.path.abspath('cor_mat.npy')
+        cor_mat_file = os.path.abspath('cor_mat_' + fname + '.npy')
         
         np.save(cor_mat_file,cor_mat)
         
         print "saving conf_cor_mat as npy"
         
-        conf_cor_mat_file = os.path.abspath('conf_cor_mat.npy')
+        conf_cor_mat_file = os.path.abspath('conf_cor_mat_' + fname + '.npy')
         
         np.save(conf_cor_mat_file,conf_cor_mat)
         
         print "saving Z_cor_mat as npy"
         
-        Z_cor_mat_file = os.path.abspath('Z_cor_mat.npy')
+        Z_cor_mat_file = os.path.abspath('Z_cor_mat_' + fname + '.npy')
         
         np.save(Z_cor_mat_file,Z_cor_mat)
         
@@ -718,7 +720,7 @@ class ComputeConfCorMat(BaseInterface):
             
             print 'plotting cor_mat heatmap'
             
-            plot_heatmap_cor_mat_file =  os.path.abspath('heatmap_cor_mat.eps')
+            plot_heatmap_cor_mat_file =  os.path.abspath('heatmap_cor_mat_' + fname + '.eps')
             
             plot_cormat(plot_heatmap_cor_mat_file,cor_mat,list_labels = labels)
             
@@ -726,7 +728,7 @@ class ComputeConfCorMat(BaseInterface):
             
             print 'plotting cor_mat histogram'
             
-            plot_hist_cor_mat_file = os.path.abspath('hist_cor_mat.eps')
+            plot_hist_cor_mat_file = os.path.abspath('hist_cor_mat_' + fname + '.eps')
             
             plot_hist(plot_hist_cor_mat_file,cor_mat,nb_bins = 100)
             
@@ -738,7 +740,7 @@ class ComputeConfCorMat(BaseInterface):
             
             print 'plotting Z_cor_mat heatmap'
             
-            plot_heatmap_Z_cor_mat_file =  os.path.abspath('heatmap_Z_cor_mat.eps')
+            plot_heatmap_Z_cor_mat_file =  os.path.abspath('heatmap_Z_cor_mat_' + fname + '.eps')
             
             plot_cormat(plot_heatmap_Z_cor_mat_file,Z_cor_mat,list_labels = labels)
             
@@ -746,7 +748,7 @@ class ComputeConfCorMat(BaseInterface):
             
             print 'plotting Z_cor_mat histogram'
             
-            plot_hist_Z_cor_mat_file = os.path.abspath('hist_Z_cor_mat.eps')
+            plot_hist_Z_cor_mat_file = os.path.abspath('hist_Z_cor_mat_' + fname + '.eps')
             
             plot_hist(plot_hist_Z_cor_mat_file,Z_cor_mat,nb_bins = 100)
             
@@ -756,7 +758,7 @@ class ComputeConfCorMat(BaseInterface):
             
             print 'plotting conf_cor_mat heatmap'
             
-            plot_heatmap_conf_cor_mat_file =  os.path.abspath('heatmap_conf_cor_mat.eps')
+            plot_heatmap_conf_cor_mat_file =  os.path.abspath('heatmap_conf_cor_mat_' + fname + '.eps')
             
             plot_cormat(plot_heatmap_conf_cor_mat_file,conf_cor_mat,list_labels = labels)
             
@@ -764,7 +766,7 @@ class ComputeConfCorMat(BaseInterface):
             
             print 'plotting conf_cor_mat histogram'
             
-            plot_hist_conf_cor_mat_file = os.path.abspath('hist_conf_cor_mat.eps')
+            plot_hist_conf_cor_mat_file = os.path.abspath('hist_conf_cor_mat_' + fname + '.eps')
 
             plot_hist(plot_hist_conf_cor_mat_file,conf_cor_mat,nb_bins = 100)
             
@@ -777,11 +779,13 @@ class ComputeConfCorMat(BaseInterface):
         
         outputs = self._outputs().get()
         
-        outputs["cor_mat_file"] = os.path.abspath('cor_mat.npy')
+        path, fname, ext = split_f(self.inputs.ts_file)
         
-        outputs["conf_cor_mat_file"] = os.path.abspath('conf_cor_mat.npy')
+        outputs["cor_mat_file"] = os.path.abspath('cor_mat_' + fname + '.npy')
         
-        outputs["Z_cor_mat_file"] = os.path.abspath('Z_cor_mat.npy')
+        outputs["conf_cor_mat_file"] = os.path.abspath('conf_cor_mat_' + fname + '.npy')
+        
+        outputs["Z_cor_mat_file"] = os.path.abspath('Z_cor_mat_' + fname + '.npy')
         
         print outputs
         
