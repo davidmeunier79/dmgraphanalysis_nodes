@@ -16,112 +16,11 @@ from  define_variables_jp import *
 
 #from compute_peak_labelled_mask import compute_labelled_mask_from_HO,compute_labelled_mask_from_HO_and_merged_spm_mask
     
-#from dmgraphanalysis_nodes.labelled_mask import compute_labelled_mask_from_ROI_coords_files,merge_coord_and_label_files
+from dmgraphanalysis_nodes.labeled_mask import compute_labelled_mask_from_ROI_coords_files,compute_labelled_mask_from_anat_ROIs
+#,merge_coord_and_label_files
 
 import numpy as np
 
-    
-def compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,MNI_coords_file,neighbourhood = 1):
-    """
-    Compute labeled mask by specifying MNI coordinates and labels 'at hand'
-    #"""
-    
-    from nipype.utils.filemanip import split_filename as split_f
-    
-    from dmgraphanalysis_nodes.utils import check_np_dimension
-    
-    import itertools as iter
-    
-    from nipy.labs.viz import coord_transform
-
-    import numpy as np
-    import nibabel as nib
-    
-    orig_image = nib.load(resliced_full_HO_img_file)
-    
-    orig_image_data = orig_image.get_data()
-    
-    orig_image_data_shape = orig_image_data.shape
-    
-    print orig_image_data_shape
-    
-    orig_image_data_sform = orig_image.get_sform()
-    
-    print orig_image_data_sform
-    
-    ROI_MNI_coords_list = np.array(np.loadtxt(MNI_coords_file),dtype = 'int').tolist()
-    
-    print ROI_MNI_coords_list
-    
-    #ROI_labels = [lign.strip() for lign in open(labels_file)]
-    
-    #print labels
-    
-    print len(ROI_MNI_coords_list)
-    #print len(ROI_labels)
-    
-    ### transform MNI coords to numpy coords
-    ## transfo inverse de celle stockes dans le header
-    mni_sform_inv = np.linalg.inv(orig_image_data_sform)
-    
-    ROI_coords = np.array([coord_transform(x, y, z, mni_sform_inv) for x,y,z in ROI_MNI_coords_list],dtype = "int64")
-    
-    #print ROI_coords
-    
-    #ROI_coords_list = ROI_coords.tolist()
-    
-    #print ROI_coords_list
-    
-    #list_selected_peaks_coords,indexed_mask_rois_data,list_selected_peaks_indexes = remove_close_peaks_neigh_in_binary_template(ROI_coords_list,orig_image_data,min_dist_between_ROIs)
-    
-    #print list_selected_peaks_indexes
-    #print len(list_selected_peaks_indexes)
-    
-    
-    ROI_coords_labelled_mask = np.zeros(shape = orig_image_data_shape,dtype = 'int64') - 1
-    
-    print ROI_coords_labelled_mask
-    
-    
-    neigh_range = range(-neighbourhood,neighbourhood+1)
-    
-    
-    
-    for i,ROI_coord in enumerate(ROI_coords):
-    
-        print ROI_coord
-        
-        for relative_coord in iter.product(neigh_range, repeat=3):
-
-            neigh_x,neigh_y,neigh_z = ROI_coord + relative_coord
-
-            print neigh_x,neigh_y,neigh_z
-            
-            if check_np_dimension(ROI_coords_labelled_mask.shape,np.array([neigh_x,neigh_y,neigh_z],dtype = 'int64')):
-            
-                ROI_coords_labelled_mask[neigh_x,neigh_y,neigh_z] = i
-            
-           
-        
-    #path, fname, ext = '','',''
-    path, fname, ext = split_f(MNI_coords_file)
-    
-    ROI_coords_labelled_mask_file = os.path.join(path,"All_labelled_ROI2-neigh_"+str(neighbourhood)+".nii")
-    
-    ROI_coords_np_coords_file = os.path.join(path,"All_ROI_np_coords2.txt")
-    
-    ###save ROI_coords_labelled_mask
-    nib.save(nib.Nifti1Image(ROI_coords_labelled_mask,orig_image.get_affine(),orig_image.get_header()),ROI_coords_labelled_mask_file)
-    
-    #### save np coords
-    np.savetxt(ROI_coords_np_coords_file,np.array(ROI_coords,dtype = int),fmt = "%d")
-    
-    
-    return ROI_coords_labelled_mask_file
-    
-    
-    
-    
 def pyplotbrain_display_ROI_coords(ROI_coords_MNI_coords_file,ROI_coords_orig_constrast_file):
 
     import pyplotbrain as ppb
@@ -243,8 +142,11 @@ if __name__ =='__main__':
     #all_ROI_coords_file,all_ROI_labels_file = merge_coord_and_label_files(ROI_coords_dir)
     
     ### compute mask from MNI coords 
-    compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file,neighbourhood = neighbourhood)
+    #compute_ROI_nii_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file,ROI_coords_labels_file,neighbourhood = neighbourhood)
+        
+    #compute_compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file,neighbourhood = neighbourhood)
     
+    compute_labelled_mask_from_anat_ROIs(ref_img_file = resliced_full_HO_img_file, ROI_dir = os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name))
     #pyplotbrain_display_ROI_coords(ROI_coords_MNI_coords_file,ROI_coords_orig_constrast_file)
     
     #pyplotbrain_display_one_ROI_coords(os.path.join(nipype_analyses_path,"ReseauALS-conj_corPos-Rec",'Coord_NetworkRec.txt'))

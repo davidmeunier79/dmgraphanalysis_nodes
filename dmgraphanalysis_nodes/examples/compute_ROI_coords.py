@@ -14,10 +14,13 @@ sys.path.append('../irm_analysis')
 from  define_variables import *
 #from utils_dtype_coord import *
 
-#from compute_peak_labelled_mask import compute_labelled_mask_from_HO,compute_labelled_mask_from_HO_and_merged_spm_mask
+from dmgraphanalysis_nodes.labeled_mask import compute_recombined_HO_template
+
+#,compute_labelled_mask_from_HO_and_merged_spm_mask
     
 
-from dmgraphanalysis.labelled_mask import compute_labelled_mask_from_ROI_coords_files,merge_coord_and_label_files
+from dmgraphanalysis.labelled_mask import compute_labelled_mask_from_ROI_coords_files
+#,merge_coord_and_label_files
 
 import pyplotbrain as ppb
 import pyqtgraph as pg
@@ -40,7 +43,6 @@ def pyplotbrain_display_ROI_coords(ROI_coords_MNI_coords_file,ROI_coords_orig_co
     print codes
     
     app = pg.mkQApp()
-
 
     view = ppb.addView(with_config = True, background_color = (1,0,0))
 
@@ -130,8 +132,18 @@ def pyplotbrain_display_one_ROI_coords(ROI_coords_MNI_coords_file):
     
 if __name__ =='__main__':
     
-    #if not (os.path.isfile(ROI_coords_labelled_mask_file) or os.path.isfile(coord_rois_file)) :
-        ##compute_labelled_mask_from_HO()
+    #if not os.path.exists(resliced_full_HO_img_file)
+    
+        #resliced_full_HO_img_file = compute_labelled_mask_from_HO(ref_img)
+            
+            
+    if not os.path.exists(ROI_coords_labelled_mask_file):
+        
+        ### compute mask from MNI coords 
+        #compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file,neighbourhood = neighbourhood)
+        
+        compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file,neighbourhood = neighbourhood)
+        
         #compute_labelled_mask_from_HO_and_merged_spm_mask()
         ### compute ROI mask HO()
             
@@ -141,10 +153,7 @@ if __name__ =='__main__':
     ### merge coord and label files 
     #all_ROI_coords_file,all_ROI_labels_file = merge_coord_and_label_files(ROI_coords_dir)
     
-    ### compute mask from MNI coords 
-    #compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file,neighbourhood = neighbourhood)
-    
-    pyplotbrain_display_ROI_coords(ROI_coords_MNI_coords_file,ROI_coords_orig_constrast_file)
+    #pyplotbrain_display_ROI_coords(ROI_coords_MNI_coords_file,ROI_coords_orig_constrast_file)
     
     #pyplotbrain_display_one_ROI_coords(os.path.join(nipype_analyses_path,"ReseauALS-conj_corPos-Rec",'Coord_NetworkRec.txt'))
     
