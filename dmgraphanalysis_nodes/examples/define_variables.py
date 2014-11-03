@@ -674,19 +674,15 @@ cond = "All"
 ## cube of side = 5 voxels
 neighbourhood = 2
 
-ROI_coords_dir = os.path.join(nipype_analyses_path,"ReseauALS-conj_corPos-OdorRecall")
+ROI_coords_dir = os.path.join(nipype_analyses_path,"Reseau_ALS_modif_coords")
+#ROI_coords_dir = os.path.join(nipype_analyses_path,"ReseauALS-conj_corPos-OdorRecall")
 
 #ROI_coords_labels_file = os.path.join(ROI_coords_dir,"Labels_Network"+cond+".txt")
-ROI_coords_labels_file = os.path.join(ROI_coords_dir,"Labels_Network"+cond+"_jane2.txt")
-
-ROI_coords_MNI_coords_file = os.path.join(ROI_coords_dir,"Coord_Network"+cond+".txt")
-
-
-ROI_coords_orig_constrast_file = os.path.join(ROI_coords_dir,"Codes_Network"+cond+".txt")
-
+ROI_coords_labels_file = os.path.join(ROI_coords_dir,"Labels_Network"+cond+"_OK.txt")
+ROI_coords_MNI_coords_file = os.path.join(ROI_coords_dir,"Coord_Network"+cond+"_OK.txt")
+ROI_coords_orig_constrast_file = os.path.join(ROI_coords_dir,"Codes_Network"+cond+"_OK.txt")
 
 ROI_coords_np_coords_file = os.path.join(ROI_coords_dir,"All_ROI_np_coords.txt")
-    
 ROI_coords_labelled_mask_file = os.path.join(ROI_coords_dir,"All_labelled_ROI-neigh_"+str(neighbourhood)+".nii")
 
 #### graph analysis with time series extraction from activation peaks (== nodes) #######################
@@ -696,7 +692,7 @@ ROI_coords_labelled_mask_file = os.path.join(ROI_coords_dir,"All_labelled_ROI-ne
 #cor_mat_analysis_name = "Correl_analyses-filtered-ROI_peaks-" + model_name + "-cor_mat_analysis_name"
 #cor_mat_analysis_name = "Correl_analyses-filtered-ROI_peaks-" + model_name + "-cor_mat_analysis_name-all_spm_contrasts"
 
-cor_mat_analysis_name = "Correl_analyses-filtered-ROI_peaks-" + model_name + "-cor_mat_analysis_name-" + cond
+cor_mat_analysis_name = "Correl_analyses-ROI_coords-modif-" + model_name + "-cor_mat_analysis_name-" + cond
 
 #### min value of BOLD signal to be considered non zeros
 min_BOLD_intensity = 50
