@@ -405,28 +405,23 @@ print "Number of contrasts (Correl): " + str(numberOfGroupContrastsCorrel)
 
 group_correl_contrast_indexes = range(numberOfGroupContrastsCorrel)
 
+
+
+
+
+
+
+
+
+
+
 ###### special ROI activation extraction (beta values from l1 analysis)
 spm_level1_path = os.path.join(nipype_analyses_path,l1_analysis_name,"l1_analysis")
 
+peak_activation_mask_analysis_name = "E_compute_peak_activation_mask_pairwise_cheese-no-cheese_O-OI"
 
-
-
-
-peak_activation_mask_analysis_name = os.path.join(main_path,"FunctConnectivity-Coords")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#peak_activation_mask_analysis_name = os.path.join(main_path,"ROIs_Selection3_pour_David")
+#peak_activation_mask_analysis_name = os.path.join(main_path,"ROIs_Selection2_pour_David")
 
 
 neighbourhood = 1 ## neighboorhood expansion (what differences in indexes is a voxel considered a neighbour)
@@ -447,6 +442,7 @@ min_BOLD_intensity = 50
 #conf_interval_prob = 0.05
 
 #### new Harvard oxford file, combining cortical and subcortical regions (111 in total) 
+
 full_HO_img_file = os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "Harvard-Oxford-cortl-sub-recombined-111regions.nii")
 resliced_full_HO_img_file = os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "rHarvard-Oxford-cortl-sub-recombined-111regions.nii")
 
@@ -465,15 +461,6 @@ resliced_ventricule_HO_img_file = os.path.join(nipype_analyses_path,peak_activat
 info_template_file  =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "info-Harvard-Oxford-reorg.txt")
 
 
-#### indexed_mask
-ROI_coords_labelled_mask_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"All_labelled_ROI-neigh_"+str(neighbourhood)+".nii")
-ROI_coords_MNI_coords_file = os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"Correlations1_Coordinates.txt")
-ROI_coords_labels_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"Correlations1_Names.txt")
-
-ROI_coords_labelled_mask_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"All_labelled_ROI2-neigh_"+str(neighbourhood)+".nii")
-ROI_coords_MNI_coords_file = os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"Correlations2_Coordinates.txt")
-ROI_coords_labels_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"Correlations2_Names.txt")
-
 ##### saving ROI coords as textfile
 #### ijk coords
 #coord_rois_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "coords-" + ROI_mask_prefix + ".txt")
@@ -486,6 +473,63 @@ ROI_coords_labels_file =  os.path.join(nipype_analyses_path,peak_activation_mask
     
 ##### all info in a text file
 #info_rois_file  =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "info-" + ROI_mask_prefix + ".txt")
+
+
+#### labeled_indexed_mask
+
+#### HO_sub
+#ROI_dir = os.path.join(nipype_analyses_path,"HO_sub")
+
+### correlation
+
+#ROI_dir = os.path.join(nipype_analyses_path,"FunctConnectivity-Coords")
+
+#ROI_coords_labelled_mask_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"All_labelled_ROI-neigh_"+str(neighbourhood)+".nii")
+#ROI_coords_MNI_coords_file = os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"Correlations1_Coordinates.txt")
+#ROI_coords_labels_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"Correlations1_Names.txt")
+#ROI_coords_labelled_mask_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"All_labelled_ROI2-neigh_"+str(neighbourhood)+".nii")
+
+### selection2 et selection3
+
+#ROI_dir = os.path.join(nipype_analyses_path,"ROIs_Selection2_pour_David")
+#ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"Hypothalamus_Coordinates_MNI.txt")
+#ROI_coords_labels_file =  os.path.join(ROI_dir,"Hypothalamus_Names.txt")
+
+
+ROI_dir = os.path.join(nipype_analyses_path,"ROIs_Selection1_pour_David")
+#ROI_dir = os.path.join(nipype_analyses_path,"ROIs_Selection3_pour_David")
+
+ROI_mask_file = os.path.join(ROI_dir,"all_ROIs_labelled_mask.nii")
+ROI_label_file = os.path.join(ROI_dir,"labels_all_ROIs.txt")
+
+
+### clusters
+
+#ROI_dir = os.path.join(nipype_analyses_path,"Coord_ROI")
+
+#ROI_mask_file = os.path.join(ROI_dir,"ROI_coords_mask.nii")
+#ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s).txt")
+#ROI_coords_labels_file =  os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s)_Names.txt")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 cor_mat_analysis_name = "Correl_analyses-filtered-ROI_coords2-amplitude_noA26"
