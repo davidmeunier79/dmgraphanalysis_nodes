@@ -43,14 +43,14 @@ def create_datasource_conf_correl_mat():
     datasource_preproc = pe.Node(interface=nio.DataGrabber(infields=['subject_num','cond'],outfields=['cor_mat_file','conf_cor_mat_file','coords_file','resid_ts_file','regressor_file']),name = 'datasource_preproc')
     #datasource_preproc.inputs.base_directory = change_name_nifti_path
     datasource_preproc.inputs.base_directory = os.path.join(nipype_analyses_path,cor_mat_analysis_name)
-    datasource_preproc.inputs.template = '_cond_%s_subject_num_%s/%s/%s'
+    datasource_preproc.inputs.template = '_cond_%s_subject_num_%s/%s/%s*%s'
 
     datasource_preproc.inputs.template_args = dict(
-        conf_cor_mat_file=[['cond','subject_num',"compute_conf_cor_mat","conf_cor_mat.npy"]],
-        cor_mat_file=[['cond','subject_num',"compute_conf_cor_mat","cor_mat.npy"]],
-        coords_file= [['cond','subject_num',"merge_runs","coord_rois_all_runs.txt"]],
-        resid_ts_file= [['cond','subject_num',"merge_runs","ts_all_runs.npy"]],
-        regressor_file = [['cond','subject_num',"merge_runs","regressor_all_runs_file.txt"]]
+        conf_cor_mat_file=[['cond','subject_num',"compute_conf_cor_mat","conf_cor_mat",".npy"]],
+        cor_mat_file=[['cond','subject_num',"compute_conf_cor_mat","cor_mat",".npy"]],
+        coords_file= [['cond','subject_num',"merge_runs","","coord_rois_all_runs.txt"]],
+        resid_ts_file= [['cond','subject_num',"merge_runs","","ts_all_runs.npy"]],
+        regressor_file = [['cond','subject_num',"merge_runs","","regressor_all_runs_file.txt"]]
         )
 
     
@@ -65,13 +65,13 @@ def create_datasource_Z_correl_mat():
     datasource_preproc = pe.Node(interface=nio.DataGrabber(infields=['subject_num','cond'],outfields=['Z_cor_mat_file','coords_file','resid_ts_file','regressor_file']),name = 'datasource_preproc')
     #datasource_preproc.inputs.base_directory = change_name_nifti_path
     datasource_preproc.inputs.base_directory = os.path.join(nipype_analyses_path,cor_mat_analysis_name)
-    datasource_preproc.inputs.template = '_cond_%s_subject_num_%s/%s/%s'
+    datasource_preproc.inputs.template = '_cond_%s_subject_num_%s/%s/%s*%s'
 
     datasource_preproc.inputs.template_args = dict(
-        Z_cor_mat_file=[['cond','subject_num',"compute_conf_cor_mat","Z_cor_mat.npy"]],
-        coords_file= [['cond','subject_num',"merge_runs","coord_rois_all_runs.txt"]],
-        resid_ts_file= [['cond','subject_num',"merge_runs","ts_all_runs.npy"]],
-        regressor_file = [['cond','subject_num',"merge_runs","regressor_all_runs.txt"]]
+        Z_cor_mat_file=[['cond','subject_num',"compute_conf_cor_mat","Z_cor_mat",".npy"]],
+        coords_file= [['cond','subject_num',"merge_runs","","coord_rois_all_runs.txt"]],
+        resid_ts_file= [['cond','subject_num',"merge_runs","","ts_all_runs.npy"]],
+        regressor_file = [['cond','subject_num',"merge_runs","","regressor_all_runs.txt"]]
         )
 
     datasource_preproc.inputs.sort_filelist = True
