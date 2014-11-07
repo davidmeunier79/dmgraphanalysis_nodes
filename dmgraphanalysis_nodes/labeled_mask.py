@@ -140,7 +140,8 @@ def compute_labelled_mask_from_ROI_coords_files(ref_img_file,MNI_coords_file,nei
                 ROI_coords_labelled_mask[neigh_x,neigh_y,neigh_z] = i
             
            
-        
+    print np.unique(ROI_coords_labelled_mask)
+    
     #path, fname, ext = '','',''
     path, fname, ext = split_f(MNI_coords_file)
     
@@ -222,53 +223,7 @@ def compute_ROI_nii_from_ROI_coords_files(ref_img_file,MNI_coords_file,labels_fi
         nib.save(nib.Nifti1Image(ROI_coords_labelled_mask,ref_image.get_affine(),ref_image.get_header()),ROI_coords_labelled_mask_file)
         
     return ROI_coords_labelled_mask_file
-    
-    ### other version, seems faster coding, not implemented to work without reference to define_variables
-#def compute_ROI_coords_mask(ref_img_file,ROI_dir,MNI_coords_file, neighbourhood = 1):
 
-    #MNI_coords = np.array([map(int,line.strip().split("\t")) for line in open(os.path.join(ROI_dir,MNI_coords_file))])
-
-    #print MNI_coords
-    
-    #ref_img = nib.load(ref_img_file)
-    
-    #ref_data = ref_img.get_data()
-    
-    #ref_affine = ref_img.get_affine()
-    
-    #ref_header = ref_img.get_header()
-    
-    #print ref_affine
-    
-    #print ref_data.shape
-    
-    ##from nipy.labs.viz_tools.activation_maps import mni_sform
-    
-    ##print mni_sform
-    ##0/0
-
-    #mni_sform_inv = np.linalg.inv(ref_affine)
-    #x_map,y_map,z_map = np.array(coord_transform(MNI_coords[:,0],MNI_coords[:,1], MNI_coords[:,2], mni_sform_inv))
-
-    #print x_map,y_map,z_map
-    
-    #mask_data = np.zeros(shape = ref_data.shape, dtype = 'int64')
-    
-    #for i in range(x_map.shape[0]):
-    
-        #mask_data[(x_map[i]-neighbourhood) : (x_map[i]+neighbourhood), y_map[i]-neighbourhood : y_map[i]+neighbourhood, z_map[i]-neighbourhood : z_map[i]+neighbourhood] = i+1
-    
-    ##print mask_data
-    
-    #print np.unique(mask_data)
-    
-    #ROI_mask_file = os.path.join(ROI_dir,"ROI_coords_mask.nii")
-    
-    #nib.save(nib.Nifti1Image(data = mask_data,header = ref_header,affine = ref_affine),ROI_mask_file)
-    
-    #return ROI_mask_file
-    
-    
 #### from a ROI directories, containing a list of VOI binary mask nii images ####
 def compute_labelled_mask_from_anat_ROIs(ref_img_file,ROI_dir):
     

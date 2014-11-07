@@ -496,20 +496,21 @@ info_template_file  =  os.path.join(nipype_analyses_path,peak_activation_mask_an
 #ROI_coords_labels_file =  os.path.join(ROI_dir,"Hypothalamus_Names.txt")
 
 
-ROI_dir = os.path.join(nipype_analyses_path,"ROIs_Selection1_pour_David")
-#ROI_dir = os.path.join(nipype_analyses_path,"ROIs_Selection3_pour_David")
+#ROI_dir = os.path.join(nipype_analyses_path,"ROIs_Selection1_pour_David")
+##ROI_dir = os.path.join(nipype_analyses_path,"ROIs_Selection3_pour_David")
 
-ROI_mask_file = os.path.join(ROI_dir,"all_ROIs_labelled_mask.nii")
-ROI_label_file = os.path.join(ROI_dir,"labels_all_ROIs.txt")
+#ROI_mask_file = os.path.join(ROI_dir,"all_ROIs_labelled_mask.nii")
+#ROI_label_file = os.path.join(ROI_dir,"labels_all_ROIs.txt")
 
 
 ### clusters
 
+ROI_dir = os.path.join(nipype_analyses_path,"tmp")
 #ROI_dir = os.path.join(nipype_analyses_path,"Coord_ROI")
 
-#ROI_mask_file = os.path.join(ROI_dir,"ROI_coords_mask.nii")
-#ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s).txt")
-#ROI_coords_labels_file =  os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s)_Names.txt")
+ROI_mask_file = os.path.join(ROI_dir,"ROI_coords_mask.nii")
+ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s).txt")
+ROI_coords_labels_file =  os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s)_Names.txt")
 
 
 

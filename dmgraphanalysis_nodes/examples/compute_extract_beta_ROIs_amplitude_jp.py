@@ -35,6 +35,9 @@ def compute_beta_2betas(ROI_path,ROI_mask_file,ROI_label_file):
     
     #ROI_label_file = os.path.join(ROI_path,"labels_all_anat_ROIs.txt")
     
+    
+    print "loading labeled_mask img"
+    
     ROI_img = nib.load(ROI_mask_file)
     
     ROI_data = ROI_img.get_data()
@@ -50,6 +53,12 @@ def compute_beta_2betas(ROI_path,ROI_mask_file,ROI_label_file):
     
     print len(ROI_labels)
         
+    if len(np.unique(ROI_data)[1:]) != len(ROI_labels):
+        
+        print "$$$$$$$$$$$$$ Warning, error between label names and index in labeled_mask"
+        
+        sys.exit()
+        
     list_reg = ['hrf','d1']
     
     for i in range(len(condition_odors)):
@@ -60,9 +69,6 @@ def compute_beta_2betas(ROI_path,ROI_mask_file,ROI_label_file):
             
             print i,j,tag,condition_odors[i], str(beta_ind).zfill(4)
             
-            #continue
-        
-                        
             for sess in funct_sessions_jp:
             
                 print sess
@@ -160,7 +166,7 @@ def compute_beta_2betas(ROI_path,ROI_mask_file,ROI_label_file):
                 df_all_percent_nans_file = os.path.join(ROI_path,"ROI_coords_"+ tag + "_" + sess + '_' + condition_odors[i] +'_percent_nans.txt')
                 
                 df_all_percent_nans.to_csv(df_all_percent_nans_file)
-                
+
 def compare_beta_2betas(ROI_path,ROI_mask_file,ROI_label_file):
 
     import numpy as np
@@ -897,14 +903,17 @@ if __name__ =='__main__':
     ### from a list of VOI single files
     #compute_ROI_nii_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file,ROI_coords_labels_file,neighbourhood = neighbourhood)
     
-    ROI_mask_file,ROI_label_file = compute_labelled_mask_from_anat_ROIs(resliced_full_HO_img_file,ROI_dir)
+    #ROI_mask_file,ROI_label_file = compute_labelled_mask_from_anat_ROIs(resliced_full_HO_img_file,ROI_dir)
     
-    compute_beta_2betas(ROI_dir,ROI_mask_file,ROI_label_file)
+    ##compute_beta_2betas(ROI_dir,ROI_mask_file,ROI_label_file)
+    #compute_beta_2betas_by_ROI(ROI_dir,ROI_mask_file,ROI_label_file)
     
-    ### from a list
-    #ROI_mask_file = compute_labelled_mask_from_ROI_coords_files(ref_img,ROI_coords_MNI_coords_file)
     
-    #compute_beta_2betas(ROI_dir,ROI_mask_file,ROI_coords_labels_file)
+    ## from a list
+    
+    ROI_mask_file = compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file)
+    
+    compute_beta_2betas(ROI_dir,ROI_mask_file,ROI_coords_labels_file)
     
     
     
