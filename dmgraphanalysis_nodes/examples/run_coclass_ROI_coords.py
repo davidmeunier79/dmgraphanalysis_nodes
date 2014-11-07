@@ -1535,16 +1535,9 @@ def gather_coclass_excluded_results2():
     print "Computing specif odor WWW coclass mat"
     odor_specif_coclass_mat = np.zeros(shape = signif_all_coclass_mat.shape[1:],dtype = int)
     
-    
-    #print odor_specif_coclass_mat
-    #print np.sum(odor_specif_coclass_mat)
-    
     odor_specif_coclass_mat[np.logical_and(signif_all_coclass_mat[0,:,:] == 1, all_coclass_mat[0,:,:] - all_coclass_mat[1,:,:] > 25)] = 1
     
     odor_specif_coclass_mat[odor_conj_coclass_mat == 1] = 0
-    #odor_specif_coclass_mat[core_coclass_mat == 1] = 0
-    
-    
     print np.sum(odor_specif_coclass_mat)
     
     
@@ -1552,12 +1545,6 @@ def gather_coclass_excluded_results2():
     
     print odor_specif_degree.shape
             
-    #node_core_odor_labels = 3 - np.argmax(np.vstack((core_degree,odor_conj_degree,odor_specif_degree)),axis = 0) 
-    
-    #node_core_odor_labels = np.argmax(np.vstack((core_degree,odor_conj_degree,odor_specif_degree)),axis = 0) + 1
-    
-    #print node_core_odor_labels
-    
     node_core_odor_labels = np.zeros(shape = core_degree.shape,dtype = int)
     
     node_core_odor_labels[core_degree != 0] = 1
@@ -1995,6 +1982,238 @@ def gather_coclass_excluded_results3():
     
     print tab_degree.shape
         
+def gather_coclass_excluded_results4():
+
+    from dmgraphanalysis_nodes.utils_net import read_Pajek_corres_nodes_and_sparse_matrix
+    from dmgraphanalysis_nodes.utils_cor import return_corres_correl_mat
+    
+    from dmgraphanalysis_nodes.plot_igraph import plot_3D_igraph_int_mat
+    
+    import pandas as pd
+    
+    ### labels
+    
+    print 'loading labels'
+    
+    labels = [line.strip() for line in open(ROI_coords_labels_file)]
+
+    print labels
+        
+    print 'loading ROI coords'
+    
+    MNI_coords = np.array(np.loadtxt(ROI_coords_MNI_coords_file),dtype = 'float')
+    
+    print MNI_coords.shape
+        
+    list_coclass_mat = []
+    
+    for cond in ['Odor_Hit-WWW','Odor_Hit-What','Recall_Hit-WWW','Recall_Hit-What']:
+    
+        coclass_list_file = os.path.join(nipype_analyses_path,coclass_analysis_name,"_cond_" + cond, "prep_rada","int_List.net")
+        
+        print coclass_list_file
+        
+        node_corres, sparse_mat = read_Pajek_corres_nodes_and_sparse_matrix(coclass_list_file)
+        
+        print node_corres
+        print sparse_mat
+        
+        gm_coords = np.loadtxt(ROI_coords_MNI_coords_file)
+        
+        node_coords = gm_coords[node_corres,:]
+        
+        full_cormat,possible_edge_mat = return_corres_correl_mat(sparse_mat.todense(),node_coords,gm_coords)
+        
+        print full_cormat.shape
+        
+        #full_cormat[full_cormat > 0] = 1
+        
+        list_coclass_mat.append(full_cormat)
+        
+    print list_coclass_mat
+    
+    all_coclass_mat = np.array(list_coclass_mat,dtype = int)
+    
+    print all_coclass_mat
+    print all_coclass_mat.shape
+    
+    signif_all_coclass_mat = np.copy(all_coclass_mat)
+    signif_all_coclass_mat[signif_all_coclass_mat > 0] = 1    
+    
+    print signif_all_coclass_mat
+    print signif_all_coclass_mat.shape
+    
+    print "computing degree"
+    
+    degree_all_coclass = np.sum(signif_all_coclass_mat,axis = 1)
+    
+    print degree_all_coclass
+    print degree_all_coclass.shape
+    
+    ##################################################### epi core ##################################################
+    
+    ### reseau commum aux 2 conditions epi
+    print "Computing epi coclass mat"
+    
+    epi_coclass_mat = np.sum(signif_all_coclass_mat[(0,2),:,:],axis = 0)
+    
+    #print epi_coclass_mat
+    
+    epi_coclass_mat[epi_coclass_mat != 2] = 0
+    epi_coclass_mat[epi_coclass_mat == 2] = 1
+    
+    
+    print np.sum(epi_coclass_mat)
+    
+    epi_degree =  np.sum(epi_coclass_mat,axis = 0)
+    
+    print epi_degree.shape
+    
+    
+    
+    
+    node_core_epi_labels = np.zeros(shape = epi_degree.shape,dtype = int)
+    
+    node_core_epi_labels[4 <= epi_degree] = 1
+    
+    print node_core_epi_labels
+    
+    node_core_epi_sizes = np.ones(shape = epi_degree.shape,dtype = float) *0.1
+    
+    node_core_epi_sizes[epi_degree != 0] = epi_degree[epi_degree != 0] * 2
+    
+    ######## plotting core + epi
+    
+    core_epi_coclass_mat = np.zeros(shape = epi_coclass_mat.shape, dtype = int)
+    
+    core_epi_coclass_mat[epi_coclass_mat == 1] = 1
+    
+    core_epi_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'exclu_core_epi_coclass4.eps')
+    
+    plot_3D_igraph_int_mat(core_epi_coclass_file,core_epi_coclass_mat, labels = labels, coords = MNI_coords, edge_colors = ["Gray"],node_col_labels = node_core_epi_labels,nodes_sizes = node_core_epi_sizes)
+    
+    ################################################## odor ##############################################
+
+        
+    ###reseau commun odor_WWW odor_what
+    print "Computing conj odor coclass mat"
+    
+    odor_conj_coclass_mat = np.sum(signif_all_coclass_mat[(0,1),:,:],axis = 0)
+    
+    odor_conj_coclass_mat[odor_conj_coclass_mat != 2] = 0
+    odor_conj_coclass_mat[odor_conj_coclass_mat == 2] = 1
+    
+    print np.sum(odor_conj_coclass_mat)
+    
+    odor_conj_degree =  np.sum(odor_conj_coclass_mat,axis = 0)
+    
+    print odor_conj_degree.shape
+    
+    ### reseau specif odor WWW
+    
+    print "Computing specif odor WWW coclass mat"
+    odor_specif_coclass_mat = np.zeros(shape = signif_all_coclass_mat.shape[1:],dtype = int)
+    
+    odor_specif_coclass_mat[np.logical_and(signif_all_coclass_mat[0,:,:] == 1, all_coclass_mat[0,:,:] - all_coclass_mat[1,:,:] > 25)] = 1
+    
+    print np.sum(odor_specif_coclass_mat)
+    
+    odor_specif_degree =  np.sum(odor_specif_coclass_mat,axis = 0)
+    
+    print odor_specif_degree.shape
+            
+    node_core_odor_labels = np.zeros(shape = epi_degree.shape,dtype = int)
+    
+    node_core_odor_labels[odor_conj_degree != 0 ] = 1
+    node_core_odor_labels[np.logical_and(odor_specif_degree != 0, odor_conj_degree <= odor_specif_degree)] = 2
+    
+    print node_core_odor_labels
+    
+    node_core_odor_sizes = np.ones(shape = epi_degree.shape,dtype = float) *0.1
+    
+    node_core_odor_sizes[node_core_odor_labels == 1] = odor_conj_degree[node_core_odor_labels == 1] * 2
+    node_core_odor_sizes[node_core_odor_labels == 2] = odor_specif_degree[node_core_odor_labels == 2] * 2
+    
+    
+    ######## plotting core + odor
+    
+    odor_core_epi_coclass_mat = np.zeros(shape = epi_coclass_mat.shape, dtype = int)
+    
+    odor_core_epi_coclass_mat[odor_conj_coclass_mat == 1] = 1
+    odor_core_epi_coclass_mat[odor_specif_coclass_mat == 1] = 2
+    
+    odor_core_epi_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'exclu_odor_core_coclass4.eps')
+    
+    plot_3D_igraph_int_mat(odor_core_epi_coclass_file,odor_core_epi_coclass_mat, labels = labels, coords = MNI_coords, edge_colors = ["Orange","Blue"],node_col_labels = node_core_odor_labels,nodes_sizes = node_core_odor_sizes)
+    
+        
+    ################################################## recall ##############################################
+
+        
+    ###reseau commun recall_WWW recall_what
+    print "Computing conj recall coclass mat"
+    
+    recall_conj_coclass_mat = np.sum(signif_all_coclass_mat[(2,3),:,:],axis = 0)
+    
+    recall_conj_coclass_mat[recall_conj_coclass_mat != 2] = 0
+    recall_conj_coclass_mat[recall_conj_coclass_mat == 2] = 1
+    
+    print np.sum(recall_conj_coclass_mat)
+    
+    recall_conj_degree =  np.sum(recall_conj_coclass_mat,axis = 0)
+    
+    print recall_conj_degree.shape
+    
+    ### reseau specif recall WWW
+    
+    print "Computing specif recall WWW coclass mat"
+    recall_specif_coclass_mat = np.zeros(shape = signif_all_coclass_mat.shape[1:],dtype = int)
+    
+    recall_specif_coclass_mat[np.logical_and(signif_all_coclass_mat[2,:,:] == 1, all_coclass_mat[2,:,:] - all_coclass_mat[3,:,:] > 25)] = 1
+    
+    print np.sum(recall_specif_coclass_mat)
+    
+    recall_specif_degree =  np.sum(recall_specif_coclass_mat,axis = 0)
+    
+    print recall_specif_degree.shape
+            
+    node_core_recall_labels = np.zeros(shape = epi_degree.shape,dtype = int)
+    
+    node_core_recall_labels[recall_conj_degree != 0 ] = 1
+    node_core_recall_labels[np.logical_and(recall_specif_degree != 0, recall_conj_degree <= recall_specif_degree)] = 2
+    
+    print node_core_recall_labels
+    
+    node_core_recall_sizes = np.ones(shape = epi_degree.shape,dtype = float) *0.1
+    
+    node_core_recall_sizes[node_core_recall_labels == 1] = recall_conj_degree[node_core_recall_labels == 1] * 2
+    node_core_recall_sizes[node_core_recall_labels == 2] = recall_specif_degree[node_core_recall_labels == 2] * 2
+    
+    
+    ######## plotting core + recall
+    
+    recall_core_epi_coclass_mat = np.zeros(shape = epi_coclass_mat.shape, dtype = int)
+    
+    recall_core_epi_coclass_mat[recall_conj_coclass_mat == 1] = 1
+    recall_core_epi_coclass_mat[recall_specif_coclass_mat == 1] = 2
+    
+    recall_core_epi_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'exclu_recall_core_coclass4.eps')
+    
+    plot_3D_igraph_int_mat(recall_core_epi_coclass_file,recall_core_epi_coclass_mat, labels = labels, coords = MNI_coords, edge_colors = ["Green","Red"],node_col_labels = node_core_recall_labels,nodes_sizes = node_core_recall_sizes)
+    
+    
+    print "Saving degree"
+    
+    tab_degree = np.column_stack((epi_degree,odor_conj_degree,odor_specif_degree,recall_conj_degree,recall_specif_degree))
+    
+    df = pd.DataFrame(tab_degree,columns = ['Episodic','Conj_odor','Signif_odor','Conj_recall','signif_recall'],index = labels)
+    
+    df_filename = os.path.join(nipype_analyses_path,coclass_analysis_name,'degrees_node.txt')
+    
+    df.to_csv(df_filename)
+    
+    print tab_degree.shape
+        
         
 if __name__ =='__main__':
     
@@ -2025,6 +2244,7 @@ if __name__ =='__main__':
     #gather_coclass_results()
     #gather_coclass_excluded_results()
     gather_coclass_excluded_results2()
-    gather_coclass_excluded_results3()
+    #gather_coclass_excluded_results3()
+    gather_coclass_excluded_results4()
     
     
