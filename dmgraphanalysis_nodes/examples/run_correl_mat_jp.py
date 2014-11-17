@@ -13,6 +13,8 @@ sys.path.append('../irm_analysis')
 from  define_variables_jp import *
 from dmgraphanalysis_nodes.nodes.correl_mat import ExtractTS,ExtractMeanTS,RegressCovar,FindSPMRegressor,ComputeConfCorMat
 
+from dmgraphanalysis_nodes.labeled_mask import compute_labelled_mask_from_ROI_coords_files
+
 ############################################################## Workflow #############################################################
     
 ################################################ Infosource/Datasource
@@ -89,7 +91,7 @@ def create_correl_mat_by_session_workflow():
     extract_mean_ROI_ts = pe.Node(interface = ExtractTS(),name = 'extract_mean_ROI_ts')
     
     #(input_names=['file_4D','indexed_rois_file','coord_rois_file','min_BOLD_intensity'],output_names=['mean_masked_ts_file','subj_coord_rois_file'],function=compute_mean_ts_from_labelled_mask),name='extract_mean_ROI_ts')
-    extract_mean_ROI_ts.inputs.indexed_rois_file = ROI_coords_labelled_mask_file
+    extract_mean_ROI_ts.inputs.indexed_rois_file = ROI_mask_file
     extract_mean_ROI_ts.inputs.coord_rois_file = ROI_coords_MNI_coords_file
     extract_mean_ROI_ts.inputs.min_BOLD_intensity = min_BOLD_intensity
     
@@ -125,12 +127,6 @@ def create_correl_mat_by_session_workflow():
 
     main_workflow.connect(compute_wm_ts, 'mean_masked_ts_file', regress_covar, 'mean_wm_ts_file')
     main_workflow.connect(compute_csf_ts, 'mean_masked_ts_file', regress_covar, 'mean_csf_ts_file')
-    
-    
-    
-    
-    
-    
     
     ### extract regressor of interest from SPM.mat
     extract_cond = pe.Node(interface = FindSPMRegressor(only_positive_values = True),name='extract_cond')
@@ -196,7 +192,7 @@ def create_correl_mat_by_session_workflow():
     
     return main_workflow
 
-def gather_correl_values():
+def gather_Z_correl_values():
 
     import numpy as np
     import pandas as pd
@@ -223,7 +219,7 @@ def gather_correl_values():
                 
                 print subject_num
                 
-                Z_cor_mat_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"_cond_" + cond + "_session_" + sess + "_subject_num_" + subject_num,"compute_conf_cor_mat","Z_cor_mat.npy" )
+                Z_cor_mat_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"_cond_" + cond + "_session_" + sess + "_subject_num_" + subject_num,"compute_conf_cor_mat","Z_cor_mat_resid_ts.npy" )
                     
                 print Z_cor_mat_file
                 
@@ -242,10 +238,6 @@ def gather_correl_values():
                 
                 all_Z_cor_values.append(vect_Z_cor_mat)
                 
-            
-            
-            
-            
             np_all_Z_cor_values = np.array(all_Z_cor_values,dtype = 'f')
             
             print np_all_Z_cor_values.shape
@@ -260,11 +252,12 @@ def gather_correl_values():
             
             df_all_Z_cor_values = pd.DataFrame(np_all_Z_cor_values,columns = labels_pairs,index = behav_subject_ids_noA26)
             
-            df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values2_" + sess + '_' + cond +'.txt')
+            df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values_" + sess + '_' + cond +'.txt')
+            #df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values2_" + sess + '_' + cond +'.txt')
             
             df_all_Z_cor_values.to_csv(df_all_Z_cor_values_file)
             
-def gather_correl_values_by_pair():
+def gather_Z_correl_values_by_pair():
 
     import numpy as np
     import pandas as pd
@@ -311,7 +304,7 @@ def gather_correl_values_by_pair():
                 
                 print subject_num
                 
-                Z_cor_mat_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"_cond_" + cond + "_session_" + sess + "_subject_num_" + subject_num,"compute_conf_cor_mat","Z_cor_mat.npy" )
+                Z_cor_mat_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"_cond_" + cond + "_session_" + sess + "_subject_num_" + subject_num,"compute_conf_cor_mat","Z_cor_mat_resid_ts.npy" )
                     
                 print Z_cor_mat_file
                 
@@ -351,7 +344,8 @@ def gather_correl_values_by_pair():
             
         df_all_Z_cor_values = pd.DataFrame(np.transpose(pair_data),columns = sess_cond_names,index = behav_subject_ids_noA26)
         
-        df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values2_" + label +'.txt')
+        df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values_" + label +'.txt')
+        #df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values2_" + label +'.txt')
         
         df_all_Z_cor_values.to_csv(df_all_Z_cor_values_file)
         
@@ -362,15 +356,163 @@ def gather_correl_values_by_pair():
     print labels_pairs
     
     
+def gather_correl_values():
+
+    import numpy as np
+    import pandas as pd
+    
+    import nibabel as nib
+    
+    print "Loading labels"
+    
+    labels = [line.strip() for line in open(ROI_coords_labels_file)]
+    
+    np_labels = np.array(labels, dtype = 'str')
+    
+    print labels
+       
+    for cond in condition_odors:
+        
+        for sess in funct_sessions_jp:
+        
+            print sess
+        
+            all_cor_values = []
+    
+            for subject_num in behav_subject_ids_noA26:
+                
+                print subject_num
+                
+                cor_mat_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"_cond_" + cond + "_session_" + sess + "_subject_num_" + subject_num,"compute_conf_cor_mat","cor_mat_resid_ts.npy" )
+                    
+                print cor_mat_file
+                
+                cor_mat = np.load(cor_mat_file)
+                
+                print cor_mat
+                print cor_mat.shape
+                
+                upper_tri_indexes = np.triu_indices(cor_mat.shape[0],k=1)
+                
+                print upper_tri_indexes
+                
+                vect_cor_mat = cor_mat[upper_tri_indexes]
+                
+                print vect_cor_mat
+                
+                all_cor_values.append(vect_cor_mat)
+                
+            np_all_cor_values = np.array(all_cor_values,dtype = 'f')
+            
+            print np_all_cor_values.shape
+            
+            print np_labels[upper_tri_indexes[0]]
+            
+            labels_pairs = ["_".join((pair_lab[0],pair_lab[1])) for pair_lab in zip(np_labels[upper_tri_indexes[0]],np_labels[upper_tri_indexes[1]]) ]
+            
+            print labels_pairs
+            
+            
+            
+            df_all_cor_values = pd.DataFrame(np_all_cor_values,columns = labels_pairs,index = behav_subject_ids_noA26)
+            
+            #df_all_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"cor_values2_" + sess + '_' + cond +'.txt')
+            df_all_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"cor_values_" + sess + '_' + cond +'.txt')
+            
+            df_all_cor_values.to_csv(df_all_cor_values_file)
+            
+def gather_correl_values_by_pair():
+
+    import numpy as np
+    import pandas as pd
+    
+    import nibabel as nib
+    
+    print "Loading labels"
+    
+    labels = [line.strip() for line in open(ROI_coords_labels_file)]
+    
+    np_labels = np.array(labels, dtype = 'str')
+    
+    print labels
+    
+    upper_tri_indexes = np.triu_indices(np_labels.shape[0],k=1)
+    
+    print upper_tri_indexes
+    
+    print np_labels[upper_tri_indexes[0]]
+    
+    labels_pairs = ["_".join((pair_lab[0],pair_lab[1])) for pair_lab in zip(np_labels[upper_tri_indexes[0]],np_labels[upper_tri_indexes[1]]) ]
+    
+    print labels_pairs
+    
+    all_cor_values = []
+    
+    sess_cond_names = []
+    
+    
+    for sess in funct_sessions_jp:
+    
+        print sess
+    
+        sess_cor_values = []
+        for cond in condition_odors:
+        
+            print cond
+            
+            sess_cond_names.append(sess + '_' + cond)
+            
+            cond_cor_values = []
+             
+            for subject_num in behav_subject_ids_noA26:
+                
+                print subject_num
+                
+                cor_mat_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"_cond_" + cond + "_session_" + sess + "_subject_num_" + subject_num,"compute_conf_cor_mat","cor_mat_resid_ts.npy" )
+                    
+                print cor_mat_file
+                
+                cor_mat = np.load(cor_mat_file)
+                
+                print cor_mat
+                print cor_mat.shape
+                
+                vect_cor_mat = cor_mat[upper_tri_indexes]
+                
+                print vect_cor_mat
+                
+                cond_cor_values.append(vect_cor_mat)
+                
+            sess_cor_values.append(cond_cor_values)
+        all_cor_values.append(sess_cor_values)
+        
+    np_all_cor_values = np.array(all_cor_values,dtype = 'f')
+    
+    print np_all_cor_values.shape
+    
+    print sess_cond_names
+    
+    for i,label in enumerate(labels_pairs):
+    
+        pair_data = np.reshape(np_all_cor_values[:,:,:,i],(-1,np_all_cor_values.shape[2]))
+        
+        df_all_cor_values = pd.DataFrame(np.transpose(pair_data),columns = sess_cond_names,index = behav_subject_ids_noA26)
+        #df_all_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"cor_values2_" + label +'.txt')
+        df_all_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"cor_values_" + label +'.txt')
+        df_all_cor_values.to_csv(df_all_cor_values_file)
+        
+    print labels_pairs
     
 if __name__ =='__main__':
     
-    #if not (os.path.isfile(indexed_mask_rois_file) or os.path.isfile(coord_rois_file)) :
+    #compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file)
+    
+    if not os.path.isfile(ROI_mask_file):
+        
         #compute_labelled_mask_from_HO()
         ### compute ROI mask HO()
+        compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file)
             
-    #print indexed_mask_rois_file,coord_rois_file
-
     #### compute preprocessing for weighted correlation matrices
     main_workflow = create_correl_mat_by_session_workflow()
     
@@ -390,3 +532,5 @@ if __name__ =='__main__':
     gather_correl_values_by_pair()
     
     
+    gather_Z_correl_values()
+    gather_Z_correl_values_by_pair()

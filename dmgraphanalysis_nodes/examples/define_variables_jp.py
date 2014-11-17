@@ -480,15 +480,6 @@ info_template_file  =  os.path.join(nipype_analyses_path,peak_activation_mask_an
 #### HO_sub
 #ROI_dir = os.path.join(nipype_analyses_path,"HO_sub")
 
-### correlation
-
-#ROI_dir = os.path.join(nipype_analyses_path,"FunctConnectivity-Coords")
-
-#ROI_coords_labelled_mask_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"All_labelled_ROI-neigh_"+str(neighbourhood)+".nii")
-#ROI_coords_MNI_coords_file = os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"Correlations1_Coordinates.txt")
-#ROI_coords_labels_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"Correlations1_Names.txt")
-#ROI_coords_labelled_mask_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name,"All_labelled_ROI2-neigh_"+str(neighbourhood)+".nii")
-
 ### selection2 et selection3
 
 #ROI_dir = os.path.join(nipype_analyses_path,"ROIs_Selection2_pour_David")
@@ -505,35 +496,30 @@ info_template_file  =  os.path.join(nipype_analyses_path,peak_activation_mask_an
 
 ### clusters
 
-ROI_dir = os.path.join(nipype_analyses_path,"tmp")
 #ROI_dir = os.path.join(nipype_analyses_path,"Coord_ROI")
 
-ROI_mask_file = os.path.join(ROI_dir,"ROI_coords_mask.nii")
-ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s).txt")
-ROI_coords_labels_file =  os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s)_Names.txt")
+#ROI_mask_file = os.path.join(ROI_dir,"ROI_coords_mask.nii")
+#ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s).txt")
+#ROI_coords_labels_file =  os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s)_Names.txt")
 
 
 
 
+### correlation
 
+ROI_dir = os.path.join(nipype_analyses_path,"FunctConnectivity-Coords-retest")
 
+ROI_mask_file =  os.path.join(ROI_dir,"All_labelled_ROI-neigh_"+str(neighbourhood)+".nii")
+ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"Correlations1_Coordinates.txt")
+ROI_coords_labels_file =  os.path.join(ROI_dir,"Correlations1_Names.txt")
 
+cor_mat_analysis_name = "Correl_analyses-filtered-ROI_coords-amplitude_noA26-retest"
 
+#ROI_mask_file =  os.path.join(ROI_dir,"All_labelled_ROI2-neigh_"+str(neighbourhood)+".nii")
+#ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"Correlations2_Coordinates.txt")
+#ROI_coords_labels_file =  os.path.join(ROI_dir,"Correlations2_Names.txt")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-cor_mat_analysis_name = "Correl_analyses-filtered-ROI_coords2-amplitude_noA26"
+#cor_mat_analysis_name = "Correl_analyses-filtered-ROI_coords2-amplitude_noA26-retest"
 
 conf_interval_prob = 0.05
     
