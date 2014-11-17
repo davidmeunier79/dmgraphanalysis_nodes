@@ -209,6 +209,67 @@ class ExtractMeanTS(BaseInterface):
         outputs["mean_masked_ts_file"] = os.path.abspath('mean_' + suffix + '_ts.txt')
     
         return outputs
+        
+        
+        
+######################################################################################## ConcatTS ##################################################################################################################
+
+from dmgraphanalysis_nodes.utils_cor import mean_select_indexed_mask_data
+
+class ConcatTSInputSpec(BaseInterfaceInputSpec):
+    
+    all_ts_file = File(exists=True, desc='npy file containing all ts to be concatenated', mandatory=True)
+    
+class ConcatTSOutputSpec(TraitedSpec):
+    
+    concatenated_ts_file = File(exists=True, desc="ts after concatenation")
+        
+
+class ConcatTS(BaseInterface):
+    
+    """Extract time series from a labelled mask in Nifti Format where all ROIs have the same index"""
+
+    input_spec = ConcatTSInputSpec
+    output_spec = ConcatTSOutputSpec
+
+    def _run_interface(self, runtime):
+            
+        #import os
+        #import numpy as np
+        #import nibabel as nib
+        
+        #from dmgraphanalysis.utils_plot import plot_signals
+        
+        all_ts_file = self.inputs.all_ts_file
+        
+        
+        ## loading ROI coordinates
+        all_ts = np.load(all_ts_file)
+        
+        print "all_ts: " 
+        print all_ts.shape
+        
+        concatenated_ts = all_ts.swapaxes(1,0).reshape(all_ts.shape[1],-1)
+        
+        print concatenated_ts.shape
+        
+        ### saving time series
+        concatenated_ts_file = os.path.abspath("concatenated_ts.npy")
+        np.save(concatenated_ts_file,concatenated_ts)
+        
+        return runtime
+        
+        #return mean_masked_ts_file,subj_coord_rois_file
+        
+    def _list_outputs(self):
+        
+        outputs = self._outputs().get()
+        
+        outputs["concatenated_ts_file"] = os.path.abspath("concatenated_ts.npy")
+    
+        return outputs
+
+        
 ################################################################################# RegressCovar ######################################################################################################################
  
 
@@ -232,7 +293,6 @@ class RegressCovarOutputSpec(TraitedSpec):
     
     resid_ts_file = File(exists=True, desc="residuals of time series after regression of all paramters")
     
-
 class RegressCovar(BaseInterface):
     """
     Regress parameters of non-interest (i.e. movement parameters, white matter, csf) from signal
@@ -424,7 +484,7 @@ class FindSPMRegressor(BaseInterface):
         ##Choosing the column according to the regressor name
         #_,col = np.where(d['SPM']['xX'][0][0]['name'][0][0] == u'Sn(1) ' + regressor_name)
         
-        cond_name = u'Sn(' + str(run_index) + ') ' + regressor_name+'*bf(1)'
+        cond_name = u'Sn(' + str(run_index) + ') ' + regressor_name + '*bf(1)'
         
         print cond_name
         
@@ -632,6 +692,8 @@ class ComputeConfCorMatOutputSpec(TraitedSpec):
     
     conf_cor_mat_file = File(exists=True, desc="npy file containing the confidence interval around R values")
     
+    Z_conf_cor_mat_file = File(exists=True, desc="npy file containing the Z-values (after Fisher's R-to-Z trasformation) of correlation")
+    
 class ComputeConfCorMat(BaseInterface):
     """
     Compute correlation between time series, with a given confidence interval. If weight_file is specified, used for weighted correlation
@@ -674,7 +736,7 @@ class ComputeConfCorMat(BaseInterface):
         
         print "compute return_Z_cor_mat"
         
-        cor_mat,Z_cor_mat,conf_cor_mat = return_conf_cor_mat(np.transpose(data_matrix),weight_vect,conf_interval_prob)
+        cor_mat,Z_cor_mat,conf_cor_mat,Z_conf_cor_mat = return_conf_cor_mat(np.transpose(data_matrix),weight_vect,conf_interval_prob)
         
         print cor_mat.shape
         
@@ -700,6 +762,12 @@ class ComputeConfCorMat(BaseInterface):
         Z_cor_mat_file = os.path.abspath('Z_cor_mat_' + fname + '.npy')
         
         np.save(Z_cor_mat_file,Z_cor_mat)
+        
+        print "saving Z_conf_cor_mat as npy"
+        
+        Z_conf_cor_mat_file = os.path.abspath('Z_conf_cor_mat_' + fname + '.npy')
+        
+        np.save(Z_conf_cor_mat_file,Z_conf_cor_mat)
         
         
         if plot_mat == True:
@@ -771,7 +839,26 @@ class ComputeConfCorMat(BaseInterface):
             plot_hist(plot_hist_conf_cor_mat_file,conf_cor_mat,nb_bins = 100)
             
         
-        
+            ############ Z_conf_cor_mat
+            
+            Z_conf_cor_mat = np.load(Z_conf_cor_mat_file)
+            
+            #### heatmap 
+            
+            print 'plotting Z_conf_cor_mat heatmap'
+            
+            plot_heatmap_Z_conf_cor_mat_file =  os.path.abspath('heatmap_Z_conf_cor_mat_' + fname + '.eps')
+            
+            plot_cormat(plot_heatmap_Z_conf_cor_mat_file,Z_conf_cor_mat,list_labels = labels)
+            
+            #### histogram 
+            
+            print 'plotting Z_conf_cor_mat histogram'
+            
+            plot_hist_Z_conf_cor_mat_file = os.path.abspath('hist_Z_conf_cor_mat_' + fname + '.eps')
+            
+            plot_hist(plot_hist_Z_conf_cor_mat_file,Z_conf_cor_mat,nb_bins = 100)
+            
         
         return runtime
         
@@ -787,404 +874,118 @@ class ComputeConfCorMat(BaseInterface):
         
         outputs["Z_cor_mat_file"] = os.path.abspath('Z_cor_mat_' + fname + '.npy')
         
+        outputs["Z_conf_cor_mat_file"] = os.path.abspath('Z_conf_cor_mat_' + fname + '.npy')
+        
         print outputs
         
         return outputs
 
-################################## pearson correl between reg and time series #######################################
+        
+        ################################################################################# SelectNonNAN ######################################################################################################################
+ 
+class SelectNonNANInputSpec(BaseInterfaceInputSpec):
+    
+    sess_ts_files = traits.List(File(exists=True), desc='Numpy files with time series to be correlated',mandatory=True)
 
-#def correl_ts_with_reg(ts_file,regressor_file):
+    sess_labels_files = traits.List(File(exists=True), desc='Name of the nodes (used only if plot = true)', mandatory=False)
+    
+class SelectNonNANOutputSpec(TraitedSpec):
+    
+    select_ts_files = traits.List(File(exists=True), desc='Numpy files with selected time series ',mandatory=True)
 
-    #import numpy as np
-    #import os
+    select_labels_file = File(exists=True, desc="npy file containing the Z-values (after Fisher's R-to-Z trasformation) of correlation")
     
-    #from scipy.stats import pearsonr
-    #from scipy.stats.mstats import zscore
+class SelectNonNAN(BaseInterface):
     
+    """
+    Select time series based on NaN
+    """
     
-    #print 'load regressor_vect'
-    
-    #regressor_vect = np.loadtxt(regressor_file)
-    
-    #print regressor_vect.shape
-    
-    
-    #print 'load ts data'
-    
-    #resid_data_matrix = np.load(ts_file)
-    
-    #print resid_data_matrix.shape
-    
-    #if regressor_vect.shape[0] == resid_data_matrix.shape[1]:
-        
-        #print "Regressor size compatible with ts length"
-        
-    #elif regressor_vect.shape[0] == resid_data_matrix.shape[0]:
-        
-        #print "Warning, should transpose ts matrix, but keeping computation"
-        
-        #resid_data_matrix = np.transpose(resid_data_matrix)
-    
-    #else:
-        #print "Warning, regressor size %d incompatible with ts length %d %d, breaking"%(regressor_vect.shape[0],resid_data_matrix.shape[0],resid_data_matrix.shape[1])
-        
-        #sys.exit()
-        
-        
-        
-    #print resid_data_matrix[0,:10]
-    
-    ##zscore_data_matrix = zscore(resid_data_matrix,axis = 0)
-    
-    #zscore_data_matrix = np.zeros(shape = resid_data_matrix.shape,dtype = resid_data_matrix.dtype)
-    
-    #for i in range(zscore_data_matrix.shape[0]):
-    
-        #zscore_data_matrix[i,:] = zscore(resid_data_matrix[i,:])
-    
-    #print zscore_data_matrix[0,:10]
-    
-    #from utils_plot import plot_sep_signals
-    
-    #plot_zscore_data_matrix_file = os.path.abspath("Zscore_regressor.eps")
-    
-    #regressor_vect2 = regressor_vect.reshape(1,regressor_vect.shape[0])
-    
-    #print regressor_vect2.shape
-    
-    #plot_data = np.concatenate((regressor_vect2,zscore_data_matrix),axis = 0)
-    
-    #print plot_data.shape
-    
-    #plot_sep_signals(plot_zscore_data_matrix_file,plot_data)
-    
-    
-    
-    
-    #correl_res = []
-    
-    #for i in range(zscore_data_matrix.shape[0]):
-        
-        #correl_res.append(list(pearsonr(zscore_data_matrix[i,:],regressor_vect)))
-    
-    #print np.array(correl_res)
-    
-        
-        
-        
-        
-    ##correl_res = []
-    
-    ##for i in range(resid_data_matrix.shape[0]):
-        
-        
-    
-        ##correl_res.append(list(pearsonr(resid_data_matrix[i,:],regressor_vect)))
-    
-    ##print np.array(correl_res)
-    
-    
-    #correl_ROI_ts_file = os.path.abspath('correl_ts_with_reg.txt')
+    input_spec = SelectNonNANInputSpec
+    output_spec = SelectNonNANOutputSpec
 
-    #np.savetxt(correl_ROI_ts_file,np.array(correl_res),fmt = '%0.5f')
-    
-    
-    
-    
-    #return correl_ROI_ts_file
-
-    
-#def compute_conf_correlation_matrix(resid_ts_file,regressor_file,conf_interval_prob):
-    
-    #import rpy,os
-    #import nibabel as nib
-    #import numpy as np
-    
-    #from dmgraphanalysis.utils_cor import return_conf_cor_mat
-    
-    
-    #print 'load regressor_vect'
-    
-    #regressor_vect = np.loadtxt(regressor_file)
-    
-    
-    #print 'load resid data'
-    
-    #resid_data_matrix = np.load(resid_ts_file)
-    
-    #print "compute return_Z_cor_mat"
-    
-    #print resid_data_matrix.shape
-    #print np.transpose(resid_data_matrix).shape
-    
-    #cor_mat,Z_cor_mat,conf_cor_mat = return_conf_cor_mat(np.transpose(resid_data_matrix),regressor_vect,conf_interval_prob)
-    
-    #print cor_mat.shape
-    
-    #print Z_cor_mat.shape
-    
-    #print conf_cor_mat.shape
-    
-    #### 
-    #print "saving cor_mat as npy"
-    
-    #cor_mat_file = os.path.abspath('cor_mat.npy')
-    
-    #np.save(cor_mat_file,cor_mat)
-    
-    #print "saving conf_cor_mat as npy"
-    
-    #conf_cor_mat_file = os.path.abspath('conf_cor_mat.npy')
-    
-    #np.save(conf_cor_mat_file,conf_cor_mat)
-    
-    #print "saving Z_cor_mat as npy"
-    
-    #Z_cor_mat_file = os.path.abspath('Z_cor_mat.npy')
-    
-    #np.save(Z_cor_mat_file,Z_cor_mat)
-    
-    #return cor_mat_file,Z_cor_mat_file,conf_cor_mat_file
-
-#def compute_Z_correlation_matrix(resid_ts_file,regressor_file):
-    
-    #import rpy,os
-    #import nibabel as nib
-    #import numpy as np
-    
-    #from dmgraphanalysis.utils_cor import return_Z_cor_mat
-    
-    
-    #print 'load regressor_vect'
-    
-    #regressor_vect = np.loadtxt(regressor_file)
-    
-    
-    #print 'load resid data'
-    
-    #resid_data_matrix = np.load(resid_ts_file)
-    
-    #print "compute return_Z_cor_mat"
-    
-    #print resid_data_matrix.shape
-    #print np.transpose(resid_data_matrix).shape
-    
-    #Z_cor_mat = return_Z_cor_mat(np.transpose(resid_data_matrix),regressor_vect)
-    
-    #print Z_cor_mat.shape
-    
-    #### 
-    #print "saving Z_cor_mat as npy"
-    
-    #Z_cor_mat_file = os.path.abspath('Z_cor_mat.npy')
-    
-    #np.save(Z_cor_mat_file,Z_cor_mat)
-    
-    #return Z_cor_mat_file
-
-    
-#def plot_hist_var_cor_mat(cor_mat_file,sderr_cor_mat_file,pval_cor_mat_file):
-
-    #import os
-    #import numpy as np
-    
-    #from dmgraphanalysis.utils_plot import plot_hist,plot_cormat
-    
-    #import nibabel as nib
-    
-    #from nipype.utils.filemanip import split_filename as split_f
-    
-    ############ cor_mat
-    
-    #cor_mat = np.load(cor_mat_file)
-    
-    ##### heatmap 
-    
-    #print 'plotting cor_mat heatmap'
-    
-    #plot_heatmap_cor_mat_file =  os.path.abspath('heatmap_cor_mat.eps')
-    
-    #plot_cormat(plot_heatmap_cor_mat_file,cor_mat,list_labels = [])
-    
-    ##### histogram 
-    
-    #print 'plotting cor_mat histogram'
-    
-    #plot_hist_cor_mat_file = os.path.abspath('hist_cor_mat.eps')
-    
-    #plot_hist(plot_hist_cor_mat_file,cor_mat,nb_bins = 100)
-    
-    
-    ########### sderr_cor_mat 
-    
-    #sderr_cor_mat = np.load(sderr_cor_mat_file)
-    
-    ##### heatmap 
-    
-    #print 'plotting sderr_cor_mat heatmap'
-    
-    #plot_heatmap_sderr_cor_mat_file =  os.path.abspath('heatmap_sderr_cor_mat.eps')
-    
-    #plot_cormat(plot_heatmap_sderr_cor_mat_file,sderr_cor_mat,list_labels = [])
-    
-    ##### histogram 
-    
-    #print 'plotting sderr_cor_mat histogram'
-    
-    #plot_hist_sderr_cor_mat_file = os.path.abspath('hist_sderr_cor_mat.eps')
-    
-    #plot_hist(plot_hist_sderr_cor_mat_file,sderr_cor_mat,nb_bins = 100)
-    
-    ############## pval cor_mat
-    
-    #pval_cor_mat = np.load(pval_cor_mat_file)
-    
-    ##### heatmap 
-    
-    #print 'plotting pval_cor_mat heatmap'
-    
-    #plot_heatmap_pval_cor_mat_file =  os.path.abspath('heatmap_pval_cor_mat.eps')
-    
-    #plot_cormat(plot_heatmap_pval_cor_mat_file,pval_cor_mat,list_labels = [])
-    
-    ##### histogram 
-    
-    #print 'plotting pval_cor_mat histogram'
-    
-    #plot_hist_pval_cor_mat_file = os.path.abspath('hist_pval_cor_mat.eps')
-    
-    #plot_hist(plot_hist_pval_cor_mat_file,pval_cor_mat,nb_bins = 100)
-    
-    #return plot_hist_cor_mat_file,plot_heatmap_cor_mat_file,plot_hist_sderr_cor_mat_file,plot_heatmap_sderr_cor_mat_file,plot_hist_pval_cor_mat_file,plot_heatmap_pval_cor_mat_file
-    
-    
-#def plot_hist_conf_cor_mat(cor_mat_file,Z_cor_mat_file,conf_cor_mat_file):
-
-    #import os
-    #import numpy as np
-    
-    #import nibabel as nib
-    
-    #from nipype.utils.filemanip import split_filename as split_f
-    
-    #from dmgraphanalysis.utils_plot import plot_hist,plot_cormat
-    
-    ############# cor_mat
-    
-    #cor_mat = np.load(cor_mat_file)
-    
-    ##### heatmap 
-    
-    #print 'plotting cor_mat heatmap'
-    
-    #plot_heatmap_cor_mat_file =  os.path.abspath('heatmap_cor_mat.eps')
-    
-    #plot_cormat(plot_heatmap_cor_mat_file,cor_mat,list_labels = [])
-    
-    ##### histogram 
-    
-    #print 'plotting cor_mat histogram'
-    
-    #plot_hist_cor_mat_file = os.path.abspath('hist_cor_mat.eps')
-    
-    #plot_hist(plot_hist_cor_mat_file,cor_mat,nb_bins = 100)
-    
-    ############# Z_cor_mat
-    
-    #Z_cor_mat = np.load(Z_cor_mat_file)
-    
-    ##### heatmap 
-    
-    #print 'plotting Z_cor_mat heatmap'
-    
-    #plot_heatmap_Z_cor_mat_file =  os.path.abspath('heatmap_Z_cor_mat.eps')
-    
-    #plot_cormat(plot_heatmap_Z_cor_mat_file,Z_cor_mat,list_labels = [])
-    
-    ##### histogram 
-    
-    #print 'plotting Z_cor_mat histogram'
-    
-    #plot_hist_Z_cor_mat_file = os.path.abspath('hist_Z_cor_mat.eps')
-    
-    #plot_hist(plot_hist_Z_cor_mat_file,Z_cor_mat,nb_bins = 100)
-    
-    ############# conf_cor_mat
-    
-    #conf_cor_mat = np.load(conf_cor_mat_file)
-    
-    ##### heatmap 
-    
-    #print 'plotting conf_cor_mat heatmap'
-    
-    #plot_heatmap_conf_cor_mat_file =  os.path.abspath('heatmap_conf_cor_mat.eps')
-    
-    #plot_cormat(plot_heatmap_conf_cor_mat_file,conf_cor_mat,list_labels = [])
-    
-    ##### histogram 
-    
-    #print 'plotting conf_cor_mat histogram'
-    
-    #plot_hist_conf_cor_mat_file = os.path.abspath('hist_conf_cor_mat.eps')
-
-    #plot_hist(plot_hist_conf_cor_mat_file,conf_cor_mat,nb_bins = 100)
-    
-    #return plot_hist_cor_mat_file,plot_heatmap_cor_mat_file,plot_hist_Z_cor_mat_file,plot_heatmap_Z_cor_mat_file,plot_hist_conf_cor_mat_file,plot_heatmap_conf_cor_mat_file
-    
-#def plot_hist_Z_cor_mat(Z_cor_mat_file):
-
-    #import os
-    #import numpy as np
-    
-    #import nibabel as nib
-    
-    #from nipype.utils.filemanip import split_filename as split_f
-    
-    #from dmgraphanalysis.utils_plot import plot_hist,plot_cormat
-    
-    ########### Z_cor_mat
-    
-    #Z_cor_mat = np.load(Z_cor_mat_file)
-    
-    ##### heatmap 
-    
-    #print 'plotting Z_cor_mat heatmap'
-    
-    #plot_heatmap_Z_cor_mat_file =  os.path.abspath('heatmap_Z_cor_mat.eps')
-    
-    #plot_cormat(plot_heatmap_Z_cor_mat_file,Z_cor_mat,list_labels = [])
-    
-    ##### histogram 
-    
-    #print 'plotting Z_cor_mat histogram'
-    
-    #plot_hist_Z_cor_mat_file = os.path.abspath('hist_Z_cor_mat.eps')
-    
-    #plot_hist(plot_hist_Z_cor_mat_file,Z_cor_mat,nb_bins = 100)
-    
-    #return plot_hist_Z_cor_mat_file,plot_heatmap_Z_cor_mat_file
-    
-###### spm_mask and all infos from contrast index
-#def extract_signif_contrast_mask(spm_contrast_index):
-
-    #import os
-    #from define_variables import nipype_analyses_path,peak_activation_mask_analysis_name,ROI_mask_prefix
-    
-    ##### indexed_mask
-    #indexed_mask_rois_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "indexed_mask-" + ROI_mask_prefix + "_spm_contrast" + str(spm_contrast_index) + ".nii")
+    def _run_interface(self, runtime):
+                   
+                  
+        print 'in compute_conf_correlation_matrix'
         
-    ##### saving ROI coords as textfile
-    #### ijk coords
-    #coord_rois_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "coords-" + ROI_mask_prefix + "_spm_contrast" + str(spm_contrast_index) + ".txt")
-
-    #### coords in MNI space
-    #MNI_coord_rois_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "coords-MNI-" + ROI_mask_prefix + "_spm_contrast" + str(spm_contrast_index) + ".txt")
-
-    ##### saving ROI coords as textfile
-    #label_rois_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "labels-" + ROI_mask_prefix + "_spm_contrast" + str(spm_contrast_index) + ".txt")
-    ##label_rois_file =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "labels-" + ROI_mask_prefix + "_jane.txt")
+        sess_ts_files = self.inputs.sess_ts_files
+        labels_files = self.inputs.sess_labels_files
         
-    ##### all info in a text file
-    #info_rois_file  =  os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name, "info-" + ROI_mask_prefix + "_spm_contrast" + str(spm_contrast_index) + ".txt")
+        
+        if len(sess_ts_files) == 0:
+            
+            print "Warning, could not find sess_ts_files"
+            
+            return runtime
+            
+            
+        path, fname, ext = split_f(sess_ts_files[0])
+        
+        list_sess_ts = []
+        
+        for ts_file in sess_ts_files:
+            
+            print 'load data'
+            
+            data_matrix = np.load(ts_file)
+            
+            print data_matrix.shape
+            
+            list_sess_ts.append(data_matrix)
+            
+        subj_ts = np.concatenate(tuple(list_sess_ts),axis = 0)
+        
+        print subj_ts.shape
+        
+        print np.sum(np.isnan(subj_ts) == True,axis = (1,2))
+        print np.sum(np.isnan(subj_ts) == True,axis = (0,2))
+        print np.sum(np.isnan(subj_ts) == True,axis = (0,1))
+        
+        good_trigs = np.sum(np.isnan(subj_ts) == True,axis = (1,2)) == 0
+        
+        select_subj_ts = subj_ts[good_trigs,:,:]
+       
+        print select_subj_ts.shape
+        
+        self.select_ts_files = []
+        
+        for i_trig in range(select_subj_ts.shape[0]):
+        
+            select_ts_file = os.path.abspath('select_' + fname + '_' + str(i_trig) + '.npy')
+            
+            np.save(select_ts_file,select_subj_ts[i_trig,:,:])
+            
+            self.select_ts_files.append(select_ts_file)
+            
+            
+        ### check if all labels_files are identical
+        
+        if len(labels_files) == 0:
+            
+            print "Warning, could not find sess_ts_files"
+            
+            return runtime
+          
+        select_labels_file = labels_files[0]
+        
+        select_labels = np.array(np.loadtxt(select_labels_file),dtype = 'str')
+        
+        print select_labels
+        0/0
+        labels_files
+        
+        return runtime
+        
+    def _list_outputs(self):
+        
+        outputs = self._outputs().get()
+        
+        outputs["select_ts_files"] = self.select_ts_files
+        
+        print outputs
+        
+        return outputs
 
-    #return indexed_mask_rois_file,coord_rois_file,MNI_coord_rois_file,label_rois_file,info_rois_file
+        
+        
