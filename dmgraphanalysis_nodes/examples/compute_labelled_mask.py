@@ -522,7 +522,6 @@ def remove_close_peaks_neigh_in_template(list_orig_peak_coords,template_data,tem
     
 
 ################################# preparing HO template by recombining sub and cortical mask + reslicing to image format ##################################
-
 def compute_recombined_HO_template(img_header,img_affine,img_shape):
 
     HO_dir = "/usr/share/fsl/data/atlases/"
@@ -886,6 +885,11 @@ def compute_labelled_mask_from_HO_sub(resliced_full_HO_img_file,info_template_fi
     
     print useful_labels
     
+    ROI_mask_labels_file = os.path.join(export_dir,"ROI_mask_labels.txt")
+    
+    np.savetxt(ROI_mask_labels_file,useful_labels,fmt = "%s")
+    
+    
     ##export each ROI in a single file (mask)
     for label_index in useful_indexes:
     
@@ -899,7 +903,7 @@ def compute_labelled_mask_from_HO_sub(resliced_full_HO_img_file,info_template_fi
         
         nib.save(single_ROI_mask,single_ROI_mask_file)
         
-    return useful_labels,useful_indexes,labeled_mask
+    return ROI_mask_file,ROI_mask_labels_file
     
 def compute_labelled_mask_from_ROI_coords(neighbourhood = 1):
     """
@@ -1014,161 +1018,6 @@ def compute_labelled_mask_from_ROI_coords(neighbourhood = 1):
     np.savetxt(ROI_coords_labels_file,ROI_labels,fmt = "%s")
     
     return ROI_coords_labelled_mask_file,ROI_coords_labels_file
-    
-    
-    
-def merge_coord_and_label_files(ROI_coords_dir):
-
-    import os
-    import numpy as np
-    
-    list_coords = []
-    
-    list_labels = []
-        
-    for event in ['Odor','Recall']:
-    
-        print event
-        
-        event_coords_file = os.path.join(ROI_coords_dir,"Coord_Network"+event+".txt")
-        
-        print event_coords_file
-        
-        for line in open(event_coords_file):
-        
-            print line
-            
-            list_coord = map(int,line.strip().split('\t'))
-            
-            print list_coord
-            
-            list_coords.append(list_coord)
-            
-            
-        event_labels_file = os.path.join(ROI_coords_dir,"Labels_Network"+event+".txt")
-        
-        for line in open(event_labels_file):
-        
-            print line
-            
-            list_labels.append(line.strip())
-                    
-        
-    print list_coords
-    
-    print list_labels
-        
-    print len(list_coords)
-    print len(list_labels)
-    
-    ###### saving merged file
-    all_coords_file = os.path.join(ROI_coords_dir,"Coord_Network_Odor-Recall.txt")
-    all_labels_file = os.path.join(ROI_coords_dir,"Labels_Network_Odor-Recall.txt")
-    
-    np.savetxt(all_coords_file,np.array(list_coords,dtype = 'int'),fmt = '%d')
-    np.savetxt(all_labels_file,np.array(list_labels,dtype = 'string'),fmt = '%s')
-    
-        #f.write(str(list_coords))
-    
-    
-    return all_coords_file,all_labels_file
-    
-def compute_labelled_mask_from_anat_ROIs(ROI_dir):
-    
-    from define_variables import resliced_full_HO_img_file
-    from nipype.utils.filemanip import split_filename as split_f
-    import glob
-    import nibabel as nib
-    """
-    compute labelled_mask from a list of img files, presenting ROIs extracted from MRIcron in the nii or img format
-    each ROI is represented by a different IMG file
-    """
-    
-    orig_image = nib.load(resliced_full_HO_img_file)
-    
-    orig_image_data = orig_image.get_data()
-    
-    orig_image_data_shape = orig_image_data.shape
-    
-    labelled_mask_data = np.zeros(shape = orig_image_data.shape, dtype = 'int')
-    
-    print labelled_mask_data.shape
-    
-    print ROI_dir
-    
-    resliced_ROI_files =  glob.glob(os.path.join(ROI_dir,"r*.nii"))
-    
-    if len(resliced_ROI_files) == 0:
-        
-        
-        ROI_files =  glob.glob(os.path.join(ROI_dir,"*.nii"))
-        
-        
-        print ROI_files
-        
-        for ROI_file in ROI_files:
-        
-            ROI_image = nib.load(ROI_file)
-        
-            ROI_data = ROI_image.get_data()
-            
-            ROI_data_shape = ROI_data.shape
-            print "Original ROI template shape:"
-            
-            print ROI_data.shape
-                
-            if np.any(ROI_data_shape != orig_image_data_shape):
-            
-                
-                
-                    
-                reslice_ROI = spm.Reslice()
-                reslice_ROI.inputs.in_file = ROI_file
-                reslice_ROI.inputs.space_defining = resliced_full_HO_img_file
-
-                resliced_ROI_file =  reslice_ROI.run().outputs.out_file
-
-                
-            else :
-                resliced_ROI_data = ROI_image.get_data()
-        
-        resliced_ROI_files = glob.glob(os.path.join(ROI_dir,"r*.nii"))
-        
-    
-    resliced_ROI_files.sort()
-    
-    print resliced_ROI_files
-    
-    labels_list = []
-    
-    for i,resliced_ROI_file in enumerate(resliced_ROI_files):
-    
-        path,fname,ext = split_f(resliced_ROI_file)
-    
-        labels_list.append(fname)
-    
-        resliced_ROI_img = nib.load(resliced_ROI_file)
-
-        resliced_ROI_data = resliced_ROI_img.get_data()
-
-        print resliced_ROI_data.shape
-        
-        print np.sum(resliced_ROI_data != 0)
-        
-        labelled_mask_data[resliced_ROI_data != 0] = i+1
-        
-    ### save labeled_mask
-    labelled_mask_data_file = os.path.join(ROI_dir,"all_ROIs_labelled_mask.nii")
-    
-    nib.save(nib.Nifti1Image(labelled_mask_data,orig_image.get_affine(),orig_image.get_header()),labelled_mask_data_file)
-    
-    ### save labels
-    labels_list_file = os.path.join(ROI_dir,"labels_all_ROIs.txt")
-    
-    np.savetxt(labels_list_file,np.array(labels_list,dtype = 'string'),fmt = "%s")
-    
-    return labelled_mask_data,labels_list
-    #nib.load(resliced_full_HO_img_file)
     
 #def compute_labelled_mask_from_spm_contrast_img():
 
