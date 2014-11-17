@@ -557,10 +557,16 @@ def return_conf_cor_mat(ts_mat,regressor_vect,conf_interval_prob):
     deg_freedom = w.sum()/w.max()-3
     #deg_freedom = w.shape[0]-3
     
+    print deg_freedom
+    
+    print norm,norm/np.sqrt(deg_freedom)
+    
     print regressor_vect.shape[0],w.shape[0],w.sum(),w.sum()/w.max()
     s, n = ts_mat.shape
     
     Z_cor_mat = np.zeros((n,n),dtype = float)
+    Z_conf_cor_mat = np.zeros((n,n),dtype = float)
+    
     cor_mat = np.zeros((n,n),dtype = float)
     conf_cor_mat = np.zeros((n,n),dtype = float)
     
@@ -574,6 +580,8 @@ def return_conf_cor_mat(ts_mat,regressor_vect,conf_interval_prob):
         cor_mat[i,j] = (s1*s2).sum()/np.sqrt((s1*s1).sum() *(s2*s2).sum())
         Z_cor_mat[i,j] = np.arctanh(cor_mat[i,j])
         
+        Z_conf_cor_mat[i,j] = norm/np.sqrt(deg_freedom)
+        
         if cor_mat[i,j] > 0:
             conf_cor_mat[i,j] = cor_mat[i,j] - np.tanh(Z_cor_mat[i,j] - norm/np.sqrt(deg_freedom))
         else:
@@ -586,7 +594,7 @@ def return_conf_cor_mat(ts_mat,regressor_vect,conf_interval_prob):
     
     print "Weighted correlation computation took " + str(t2-t1) + "s"
     
-    return cor_mat,Z_cor_mat,conf_cor_mat
+    return cor_mat,Z_cor_mat,conf_cor_mat,Z_conf_cor_mat
     
     
 #def return_var_cor_mat(ts_mat,regressor_vect):
