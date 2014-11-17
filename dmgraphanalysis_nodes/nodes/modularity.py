@@ -26,6 +26,8 @@ class ComputeNetListInputSpec(BaseInterfaceInputSpec):
     
     coords_file = File(exists=True, desc='Corresponding coordiantes', mandatory=True)
     
+    threshold = traits.Float(usedefault = True, mandatory = False)
+    
 class ComputeNetListOutputSpec(TraitedSpec):
     
     net_List_file = File(exists=True, desc="net list for radatools")
@@ -45,10 +47,13 @@ class ComputeNetList(BaseInterface):
                 
         Z_cor_mat_file = self.inputs.Z_cor_mat_file
         coords_file = self.inputs.coords_file
+        threshold = self.inputs.threshold
         
         print "loading Z_cor_mat_file"
         
         Z_cor_mat = np.load(Z_cor_mat_file)
+        
+        Z_cor_mat[np.abs(Z_cor_mat) < threshold] = 0.0
         
         print 'load coords'
         
@@ -565,12 +570,17 @@ class PlotIGraphModules(BaseInterface):
             
             
             
-            coords = np.array(np.loadtxt(coords_file),dtype = 'int64')
+            coords = np.array(np.loadtxt(coords_file),dtype = 'float')
             print coords.shape
             
             node_coords = coords[node_corres,:]
             print node_coords.shape
             
+            #print np.isnan(node_coords)
+            
+            #node_coords[np.isnan(node_coords)] = -100
+            ##print node_coords
+                        
         else :
             node_coords = np.array([])
             
