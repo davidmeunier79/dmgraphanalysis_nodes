@@ -270,6 +270,69 @@ class ConcatTS(BaseInterface):
         return outputs
 
         
+######################################################################################## SeparateTS ##################################################################################################################
+
+from dmgraphanalysis_nodes.utils_cor import mean_select_indexed_mask_data
+
+class SeparateTSInputSpec(BaseInterfaceInputSpec):
+    
+    all_ts_file = File(exists=True, desc='npy file containing all ts to be concatenated', mandatory=True)
+    
+class SeparateTSOutputSpec(TraitedSpec):
+    
+    separated_ts_files = traits.List(File(exists=True), desc="ts files after separation")
+    
+class SeparateTS(BaseInterface):
+    
+    """Extract time series from a labelled mask in Nifti Format where all ROIs have the same index"""
+
+    input_spec = SeparateTSInputSpec
+    output_spec = SeparateTSOutputSpec
+
+    def _run_interface(self, runtime):
+            
+        #import os
+        #import numpy as np
+        #import nibabel as nib
+        
+        #from dmgraphanalysis.utils_plot import plot_signals
+        
+        all_ts_file = self.inputs.all_ts_file
+        
+        path,fname_ts,ext = split_f(all_ts_file)
+        
+        ### loading ts shape = (trigs, electrods, time points)
+        
+        all_ts = np.load(all_ts_file)
+        
+        print "all_ts: " 
+        print all_ts.shape
+        
+        separated_ts_files = []
+        
+        for i in range(all_ts.shape[0]):
+            
+            
+            sep_ts_file = os.path.abspath(fname_ts + '_trig_' + str(i) + '.npy')
+            
+            np.save(sep_ts_file,all_ts[i,:,:])
+            
+            separated_ts_files.append(sep_ts_file)
+        
+        self.separated_ts_files = separated_ts_files
+        
+        return runtime
+        
+        #return mean_masked_ts_file,subj_coord_rois_file
+        
+    def _list_outputs(self):
+        
+        outputs = self._outputs().get()
+        
+        outputs["separated_ts_files"] = self.separated_ts_files
+        
+        return outputs
+
 ################################################################################# RegressCovar ######################################################################################################################
  
 
