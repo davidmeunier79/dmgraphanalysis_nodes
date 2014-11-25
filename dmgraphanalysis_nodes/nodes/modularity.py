@@ -34,6 +34,8 @@ class ComputeNetListOutputSpec(TraitedSpec):
     
     net_Louvain_file = File(exists=True, desc="net list for Louvain")
     
+    out_coords_file = File(exists=True, desc='Corresponding coordiantes (copy from previous one)')
+    
 class ComputeNetList(BaseInterface):
     
     """
@@ -81,6 +83,12 @@ class ComputeNetList(BaseInterface):
         
         export_Louvain_net_from_list(net_Louvain_file,Z_list,coords)
         
+        #### saving coordinates for references
+        
+        out_coords_file = os.path.abspath('coords.txt')
+        
+        np.savetxt(out_coords_file,coords,fmt = "%d")
+        
         return runtime
         
         #return mean_masked_ts_file,subj_coord_rois_file
@@ -91,7 +99,8 @@ class ComputeNetList(BaseInterface):
         
         outputs["net_List_file"] = os.path.abspath("Z_List.txt")
         outputs["net_Louvain_file"] = os.path.abspath("Z_Louvain.txt")
-    
+        outputs["out_coords_file"] = os.path.abspath("coords.txt")
+        
         return outputs
     
 ######################################################################################## ComputeIntNetList ##################################################################################################################
