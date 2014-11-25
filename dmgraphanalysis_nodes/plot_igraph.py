@@ -1309,18 +1309,12 @@ def plot_3D_igraph_all_modules(community_vect,Z_list,node_coords = np.array([]),
     print g_all.vs['color']
     print g_all
     
-    print np.where(np.array(node_labels,dtype = "string") == "aHippo_R2")
-    
-    print Z_list.todense()[6,19]
-    
-    
-    #print np.where(np.array(node_labels,dtype = "string") == "PHC_FusG_R2")
-    
-    #print Z_list.todense()[19,:]
-    
     if len(node_labels) != 0:
         print "non void labels found"
         add_non_null_labels(g_all,node_labels)
+        
+        print g_all.vs['label']
+        
     else :
         print "empty labels"
         
@@ -1337,8 +1331,6 @@ def plot_3D_igraph_all_modules(community_vect,Z_list,node_coords = np.array([]),
     
         g_all['layout'] = g_all.layout_fruchterman_reingold()
     
-        print g_all.vs['label']
-        
         Z_list_all_modules_file = os.path.abspath("All_modules_FR.eps")
 
         ig.plot(g_all, Z_list_all_modules_file, edge_width = 0.1, edge_curved = False)
