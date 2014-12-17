@@ -962,6 +962,7 @@ class SelectNonNAN(BaseInterface):
     
     """
     Select time series based on NaN
+    TODO: finally no used
     """
     
     input_spec = SelectNonNANInputSpec

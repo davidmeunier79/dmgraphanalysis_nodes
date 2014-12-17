@@ -256,6 +256,58 @@ def read_Pajek_corres_nodes_and_sparse_matrix(Pajek_net_file):
         
     return node_corres,sparse_matrix
    
+   
+### read strength from Network_Properties node results 
+def get_strength_values_from_info_nodes_file(info_nodes_file):
+
+    from pandas.io.parsers import read_csv
+    
+    info_nodes = read_csv(info_nodes_file, sep = "\t")
+    
+    #print info_nodes
+    
+    return info_nodes['Strength'].values
+    
+def get_strength_pos_values_from_info_nodes_file(info_nodes_file):
+
+    from pandas.io.parsers import read_csv
+    
+    info_nodes = read_csv(info_nodes_file, sep = "\t")
+    
+    print info_nodes
+    
+    return info_nodes['Strength_Pos']
+
+def get_strength_neg_values_from_info_nodes_file(info_nodes_file):
+
+    from pandas.io.parsers import read_csv
+    
+    info_nodes = read_csv(info_nodes_file, sep = "\t")
+    
+    print info_nodes
+    
+    return info_nodes['Strength_Neg']
+    
+def get_degree_pos_values_from_info_nodes_file(info_nodes_file):
+
+    from pandas.io.parsers import read_csv
+    
+    info_nodes = read_csv(info_nodes_file, sep = "\t")
+    
+    print info_nodes
+    
+    return info_nodes['Degree_Pos']
+
+def get_degree_neg_values_from_info_nodes_file(info_nodes_file):
+
+    from pandas.io.parsers import read_csv
+    
+    info_nodes = read_csv(info_nodes_file, sep = "\t")
+    
+    print info_nodes
+    
+    return info_nodes['Degree_Neg']
+    
 ##################################### Formatting data for external community detection algorithm (Louvain_Traag) ##############################
         
 def export_Louvain_net_from_list(Z_Louvain_file,Z_list,coords):

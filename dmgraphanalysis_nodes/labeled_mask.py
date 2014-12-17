@@ -146,10 +146,10 @@ def compute_labelled_mask_from_ROI_coords_files(ref_img_file,MNI_coords_file,nei
     path, fname, ext = split_f(MNI_coords_file)
     
     #ROI_coords_labelled_mask_file = os.path.join(path,"All_labelled_ROI2-neigh_"+str(neighbourhood)+".nii")
-    ROI_coords_labelled_mask_file = os.path.join(path,"All_labelled_ROI-neigh_"+str(neighbourhood)+".nii")
+    ROI_coords_labelled_mask_file = os.path.join(path,"All_labelled_ROI3-neigh_"+str(neighbourhood)+".nii")
     
     #ROI_coords_np_coords_file = os.path.join(path,"All_ROI_np_coords.txt")
-    ROI_coords_np_coords_file = os.path.join(path,"All_ROI_np_coords2.txt")
+    ROI_coords_np_coords_file = os.path.join(path,"All_ROI_np_coords3.txt")
     
     ###save ROI_coords_labelled_mask
     nib.save(nib.Nifti1Image(ROI_coords_labelled_mask,ref_image.get_affine(),ref_image.get_header()),ROI_coords_labelled_mask_file)
@@ -219,7 +219,7 @@ def compute_ROI_nii_from_ROI_coords_files(ref_img_file,MNI_coords_file,labels_fi
         path, fname, ext = split_f(MNI_coords_file)
         
         
-        ROI_coords_labelled_mask_file = os.path.join(path,"ROI_" + ROI_labels[i] + "-neigh_" + str(neighbourhood) + ".nii")
+        ROI_coords_labelled_mask_file = os.path.join(path,"ROI_" + ROI_labels[i] + "-neigh_" + str(neighbourhood) + "_2.nii")
             
         ###save ROI_coords_labelled_mask
         nib.save(nib.Nifti1Image(ROI_coords_labelled_mask,ref_image.get_affine(),ref_image.get_header()),ROI_coords_labelled_mask_file)

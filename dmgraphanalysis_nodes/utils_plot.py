@@ -99,7 +99,15 @@ def plot_int_mat(plot_file, cor_mat,list_labels, fix_full_range,label_size = 2):
     fig1 = plt.figure(frameon=False)
     ax = fig1.add_subplot(1,1,1)
     
-    cmap= plt.get_cmap('spectral',9) 
+    #cmap= plt.get_cmap('spectral',9) 
+    
+    
+    cmap = plt.get_cmap('jet',9)
+    
+    #cmap_vals = cmap(np.linspace(0.2,0.8,9))
+    
+    
+    print np.array(cmap(np.arange(9)))
     
     im = ax.matshow(cor_mat,vmin = fix_full_range[0], vmax = fix_full_range[1],interpolation="none", cmap= cmap)
     #plt.axis('off')
@@ -142,6 +150,8 @@ def plot_int_mat(plot_file, cor_mat,list_labels, fix_full_range,label_size = 2):
     #fig1.close()
     del fig1
     
+    return 
+    
 def plot_hist(plot_hist_file,data,nb_bins = 100):
     
     #fig2 = figure.Figure()
@@ -156,13 +166,17 @@ def plot_hist(plot_hist_file,data,nb_bins = 100):
     #fig2.close()
     del fig2
     
-def plot_signals(plot_signals_file,signals_matrix,colors = ['blue']):
+def plot_signals(plot_signals_file,signals_matrix,colors = [], ylim = []):
     
     fig2 = plt.figure()
     ax = fig2.add_subplot(1,1,1)
     
     #print signals_matrix.shape[0]
     #print len(signals_matrix.shape)
+    
+    if len(ylim) != 0:
+        
+        ax.set_ylim(ylim[0],ylim[1])
     
     if len(signals_matrix.shape) == 1:
         ax.plot(range(signals_matrix.shape[0]),signals_matrix[:]) 
@@ -171,12 +185,18 @@ def plot_signals(plot_signals_file,signals_matrix,colors = ['blue']):
         for i in range(signals_matrix.shape[0]): 
         
             if len(colors) == signals_matrix.shape[0]:
-                print i,colors[i]
+                #print i,colors[i]
                 
                 ax.plot(range(signals_matrix.shape[1]),signals_matrix[i,:],colors[i]) 
                 
+            elif len(colors) == 1:
+                
+                ax.plot(range(signals_matrix.shape[1]),signals_matrix[i,:],colors[0])
+                
             else:
                 ax.plot(range(signals_matrix.shape[1]),signals_matrix[i,:])
+                
+                
      
     #ax.plot(,signals_matrix)
     fig2.savefig(plot_signals_file)
@@ -230,188 +250,4 @@ def plot_sep_signals(plot_signals_file,signals_matrix,colors = [],range_signal =
     del fig2
         
     return
-    
-#def plot_curve(plot_curve_file,curve_data,x_range,label):
-    
-
-    #fig2 = plt.figure()
-    #ax = fig2.add_subplot(1,1,1)
-    
-    
-    ##print range_signal
-    
-    #print curve_data.shape
-    
-    
-    #ax.plot(x_range,curve_data, color = "blue",label = label)
-            
-    #legend = ax.legend(loc='upper center', shadow=True)
-    
-    #fig2.savefig(plot_curve_file)
-    
-    #plt.close(fig2)
-    ##fig2.close()
-    #del fig2
-    
-#def plot_diff_signals(plot_signals_file,signals_matrix):
-    
-
-    #fig2 = plt.figure()
-    #ax = fig2.add_subplot(1,1,1)
-    
-    
-    ##print range_signal
-    
-    #print signals_matrix.shape
-    
-    
-    #ax.plot(range(-2,signals_matrix.shape[1]-2),signals_matrix[0,:], color = "blue",label = "WWW")
-    #ax.plot(range(-2,signals_matrix.shape[1]-2),signals_matrix[1,:], color = "red",label = "What")
-            
-    #legend = ax.legend(loc='upper center', shadow=True)
-    
-    #fig2.savefig(plot_signals_file)
-    
-    #plt.close(fig2)
-    ##fig2.close()
-    #del fig2
-
-#def plot_diff_signals_errorbar(plot_signals_file,signals_matrix,errorbar_matrix):
-    
-
-    #fig2 = plt.figure()
-    #ax = fig2.add_subplot(1,1,1)
-    
-    
-    ##print range_signal
-    
-    #print signals_matrix.shape
-    
-    
-    #ax.plot(range(-2,signals_matrix.shape[1]-2),signals_matrix[0,:], color = "blue",label = "WWW")
-    #ax.plot(range(-2,signals_matrix.shape[1]-2),signals_matrix[1,:], color = "red",label = "What")
-            
-    #ax.errorbar(range(-2,signals_matrix.shape[1]-2),signals_matrix[0,:],errorbar_matrix[0,:], color = "blue")
-    #ax.errorbar(range(-2,signals_matrix.shape[1]-2),signals_matrix[1,:],errorbar_matrix[1,:], color = "red")
-    
-    
-    #legend = ax.legend(loc='upper center', shadow=True)
-    
-    #fig2.savefig(plot_signals_file)
-    
-    #plt.close(fig2)
-    ##fig2.close()
-    #del fig2
-    
-#def plot_sep_diff_signals(plot_signals_file,signals_matrix):
-    
-    #fig2 = plt.figure()
-    #ax = fig2.add_subplot(1,1,1)
-    
-    
-    #range_signal = np.amax(signals_matrix) - np.amin(signals_matrix)
-    
-    #print range_signal
-    
-    #print signals_matrix.shape
-    
-    
-    #for i in range(signals_matrix.shape[0]): 
-    
-        #if i == 0:
-        
-            #color = "blue"
-        #else :
-            #color = "red"
-            
-            
-        #for j in range(signals_matrix.shape[1]): 
-    
-        ##print range_signal*i
-            #ax.plot(signals_matrix[i,j,:] + range_signal*j,color = color) 
-        
-    ##for i in range(signals_matrix.shape[0]): 
-        ##print range_signal*i
-        
-        ##sep_signals_matrix[i,:] = signals_matrix[i,:] + range_signal*i
-        
-    ##print sep_signals_matrix
-    
-    ##ax.plot(range(signals_matrix.shape[1]),sep_signals_matrix) 
-        
-    
-    
-    #fig2.savefig(plot_signals_file)
-    
-    #plt.close(fig2)
-    ##fig2.close()
-    #del fig2
-    
-    
-#def plot_sep_diff_signals_errorbar(plot_signals_file,signals_matrix,errorbar_matrix):
-    
-    #fig2 = plt.figure()
-    #ax = fig2.add_subplot(1,1,1)
-    
-    
-    #range_signal = np.amax(signals_matrix) - np.amin(signals_matrix)
-    
-    #print range_signal
-    
-    #print signals_matrix.shape
-    
-    
-    #for i in range(signals_matrix.shape[0]): 
-    
-        #if i == 0:
-        
-            #color = "blue"
-        #else :
-            #color = "red"
-            
-            
-        #for j in range(signals_matrix.shape[1]): 
-    
-        ##print range_signal*i
-            #ax.plot(signals_matrix[i,j,:] + range_signal*j,color = color) 
-        
-    ##for i in range(signals_matrix.shape[0]): 
-        ##print range_signal*i
-        
-        ##sep_signals_matrix[i,:] = signals_matrix[i,:] + range_signal*i
-        
-    ##print sep_signals_matrix
-    
-    ##ax.plot(range(signals_matrix.shape[1]),sep_signals_matrix) 
-        
-    
-    
-    #fig2.savefig(plot_signals_file)
-    
-    #plt.close(fig2)
-    ##fig2.close()
-    #del fig2
-    
-#def plot_diff_signals_by_lines(plot_diff_signals_path,signals_matrix):
-
-    #import os
-    
-    #for j in range(signals_matrix.shape[1]): 
-    
-        #plot_signals_file = os.path.join(plot_diff_signals_path,"plot_diff_signals_by_ROIs_" + str(j) + ".eps")
-        
-        #plot_diff_signals(plot_signals_file,signals_matrix[:,j,:])
-        
-
-#def plot_diff_signals_errorbar_by_lines(plot_diff_signals_path,signals_matrix,errorbar_matrix):
-
-    #import os
-    
-    #for j in range(signals_matrix.shape[1]): 
-    
-        #plot_signals_file = os.path.join(plot_diff_signals_path,"plot_diff_signals_errorbar_by_ROIs_" + str(j) + ".eps")
-        
-        #plot_diff_signals_errorbar(plot_signals_file,signals_matrix[:,j,:],errorbar_matrix[:,j,:])
-        
-    
     
