@@ -2314,6 +2314,10 @@ def gather_coclass_excluded_results5():
     plot_3D_igraph_int_mat(core_coclass_file,core_coclass_mat, labels = labels, coords = MNI_coords, edge_colors = ["Gray"],node_col_labels = node_core_labels,nodes_sizes = node_core_sizes)
     
     
+    core_coclass_topo_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'exclu_core_coclass5_topo.eps')
+    
+    plot_3D_igraph_int_mat(core_coclass_topo_file,core_coclass_mat, labels = labels, edge_colors = ["Gray"],node_col_labels = node_core_labels,nodes_sizes = node_core_sizes)
+    
     
     ################################################## odor ##############################################
 
@@ -2341,9 +2345,13 @@ def gather_coclass_excluded_results5():
     node_core_odor_sizes[node_core_odor_labels == 1] = odor_signif_degree[node_core_odor_labels == 1] * 2
     
     
-    odor_core_epi_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'signif_odor_core_coclass5.eps')
+    odor_core_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'signif_odor_core_coclass5.eps')
     
-    plot_3D_igraph_int_mat(odor_core_epi_coclass_file,odor_signif_coclass_mat, labels = labels, coords = MNI_coords, edge_colors = ["Blue"],node_col_labels = node_core_odor_labels,nodes_sizes = node_core_odor_sizes)
+    plot_3D_igraph_int_mat(odor_core_coclass_file,odor_signif_coclass_mat, labels = labels, coords = MNI_coords, edge_colors = ["Blue"],node_col_labels = node_core_odor_labels,nodes_sizes = node_core_odor_sizes)
+        
+    odor_core_coclass_topo_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'signif_odor_core_coclass5_topo.eps')
+    
+    plot_3D_igraph_int_mat(odor_core_coclass_topo_file,odor_signif_coclass_mat, labels = labels, edge_colors = ["Blue"],node_col_labels = node_core_odor_labels,nodes_sizes = node_core_odor_sizes)
         
     ################################################## recall ##############################################
 
@@ -2372,9 +2380,13 @@ def gather_coclass_excluded_results5():
     node_core_recall_sizes[node_core_recall_labels == 1] = recall_signif_degree[node_core_recall_labels == 1] * 2
     
     
-    recall_core_epi_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'signif_recall_core_coclass5.eps')
+    recall_core_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'signif_recall_core_coclass5.eps')
     
-    plot_3D_igraph_int_mat(recall_core_epi_coclass_file,recall_signif_coclass_mat, labels = labels, coords = MNI_coords, edge_colors = ["Red"],node_col_labels = node_core_recall_labels,nodes_sizes = node_core_recall_sizes)
+    plot_3D_igraph_int_mat(recall_core_coclass_file,recall_signif_coclass_mat, labels = labels, coords = MNI_coords, edge_colors = ["Red"],node_col_labels = node_core_recall_labels,nodes_sizes = node_core_recall_sizes)
+        
+    recall_core_coclass_topo_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'signif_recall_core_coclass5_topo.eps')
+    
+    plot_3D_igraph_int_mat(recall_core_coclass_topo_file,recall_signif_coclass_mat, labels = labels, edge_colors = ["Red"],node_col_labels = node_core_recall_labels,nodes_sizes = node_core_recall_sizes)
         
         
     print "Computing conj signif odor and recall WWW coclass mat"
@@ -2403,6 +2415,78 @@ def gather_coclass_excluded_results5():
     
     plot_3D_igraph_int_mat(conj_signif_odor_recall_coclass_file,conj_signif_odor_recall_coclass_mat, labels = labels, coords = MNI_coords, edge_colors = ["Purple"],node_col_labels = conj_signif_odor_recall_labels,nodes_sizes = conj_signif_odor_recall_sizes)
     
+    conj_signif_odor_recall_coclass_topo_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'conj_signif_odor_recall_core_coclass5_topo.eps')
+    
+    plot_3D_igraph_int_mat(conj_signif_odor_recall_coclass_topo_file,conj_signif_odor_recall_coclass_mat, labels = labels, edge_colors = ["Purple"],node_col_labels = conj_signif_odor_recall_labels,nodes_sizes = conj_signif_odor_recall_sizes)
+    
+    
+    
+    
+    ######## subgraph core for all conditions
+    
+    core_nodes = core_degree != 0
+    
+    print core_nodes
+    
+    subgraph_labels = [label for i,label in enumerate(labels) if core_nodes[i] == True]
+    print subgraph_labels
+    
+    subgraph_MNI_coords = MNI_coords[core_nodes,:]
+    print subgraph_MNI_coords
+    
+    
+    
+    
+    subgraph_core_coclass_mat = core_coclass_mat[core_nodes,:][:,core_nodes]
+    print subgraph_core_coclass_mat
+    
+    subgraph_odor_signif_coclass_mat = odor_signif_coclass_mat[core_nodes,:][:,core_nodes]
+    print subgraph_odor_signif_coclass_mat
+    
+    subgraph_recall_signif_coclass_mat = recall_signif_coclass_mat[core_nodes,:][:,core_nodes]
+    print subgraph_recall_signif_coclass_mat
+    
+    subgraph_conj_signif_odor_recall_coclass_mat = conj_signif_odor_recall_coclass_mat[core_nodes,:][:,core_nodes]
+    print subgraph_conj_signif_odor_recall_coclass_mat
+    
+    subgraph_coclass_mat = np.zeros(shape = subgraph_core_coclass_mat.shape, dtype = int)
+    
+    subgraph_coclass_mat[subgraph_core_coclass_mat == 1] = 1
+    
+    subgraph_coclass_mat[np.logical_and(subgraph_core_coclass_mat == 0,subgraph_odor_signif_coclass_mat == 1)] = 2
+    
+    subgraph_coclass_mat[np.logical_and(subgraph_core_coclass_mat == 0,subgraph_recall_signif_coclass_mat == 1)] = 3
+    
+    subgraph_coclass_mat[np.logical_and(subgraph_core_coclass_mat == 0,subgraph_conj_signif_odor_recall_coclass_mat == 1)] = 4
+    
+    
+    subgraph_coclass_mat[np.logical_and(subgraph_core_coclass_mat == 1,subgraph_odor_signif_coclass_mat == 1)] = 5
+    
+    subgraph_coclass_mat[np.logical_and(subgraph_core_coclass_mat == 1,subgraph_recall_signif_coclass_mat == 1)] = 6
+    
+    subgraph_coclass_mat[np.logical_and(subgraph_core_coclass_mat == 1,subgraph_conj_signif_odor_recall_coclass_mat == 1)] = 7
+    
+    
+    print subgraph_coclass_mat
+    
+    subgraph_core_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'subgraph_core_coclass5.eps')
+    
+    plot_3D_igraph_int_mat(subgraph_core_coclass_file,subgraph_coclass_mat, labels = subgraph_labels, coords = subgraph_MNI_coords, edge_colors = ["Gray","Blue","Red","Purple","Green","Orange","Black"])
+    
+    subgraph_core_coclass_topo_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'subgraph_core_coclass5_topo.eps')
+    
+    plot_3D_igraph_int_mat(subgraph_core_coclass_topo_file,subgraph_coclass_mat, labels = subgraph_labels, edge_colors = ["Gray","Blue","Red","Purple","Green","Orange","Black"])
+    
+    #conj_signif_odor_recall_coclass_topo_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'conj_signif_odor_recall_core_coclass5_topo.eps')
+    
+    #plot_3D_igraph_int_mat(conj_signif_odor_recall_coclass_topo_file,conj_signif_odor_recall_coclass_mat, labels = labels, edge_colors = ["Purple"],node_col_labels = conj_signif_odor_recall_labels,nodes_sizes = conj_signif_odor_recall_sizes)
+    
+        
+    
+    
+    
+    
+    
     print "Saving degree"
     
     tab_degree = np.column_stack((core_degree,odor_signif_degree,recall_signif_degree,conj_signif_odor_recall_degree))
@@ -2414,6 +2498,231 @@ def gather_coclass_excluded_results5():
     df.to_csv(df_filename)
     
     print tab_degree.shape
+    
+def gather_coclass_excluded_results6():
+
+    from dmgraphanalysis_nodes.utils_net import read_Pajek_corres_nodes_and_sparse_matrix
+    from dmgraphanalysis_nodes.utils_cor import return_corres_correl_mat
+    
+    from dmgraphanalysis_nodes.plot_igraph import plot_3D_igraph_int_mat
+    
+    import pandas as pd
+    
+    ### labels
+    
+    print 'loading labels'
+    
+    labels = [line.strip() for line in open(ROI_coords_labels_file)]
+
+    print labels
+        
+    print 'loading ROI coords'
+    
+    MNI_coords = np.array(np.loadtxt(ROI_coords_MNI_coords_file),dtype = 'float')
+    
+    print MNI_coords.shape
+        
+    list_coclass_mat = []
+    
+    for cond in ['Odor_Hit-WWW','Odor_Hit-What','Recall_Hit-WWW','Recall_Hit-What']:
+    
+        coclass_list_file = os.path.join(nipype_analyses_path,coclass_analysis_name,"_cond_" + cond, "prep_rada","int_List.net")
+        
+        print coclass_list_file
+        
+        node_corres, sparse_mat = read_Pajek_corres_nodes_and_sparse_matrix(coclass_list_file)
+        
+        print node_corres
+        print sparse_mat
+        
+        gm_coords = np.loadtxt(ROI_coords_MNI_coords_file)
+        
+        node_coords = gm_coords[node_corres,:]
+        
+        full_cormat,possible_edge_mat = return_corres_correl_mat(sparse_mat.todense(),node_coords,gm_coords)
+        
+        print full_cormat.shape
+        
+        #full_cormat[full_cormat > 0] = 1
+        
+        list_coclass_mat.append(full_cormat)
+        
+    print list_coclass_mat
+    
+    all_coclass_mat = np.array(list_coclass_mat,dtype = int)
+    
+    print all_coclass_mat
+    print all_coclass_mat.shape
+    
+    signif_all_coclass_mat = np.copy(all_coclass_mat)
+    signif_all_coclass_mat[signif_all_coclass_mat > 0] = 1    
+    
+    print signif_all_coclass_mat
+    print signif_all_coclass_mat.shape
+    
+    print "computing degree"
+    
+    degree_all_coclass = np.sum(signif_all_coclass_mat,axis = 1)
+    
+    print degree_all_coclass
+    print degree_all_coclass.shape
+    
+    ##################################################### core ##################################################
+    
+    ### reseau commum aux 4 conditions
+    print "Computing core coclass mat"
+    
+    core_coclass_mat = np.sum(signif_all_coclass_mat,axis = 0)
+    
+    core_coclass_mat[core_coclass_mat != 4] = 0
+    core_coclass_mat[core_coclass_mat == 4] = 1
+    
+    print np.sum(core_coclass_mat)
+    
+    core_degree = np.sum(core_coclass_mat,axis = 0)
+    
+    print core_degree
+    print core_degree.shape
+    
+    node_core_labels = np.zeros(shape = core_degree.shape,dtype = int)
+    
+    node_core_labels[core_degree != 0] = 1
+    
+    print node_core_labels
+    
+    node_core_sizes = np.ones(shape = core_degree.shape,dtype = float) *0.1
+    
+    node_core_sizes[core_degree != 0] = core_degree[core_degree != 0] * 2
+    
+    core_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'exclu_core_coclass6.eps')
+    
+    plot_3D_igraph_int_mat(core_coclass_file,core_coclass_mat, labels = labels, coords = MNI_coords, edge_colors = ["Gray"],node_col_labels = node_core_labels,nodes_sizes = node_core_sizes)
+    
+    
+    core_coclass_topo_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'exclu_core_coclass6_topo.eps')
+    
+    plot_3D_igraph_int_mat(core_coclass_topo_file,core_coclass_mat, labels = labels, edge_colors = ["Gray"],node_col_labels = node_core_labels,nodes_sizes = node_core_sizes)
+    
+    
+    ################################################## odor ##############################################
+
+    ### reseau signif odor WWW
+    
+    print "Computing signif odor WWW coclass mat"
+    odor_signif_coclass_mat = np.zeros(shape = signif_all_coclass_mat.shape[1:],dtype = int)
+    
+    odor_signif_coclass_mat[np.logical_and(signif_all_coclass_mat[0,:,:] == 1, all_coclass_mat[0,:,:] - all_coclass_mat[1,:,:] > 26)] = 1
+    odor_signif_coclass_mat[core_coclass_mat == 1] = 2
+    
+    print np.sum(odor_signif_coclass_mat)
+    
+    odor_signif_degree =  np.sum(odor_signif_coclass_mat,axis = 0)
+    
+    print odor_signif_degree.shape
+            
+    node_core_odor_labels = np.zeros(shape = core_degree.shape,dtype = int)
+    
+    node_core_odor_labels[odor_signif_degree != 0] = 1
+    node_core_odor_labels[core_degree != 0] = 2
+    
+    print node_core_odor_labels
+    
+    node_core_odor_sizes = np.ones(shape = core_degree.shape,dtype = float) *0.1
+    
+    node_core_odor_sizes[node_core_odor_labels == 1] = odor_signif_degree[node_core_odor_labels == 1] * 2
+    node_core_odor_sizes[node_core_odor_labels == 2] = core_degree[node_core_odor_labels == 2] * 2
+    
+    odor_core_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'signif_odor_core_coclass6.eps')
+    
+    plot_3D_igraph_int_mat(odor_core_coclass_file,odor_signif_coclass_mat, labels = labels, coords = MNI_coords, edge_colors = ["Blue","Gray"],node_col_labels = node_core_odor_labels,nodes_sizes = node_core_odor_sizes)
+        
+    odor_core_coclass_topo_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'signif_odor_core_coclass6_topo.eps')
+    
+    plot_3D_igraph_int_mat(odor_core_coclass_topo_file,odor_signif_coclass_mat, labels = labels, edge_colors = ["Blue","Gray"],node_col_labels = node_core_odor_labels,nodes_sizes = node_core_odor_sizes)
+    ################################################## recall ##############################################
+
+        
+    ### reseau signif recall WWW
+    
+    print "Computing signif recall WWW coclass mat"
+    recall_signif_coclass_mat = np.zeros(shape = signif_all_coclass_mat.shape[1:],dtype = int)
+    
+    recall_signif_coclass_mat[np.logical_and(signif_all_coclass_mat[2,:,:] == 1, all_coclass_mat[2,:,:] - all_coclass_mat[3,:,:] > 26)] = 1
+    recall_signif_coclass_mat[core_coclass_mat == 1] = 2
+    
+    print np.sum(recall_signif_coclass_mat)
+    
+    recall_signif_degree =  np.sum(recall_signif_coclass_mat,axis = 0)
+    
+    print recall_signif_degree.shape
+            
+    node_core_recall_labels = np.zeros(shape = core_degree.shape,dtype = int)
+    
+    node_core_recall_labels[recall_signif_degree != 0] = 1
+    node_core_recall_labels[core_degree != 0] = 2
+    
+    print node_core_recall_labels
+    
+    node_core_recall_sizes = np.ones(shape = core_degree.shape,dtype = float) *0.1
+    
+    node_core_recall_sizes[node_core_recall_labels == 1] = recall_signif_degree[node_core_recall_labels == 1] * 2
+    node_core_recall_sizes[node_core_recall_labels == 2] = core_degree[node_core_recall_labels == 2] * 2
+    
+    recall_core_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'signif_recall_core_coclass6.eps')
+    
+    plot_3D_igraph_int_mat(recall_core_coclass_file,recall_signif_coclass_mat, labels = labels, coords = MNI_coords, edge_colors = ["Red","Gray"],node_col_labels = node_core_recall_labels,nodes_sizes = node_core_recall_sizes)
+        
+    recall_core_coclass_topo_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'signif_recall_core_coclass6_topo.eps')
+    
+    plot_3D_igraph_int_mat(recall_core_coclass_topo_file,recall_signif_coclass_mat, labels = labels, edge_colors = ["Red","Gray"],node_col_labels = node_core_recall_labels,nodes_sizes = node_core_recall_sizes)
+    
+        
+    print "Computing conj signif odor and recall WWW coclass mat"
+    
+    conj_signif_odor_recall_coclass_mat = np.zeros(shape = signif_all_coclass_mat.shape[1:],dtype = int)
+    
+    conj_signif_odor_recall_coclass_mat[np.logical_and(recall_signif_coclass_mat == 1, odor_signif_coclass_mat == 1)] = 1
+    conj_signif_odor_recall_coclass_mat[core_coclass_mat == 1] = 2
+    
+    print np.sum(recall_signif_coclass_mat)
+    
+    conj_signif_odor_recall_degree =  np.sum(conj_signif_odor_recall_coclass_mat,axis = 0)
+    
+    print conj_signif_odor_recall_degree.shape
+            
+    conj_signif_odor_recall_labels = np.zeros(shape = conj_signif_odor_recall_degree.shape,dtype = int)
+    
+    conj_signif_odor_recall_labels[conj_signif_odor_recall_degree != 0] = 1
+    conj_signif_odor_recall_labels[core_degree != 0] = 2
+    
+    print conj_signif_odor_recall_labels
+    
+    conj_signif_odor_recall_sizes = np.ones(shape = conj_signif_odor_recall_degree.shape,dtype = float) *0.1
+    
+    conj_signif_odor_recall_sizes[conj_signif_odor_recall_labels == 1] = conj_signif_odor_recall_degree[conj_signif_odor_recall_labels == 1] * 2
+    conj_signif_odor_recall_sizes[conj_signif_odor_recall_labels == 2] = core_degree[conj_signif_odor_recall_labels == 2] * 2
+    
+    
+    conj_signif_odor_recall_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'conj_signif_odor_recall_core_coclass6.eps')
+    
+    plot_3D_igraph_int_mat(conj_signif_odor_recall_coclass_file,conj_signif_odor_recall_coclass_mat, labels = labels, coords = MNI_coords, edge_colors = ["Purple","Gray"],node_col_labels = conj_signif_odor_recall_labels,nodes_sizes = conj_signif_odor_recall_sizes)
+    
+    conj_signif_odor_recall_coclass_topo_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'conj_signif_odor_recall_core_coclass6_topo.eps')
+    
+    plot_3D_igraph_int_mat(conj_signif_odor_recall_coclass_topo_file,conj_signif_odor_recall_coclass_mat, labels = labels, edge_colors = ["Purple","Gray"],node_col_labels = conj_signif_odor_recall_labels,nodes_sizes = conj_signif_odor_recall_sizes)
+    
+    print "Saving degree"
+    
+    tab_degree = np.column_stack((core_degree,odor_signif_degree,recall_signif_degree,conj_signif_odor_recall_degree))
+    
+    df = pd.DataFrame(tab_degree,columns = ['Core','Signif_odor','signif_recall','conj_signif_odor_recall'],index = labels)
+    
+    df_filename = os.path.join(nipype_analyses_path,coclass_analysis_name,'degrees_node6.txt')
+    
+    df.to_csv(df_filename)
+    
+    print tab_degree.shape
+        
         
         
 if __name__ =='__main__':
@@ -2448,6 +2757,7 @@ if __name__ =='__main__':
     #gather_coclass_excluded_results3()
     #gather_coclass_excluded_results4()
     
-    gather_coclass_excluded_results5()
+    #gather_coclass_excluded_results5()
     
+    gather_coclass_excluded_results6()
     

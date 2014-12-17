@@ -494,26 +494,26 @@ info_template_file  =  os.path.join(nipype_analyses_path,peak_activation_mask_an
 #ROI_label_file = os.path.join(ROI_dir,"labels_all_ROIs.txt")
 
 
-### clusters
+## clusters
 
-#ROI_dir = os.path.join(nipype_analyses_path,"Coord_ROI")
+ROI_dir = os.path.join(nipype_analyses_path,"Coord_ROI")
 
-#ROI_mask_file = os.path.join(ROI_dir,"ROI_coords_mask.nii")
-#ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s).txt")
-#ROI_coords_labels_file =  os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s)_Names.txt")
+ROI_mask_file = os.path.join(ROI_dir,"ROI_coords_mask2.nii")
+ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s)3.txt")
+ROI_coords_labels_file =  os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s)_Names3.txt")
 
 
 
 
 ### correlation
 
-ROI_dir = os.path.join(nipype_analyses_path,"FunctConnectivity-Coords-retest")
+#ROI_dir = os.path.join(nipype_analyses_path,"FunctConnectivity-Coords-retest")
 
-ROI_mask_file =  os.path.join(ROI_dir,"All_labelled_ROI-neigh_"+str(neighbourhood)+".nii")
-ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"Correlations1_Coordinates.txt")
-ROI_coords_labels_file =  os.path.join(ROI_dir,"Correlations1_Names.txt")
+#ROI_mask_file =  os.path.join(ROI_dir,"All_labelled_ROI-neigh_"+str(neighbourhood)+".nii")
+#ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"Correlations1_Coordinates.txt")
+#ROI_coords_labels_file =  os.path.join(ROI_dir,"Correlations1_Names.txt")
 
-cor_mat_analysis_name = "Correl_analyses-filtered-ROI_coords-amplitude_noA26-retest"
+#cor_mat_analysis_name = "Correl_analyses-filtered-ROI_coords-amplitude_noA26-retest"
 
 #ROI_mask_file =  os.path.join(ROI_dir,"All_labelled_ROI2-neigh_"+str(neighbourhood)+".nii")
 #ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"Correlations2_Coordinates.txt")

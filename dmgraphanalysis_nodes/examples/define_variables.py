@@ -678,7 +678,7 @@ ROI_coords_dir = os.path.join(nipype_analyses_path,"Reseau_ALS_modif_coords")
 #ROI_coords_dir = os.path.join(nipype_analyses_path,"ReseauALS-conj_corPos-OdorRecall")
 
 #ROI_coords_labels_file = os.path.join(ROI_coords_dir,"Labels_Network"+cond+".txt")
-ROI_coords_labels_file = os.path.join(ROI_coords_dir,"Labels_Network"+cond+"_OK.txt")
+ROI_coords_labels_file = os.path.join(ROI_coords_dir,"Labels_Network"+cond+"_OK2.txt")
 ROI_coords_MNI_coords_file = os.path.join(ROI_coords_dir,"Coord_Network"+cond+"_OK.txt")
 ROI_coords_orig_constrast_file = os.path.join(ROI_coords_dir,"Codes_Network"+cond+"_OK.txt")
 
@@ -942,7 +942,7 @@ t_test_thresh_fdr = 0.05
 ##THRESH= 3.7
 ###THRESH= 3.5
 ##THRESH= 3.0
-##THRESH= 2.5
+###THRESH= 2.5cocl
 ##THRESH= 2.0
 #THRESH= 1.5
 

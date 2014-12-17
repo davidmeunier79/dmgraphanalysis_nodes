@@ -141,12 +141,22 @@ if __name__ =='__main__':
     ### merge coord and label files 
     #all_ROI_coords_file,all_ROI_labels_file = merge_coord_and_label_files(ROI_coords_dir)
     
+    ### compute ROI nii files from MNI coords
     ### compute mask from MNI coords 
+    #from dmgraphanalysis_nodes.labeled_mask import compute_ROI_nii_from_ROI_coords_files
     #compute_ROI_nii_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file,ROI_coords_labels_file,neighbourhood = neighbourhood)
-        
+    
+    from dmgraphanalysis_nodes.labeled_mask import compute_labelled_mask_from_ROI_coords_files
+    compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file,neighbourhood = neighbourhood)
+    
     #compute_compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file,neighbourhood = neighbourhood)
     
-    compute_labelled_mask_from_anat_ROIs(ref_img_file = resliced_full_HO_img_file, ROI_dir = os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name))
+    #compute_labelled_mask_from_anat_ROIs(ref_img_file = resliced_full_HO_img_file, ROI_dir = os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name))
+    
+    
+    
+    
+    #### display
     #pyplotbrain_display_ROI_coords(ROI_coords_MNI_coords_file,ROI_coords_orig_constrast_file)
     
     #pyplotbrain_display_one_ROI_coords(os.path.join(nipype_analyses_path,"ReseauALS-conj_corPos-Rec",'Coord_NetworkRec.txt'))
