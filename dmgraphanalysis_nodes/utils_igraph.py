@@ -90,8 +90,8 @@ def generate_igraph_colors(nb_colors):
     
     N = 1000
     
-    RGB_tuples = cm.get_cmap('rainbow',N)
-    #RGB_tuples = cm.get_cmap('spectral',N)
+    #RGB_tuples = cm.get_cmap('rainbow',N)
+    RGB_tuples = cm.get_cmap('spectral',N)
     
     print RGB_tuples
        
@@ -111,30 +111,60 @@ def generate_igraph_colors(nb_colors):
     
     list_val = []
     
-    #while len(igraph_colors) < nb_colors:
+    while len(igraph_colors) < nb_colors:
         
         ##print val
         ##print RGB_tuples[int(val*N)]
         
         
-        #color = frac_tohex_tuple(RGB_tuples(val))
+        color = frac_tohex_tuple(RGB_tuples(val))
         
         ##print color
         
-        #if not color in igraph_colors:
-            #igraph_colors.append(color)
+        if not color in igraph_colors:
+            igraph_colors.append(color)
             
         
-        #val = val+ 1.0/increment
+        val = val+ 1.0/increment
         
-        #if (val > 1.0):
+        if (val > 1.0):
             
-            #increment = increment +1
+            increment = increment +1
             
-            #val = 1.0/increment
+            val = 1.0/increment
             
             
         ##print len(igraph_colors)
+
+    return igraph_colors
+
+def generate_new_igraph_colors(nb_colors):
+
+    import colorsys
+    import matplotlib.cm as cm
+    
+    N = 1000
+    
+    #RGB_tuples = cm.get_cmap('rainbow',N)
+    RGB_tuples = cm.get_cmap('spectral',N)
+    
+    print RGB_tuples
+       
+    
+    #RGB_tuples = my_cmap[:N]
+    
+    #print RGB_tuples
+    
+    
+    #print RGB_tuples
+    
+    igraph_colors = []
+    
+    increment = 1
+    
+    val = 0.0
+    
+    list_val = []
     
     while len(igraph_colors) < nb_colors:
         
@@ -205,6 +235,8 @@ def generate_igraph_colors(nb_colors):
     #return igraph_colors
 
 igraph_colors = generate_igraph_colors(nb_igraph_colors)
+
+new_igraph_colors = generate_new_igraph_colors(nb_igraph_colors)
 
 RGB_colors = generate_RGB_colors(nb_igraph_colors)
 #igraph_colors = ['red','blue','green','yellow','brown','purple','orange','black']

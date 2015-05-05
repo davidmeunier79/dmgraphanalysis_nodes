@@ -380,7 +380,7 @@ def gather_degree_neg_values():
     
     print node_labels
         
-    degree_neg_filename = os.path.join(nipype_analyses_path,graph_analysis_name,'degree_neg_values_by_cond.xls')
+    degree_neg_filename = os.path.join(nipype_analyses_path,graph_analysis_name,'degree_neg_values_by_cond2.xls')
     
     degree_neg_writer = pd.ExcelWriter(degree_neg_filename)
     
@@ -424,8 +424,6 @@ def gather_degree_neg_values():
         
         print df.dtypes
         
-        print df['pHip']
-        
         df.to_excel(degree_neg_writer,cond)
         
     degree_neg_writer.save()
@@ -441,7 +439,7 @@ def gather_degree_pos_values():
     
     print node_labels
         
-    degree_pos_filename = os.path.join(nipype_analyses_path,graph_analysis_name,'degree_pos_values_by_cond.xls')
+    degree_pos_filename = os.path.join(nipype_analyses_path,graph_analysis_name,'degree_pos_values_by_cond2.xls')
     
     degree_pos_writer = pd.ExcelWriter(degree_pos_filename)
     
@@ -484,8 +482,6 @@ def gather_degree_pos_values():
         print df.columns
         
         print df.dtypes
-        
-        print df['pHip']
         
         df.to_excel(degree_pos_writer,cond)
         
@@ -631,9 +627,9 @@ if __name__ =='__main__':
     #gather_strength_pos_values()
     #gather_strength_neg_values()
     
-    #gather_degree_pos_values()
-    #gather_degree_neg_values()
+    gather_degree_pos_values()
+    gather_degree_neg_values()
     
-    compute_similarity_between_cond(simil_method = "rand")
+    #compute_similarity_between_cond(simil_method = "rand")
     
     

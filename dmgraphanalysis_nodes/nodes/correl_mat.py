@@ -214,8 +214,6 @@ class ExtractMeanTS(BaseInterface):
         
 ######################################################################################## ConcatTS ##################################################################################################################
 
-from dmgraphanalysis_nodes.utils_cor import mean_select_indexed_mask_data
-
 class ConcatTSInputSpec(BaseInterfaceInputSpec):
     
     all_ts_file = File(exists=True, desc='npy file containing all ts to be concatenated', mandatory=True)
@@ -227,7 +225,7 @@ class ConcatTSOutputSpec(TraitedSpec):
 
 class ConcatTS(BaseInterface):
     
-    """Extract time series from a labelled mask in Nifti Format where all ROIs have the same index"""
+    """Concenate time series """
 
     input_spec = ConcatTSInputSpec
     output_spec = ConcatTSOutputSpec
@@ -269,10 +267,74 @@ class ConcatTS(BaseInterface):
     
         return outputs
 
+######################################################################################## MergeTS ##################################################################################################################
+
+class MergeTSInputSpec(BaseInterfaceInputSpec):
+    
+    all_ts_files = traits.List(File(exists=True), desc='list of npy files containing all ts to be merged', mandatory=True)
+    
+class MergeTSOutputSpec(TraitedSpec):
+    
+    merged_ts_file = File(exists=True, desc="ts after merge")
+        
+
+class MergeTS(BaseInterface):
+    
+    """Merges time series from several files """
+
+    input_spec = MergeTSInputSpec
+    output_spec = MergeTSOutputSpec
+
+    def _run_interface(self, runtime):
+            
+        all_ts_files = self.inputs.all_ts_files
+        print all_ts_files
+
+	for i,all_ts_file in enumerate(all_ts_files):
+        
+        	## loading ROI coordinates
+        	all_ts = np.load(all_ts_file)
+        
+        	#print "all_ts: " 
+        	#print all_ts.shape
+        
+	        concatenated_ts = all_ts.swapaxes(1,0).reshape(all_ts.shape[1],-1)
+        
+        	print concatenated_ts.shape
+
+		if len(concatenated_ts.shape) > 1:
+
+			if i == 0:
+				merged_ts = concatenated_ts.copy()
+				print merged_ts.shape
+ 			else:
+				merged_ts = np.concatenate((merged_ts,concatenated_ts),axis = 1)
+				print merged_ts.shape
+
+        #np_merge_ts = np.array(merge_ts)
+
+	#print np_merge_ts.shape
+
+	#merged_ts = np_merge_ts.swapaxes(1,0).reshape(np_merge_ts.shape[1],-1)
+
+	#print merged_ts.shape
+
+	### saving time series
+        merged_ts_file = os.path.abspath("merged_ts.npy")
+        np.save(merged_ts_file,merged_ts)
+        
+        return runtime
+        
+    def _list_outputs(self):
+        
+        outputs = self._outputs().get()
+        
+        outputs["merged_ts_file"] = os.path.abspath("merged_ts.npy")
+    
+        return outputs
+
         
 ######################################################################################## SeparateTS ##################################################################################################################
-
-from dmgraphanalysis_nodes.utils_cor import mean_select_indexed_mask_data
 
 class SeparateTSInputSpec(BaseInterfaceInputSpec):
     

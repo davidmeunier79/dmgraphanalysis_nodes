@@ -2469,9 +2469,9 @@ def gather_coclass_excluded_results5():
     
     print subgraph_coclass_mat
     
-    subgraph_core_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'subgraph_core_coclass5.eps')
+    subgraph_core_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'subgraph_core_coclass5_from_top.eps')
     
-    plot_3D_igraph_int_mat(subgraph_core_coclass_file,subgraph_coclass_mat, labels = subgraph_labels, coords = subgraph_MNI_coords, edge_colors = ["Gray","Blue","Red","Purple","Green","Orange","Black"])
+    plot_3D_igraph_int_mat(subgraph_core_coclass_file,subgraph_coclass_mat, labels = subgraph_labels, coords = subgraph_MNI_coords, edge_colors = ["Gray","Blue","Red","Purple","Green","Orange","Black"], view_from = '_from_top')
     
     subgraph_core_coclass_topo_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'subgraph_core_coclass5_topo.eps')
     
@@ -2757,7 +2757,7 @@ if __name__ =='__main__':
     #gather_coclass_excluded_results3()
     #gather_coclass_excluded_results4()
     
-    #gather_coclass_excluded_results5()
+    gather_coclass_excluded_results5()
     
-    gather_coclass_excluded_results6()
+    #gather_coclass_excluded_results6()
     

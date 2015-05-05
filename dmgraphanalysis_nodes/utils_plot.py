@@ -166,7 +166,7 @@ def plot_hist(plot_hist_file,data,nb_bins = 100):
     #fig2.close()
     del fig2
     
-def plot_signals(plot_signals_file,signals_matrix,colors = [], ylim = []):
+def plot_signals(plot_signals_file,signals_matrix,colors = [], ylim = [], labels = []):
     
     fig2 = plt.figure()
     ax = fig2.add_subplot(1,1,1)
@@ -187,16 +187,24 @@ def plot_signals(plot_signals_file,signals_matrix,colors = [], ylim = []):
             if len(colors) == signals_matrix.shape[0]:
                 #print i,colors[i]
                 
-                ax.plot(range(signals_matrix.shape[1]),signals_matrix[i,:],colors[i]) 
-                
+		if len(labels) == 0 or len(labels) != len(colors) :
+	                ax.plot(range(signals_matrix.shape[1]),signals_matrix[i,:],colors[i]) 
+        	else:
+	                ax.plot(range(signals_matrix.shape[1]),signals_matrix[i,:],colors[i],label = labels[i])
             elif len(colors) == 1:
                 
                 ax.plot(range(signals_matrix.shape[1]),signals_matrix[i,:],colors[0])
                 
             else:
-                ax.plot(range(signals_matrix.shape[1]),signals_matrix[i,:])
+		if len(labels) == signals_matrix.shape[0]:
+			print "adding label: " +labels[i] 
+                	ax.plot(range(signals_matrix.shape[1]),signals_matrix[i,:],label = labels[i])
+                else:
+			ax.plot(range(signals_matrix.shape[1]),signals_matrix[i,:])
                 
-                
+    if signals_matrix.shape[0] == len(labels):
+	print "adding legend"
+	ax.legend()
      
     #ax.plot(,signals_matrix)
     fig2.savefig(plot_signals_file)

@@ -19,7 +19,7 @@ from dmgraphanalysis_nodes.utils_dtype_coord import where_in_coords,find_index_i
 from dmgraphanalysis_nodes.utils_igraph import add_non_null_labels,return_base_weighted_graph
 
 
-def plot_3D_igraph_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]),labels = [], edge_colors = ['Gray','Blue','Red'], node_col_labels = np.array([]),nodes_sizes = np.array([])):
+def plot_3D_igraph_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]),labels = [], edge_colors = ['Gray','Blue','Red'], node_col_labels = np.array([]),nodes_sizes = np.array([]),view_from = '_from_left'):
     
     g = return_base_weighted_graph(int_matrix)
     
@@ -78,9 +78,23 @@ def plot_3D_igraph_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]
     
     else:
     
-        layout2D = project2D_np(coords).tolist()
+        if view_from == '_from_left':
+            
+            view = [0.0,0.0]
+        elif view_from == '_from_front':
+            
+            view = [0.,90.0]
+            
+        elif view_from == '_from_top':
+            
+            view = [90.,-90]
+           
+        elif view_from == '_from_behind':
+            
+            view = [0.,-90.0]
+           
+        layout2D = project2D_np(coords,angle_alpha = view[0],angle_beta = view[1]).tolist()
         
-    
     ###print g
     #ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = vertex_degree,    edge_width = np.array(g.es['weight']), edge_curved = True)
     #ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = vertex_degree,    edge_width = 0.01, edge_curved = True)
