@@ -2,7 +2,8 @@
 
 #from dmgraphanalysis.plot_igraph import *
 
-import rpy,os
+#import rpy,os
+import os
 import nibabel as nib
 import numpy as np
 

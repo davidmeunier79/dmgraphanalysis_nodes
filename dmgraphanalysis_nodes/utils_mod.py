@@ -29,7 +29,139 @@ def get_modularity_value_from_lol_file(modularity_file):
         print "Unable to find modularity line in file, returning -1"
         
         return -1.0
+
+
+def get_values_from_global_info_file(global_info_file):
+    
+    
+    global_values = {}
+    
+    with open(global_info_file,'r') as f:
         
+        lines = f.readlines()
+        
+        for i,line in enumerate(lines):
+        
+            split_line = line.strip().split(' ')
+            
+            #print split_line
+            
+            
+            if split_line[0] == 'Total' and split_line[1] == 'degree':
+            
+                print "Found Total degree value line"
+                
+                print line.strip().split('\t')[-1]
+                
+                global_values['Total_degree'] = line.strip().split('\t')[-1]
+                
+                global_values['Total_pos_degree'] = lines[i+1].strip().split('\t')[-1]
+                
+                global_values['Total_neg_degree'] = lines[i+2].strip().split('\t')[-1]
+                
+            elif split_line[0] == 'Average' and split_line[1] == 'degree':
+            
+                print "Found Average degree value line"
+                
+                print line.strip().split('\t')[-1]
+                
+                global_values['Average_degree'] = line.strip().split('\t')[-1]
+                  
+                global_values['Average_pos_degree'] = lines[i+1].strip().split('\t')[-1]
+                
+                global_values['Average_neg_degree'] = lines[i+2].strip().split('\t')[-1]
+                
+            elif split_line[0] == 'Minimum' and split_line[1] == 'degree':
+            
+                print "Found Minimum degree value line"
+                
+                print line.strip().split('\t')[-1]
+                
+                global_values['Minimum_degree'] = line.strip().split('\t')[-1]
+                
+                global_values['Minimum_pos_degree'] = lines[i+1].strip().split('\t')[-1]
+                
+                global_values['Minimum_neg_degree'] = lines[i+2].strip().split('\t')[-1]
+                
+            elif split_line[0] == 'Maximum' and split_line[1] == 'degree':
+            
+                print "Found Maximum degree value line"
+                
+                print line.strip().split('\t')[-1]
+                
+                global_values['Maximum_degree'] = line.strip().split('\t')[-1]
+                
+                global_values['Maximum_pos_degree'] = lines[i+1].strip().split('\t')[-1]
+                
+                global_values['Maximum_neg_degree'] = lines[i+2].strip().split('\t')[-1]
+                
+            elif split_line[0] == 'Assortativity':
+            
+                print "Found Assortativity value line"
+                
+                print line.strip().split('\t')[-1]
+                
+                global_values['Assortativity'] = line.strip().split('\t')[-1]
+                
+                global_values['Assortativity_pos'] = lines[i+1].strip().split('\t')[-1]
+                
+                global_values['Assortativity_neg'] = lines[i+2].strip().split('\t')[-1]
+                
+        return global_values
+    
+    #global_values = {}
+    
+    #with open(global_info_file,'r') as f:
+        
+        #for line in f.readlines():
+        
+            #split_line = line.strip().split(' ')
+            
+            #print split_line
+            
+            
+            #if split_line[0] == 'Total' and split_line[1] == 'degree':
+            
+                #print "Found Total degree value line"
+                
+                #print line.strip().split('\t')[-1]
+                
+                #global_values['Total_degree'] = line.strip().split('\t')[-1]
+                
+            #elif split_line[0] == 'Average' and split_line[1] == 'degree':
+            
+                #print "Found Average degree value line"
+                
+                #print line.strip().split('\t')[-1]
+                
+                #global_values['Average_degree'] = line.strip().split('\t')[-1]
+                  
+            #elif split_line[0] == 'Minimum' and split_line[1] == 'degree':
+            
+                #print "Found Minimum degree value line"
+                
+                #print line.strip().split('\t')[-1]
+                
+                #global_values['Minimum_degree'] = line.strip().split('\t')[-1]
+                
+            #elif split_line[0] == 'Maximum' and split_line[1] == 'degree':
+            
+                #print "Found Maximum degree value line"
+                
+                #print line.strip().split('\t')[-1]
+                
+                #global_values['Maximum_degree'] = line.strip().split('\t')[-1]
+                
+            #elif split_line[0] == 'Assortativity':
+            
+                #print "Found Assortativity value line"
+                
+                #print line.strip().split('\t')[-1]
+                
+                #global_values['Assortativity'] = line.strip().split('\t')[-1]
+                
+        #return global_values
+    
 ################################################################# Node roles 
 
 def return_all_Z_com_degree(community_vect,dense_mat):
