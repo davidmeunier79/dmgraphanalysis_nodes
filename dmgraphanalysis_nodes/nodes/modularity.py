@@ -28,7 +28,9 @@ class ComputeNetListInputSpec(BaseInterfaceInputSpec):
     
     #coords_file = File(exists=True, desc='Corresponding coordiantes', mandatory=False)
     
-    threshold = traits.Float(usedefault = True, mandatory = False)
+    threshold = traits.Float(xor = ['density'], mandatory = False)
+    
+    density = traits.Float(xor = ['threshold'], mandatory = False)
     
 class ComputeNetListOutputSpec(TraitedSpec):
     
@@ -52,12 +54,18 @@ class ComputeNetList(BaseInterface):
         Z_cor_mat_file = self.inputs.Z_cor_mat_file
         #coords_file = self.inputs.coords_file
         threshold = self.inputs.threshold
+        density = self.inputs.density
         
         print "loading Z_cor_mat_file"
         
         Z_cor_mat = np.load(Z_cor_mat_file)
         
-        Z_cor_mat[np.abs(Z_cor_mat) < threshold] = 0.0
+        print threshold,density
+        
+        if density == '<undefined>' and threshold != '<undefined>':
+            
+            Z_cor_mat[np.abs(Z_cor_mat) < threshold] = 0.0
+        
         
         #print 'load coords'
         
@@ -69,6 +77,19 @@ class ComputeNetList(BaseInterface):
         
         Z_list = return_net_list(Z_cor_mat)
         
+        if density != '<undefined>':
+            
+            print density
+            print Z_list.shape
+            
+            N =  int(Z_list.shape[0]*density)
+            
+            sorted_indexes =  (-np.abs(Z_list[:,2])).argsort()[:N]
+            
+            Z_list = Z_list[sorted_indexes,:]
+            
+            print Z_list
+            
         ## Z correl_mat as list of edges
         
         print "saving Z_list as list of edges"
