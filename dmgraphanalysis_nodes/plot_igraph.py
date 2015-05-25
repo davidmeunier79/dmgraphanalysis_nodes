@@ -18,7 +18,99 @@ from dmgraphanalysis_nodes.utils_igraph import igraph_colors,project2D_np
 from dmgraphanalysis_nodes.utils_dtype_coord import where_in_coords,find_index_in_coords
 from dmgraphanalysis_nodes.utils_igraph import add_non_null_labels,return_base_weighted_graph
 
+from dmgraphanalysis_nodes.utils_igraph import new_igraph_colors
 
+def plot_3D_igraph_int_mat_modules(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]),labels = [], edge_colors = new_igraph_colors, node_col_labels = np.array([]),nodes_sizes = np.array([]),view_from = '_from_left'):
+    
+    g = return_base_weighted_graph(int_matrix)
+    
+    print labels
+    
+    if len(labels) == len(g.vs):
+    
+        add_non_null_labels(g,labels)
+        
+    
+    print np.unique(int_matrix)
+    
+    print int_matrix
+    
+    
+    if len(edge_colors) < len(np.unique(int_matrix)[1:]):
+        
+        print "Warning, edge_colors {} < np.unique(int_matrix)[1:] {}".format(len(edge_colors), len(np.unique(int_matrix)[1:]))
+    
+        0/0
+        
+    for i,index in enumerate(np.unique(int_matrix)[1:]):
+    
+        colored_egde_list = g.es.select(weight_eq = index)
+        
+        print len(colored_egde_list),np.sum(int_matrix == index)
+        
+        colored_egde_list["color"] = edge_colors[i]
+    
+        print i,index,len(colored_egde_list)
+        
+    print g.es['color']
+    
+    if node_col_labels.size == len(g.vs) and nodes_sizes.size == len(g.vs):
+        
+        for i,v in enumerate(g.vs):
+            
+            if node_col_labels[i] != 0:
+                
+                print node_col_labels[i]
+                
+                v["color"] = edge_colors[node_col_labels[i]-1]
+                
+                v["size"] = nodes_sizes[i]
+                
+            else:
+            
+                
+                v["color"] = "Black"
+                
+                v["size"] = 0.1
+            
+                
+        print g.vs["size"]
+        
+        print g.vs["color"]
+        
+    else:
+        
+        vertex_degree = np.array(g.degree())*0.2
+    
+    if coords.shape[0] != len(g.vs):
+    
+        layout2D = g.layout_fruchterman_reingold()
+    
+    else:
+    
+        if view_from == '_from_left':
+            
+            view = [0.0,0.0]
+        elif view_from == '_from_front':
+            
+            view = [0.,90.0]
+            
+        elif view_from == '_from_top':
+            
+            view = [90.,-90]
+           
+        elif view_from == '_from_behind':
+            
+            view = [0.,-90.0]
+           
+        layout2D = project2D_np(coords,angle_alpha = view[0],angle_beta = view[1]).tolist()
+        
+    ###print g
+    #ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = vertex_degree,    edge_width = np.array(g.es['weight']), edge_curved = True)
+    #ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = vertex_degree,    edge_width = 0.01, edge_curved = True)
+    ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D , edge_curved = False)
+    
+    
 def plot_3D_igraph_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]),labels = [], edge_colors = ['Gray','Blue','Red'], node_col_labels = np.array([]),nodes_sizes = np.array([]),view_from = '_from_left'):
     
     g = return_base_weighted_graph(int_matrix)
