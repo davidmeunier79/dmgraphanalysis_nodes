@@ -2,7 +2,7 @@
 """
 Support function for net handling
 """
-
+import sys
 import time
 
 import numpy as np
@@ -47,53 +47,147 @@ def get_values_from_global_info_file(global_info_file):
             #print split_line
             
             
-            if split_line[0] == 'Total' and split_line[1] == 'degree':
+            if split_line[0] == 'Vertices':
             
-                print "Found Total degree value line"
-                
+                print "Found Vertices value line"
+                    
                 print line.strip().split('\t')[-1]
+                    
+                global_values['Vertices'] = line.strip().split('\t')[-1]
                 
-                global_values['Total_degree'] = line.strip().split('\t')[-1]
-                
-                global_values['Total_pos_degree'] = lines[i+1].strip().split('\t')[-1]
-                
-                global_values['Total_neg_degree'] = lines[i+2].strip().split('\t')[-1]
-                
-            elif split_line[0] == 'Average' and split_line[1] == 'degree':
+            elif split_line[0] == 'Edges':
             
-                print "Found Average degree value line"
-                
+                print "Found Edges value line"
+                    
                 print line.strip().split('\t')[-1]
+                    
+                global_values['Edges'] = line.strip().split('\t')[-1]
                 
-                global_values['Average_degree'] = line.strip().split('\t')[-1]
-                  
-                global_values['Average_pos_degree'] = lines[i+1].strip().split('\t')[-1]
-                
-                global_values['Average_neg_degree'] = lines[i+2].strip().split('\t')[-1]
-                
-            elif split_line[0] == 'Minimum' and split_line[1] == 'degree':
             
-                print "Found Minimum degree value line"
-                
-                print line.strip().split('\t')[-1]
-                
-                global_values['Minimum_degree'] = line.strip().split('\t')[-1]
-                
-                global_values['Minimum_pos_degree'] = lines[i+1].strip().split('\t')[-1]
-                
-                global_values['Minimum_neg_degree'] = lines[i+2].strip().split('\t')[-1]
-                
-            elif split_line[0] == 'Maximum' and split_line[1] == 'degree':
+            elif split_line[0] == 'Total' :
             
-                print "Found Maximum degree value line"
+                if split_line[1] == 'degree':
                 
-                print line.strip().split('\t')[-1]
+                    print "Found Total degree value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Total_degree'] = line.strip().split('\t')[-1]
+                    
+                    global_values['Total_pos_degree'] = lines[i+1].strip().split('\t')[-1]
+                    
+                    global_values['Total_neg_degree'] = lines[i+2].strip().split('\t')[-1]
+                    
+                elif split_line[1] == 'strength':
+                    
+                    print "Found Total strength value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Total_strength'] = line.strip().split('\t')[-1]
+                    
+                    global_values['Total_pos_strength'] = lines[i+1].strip().split('\t')[-1]
+                    
+                    global_values['Total_neg_strength'] = lines[i+2].strip().split('\t')[-1]
+                    
+            elif split_line[0] == 'Average':
+            
+                if split_line[1] == 'degree':
+                    
+                    print "Found Average degree value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Average_degree'] = line.strip().split('\t')[-1]
+                    
+                    global_values['Average_pos_degree'] = lines[i+1].strip().split('\t')[-1]
+                    
+                    global_values['Average_neg_degree'] = lines[i+2].strip().split('\t')[-1]
+                    
                 
-                global_values['Maximum_degree'] = line.strip().split('\t')[-1]
+                elif split_line[1] == 'strength':
+                    
+                    print "Found Average strength value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Average_strength'] = line.strip().split('\t')[-1]
+                    
+                    global_values['Average_pos_strength'] = lines[i+1].strip().split('\t')[-1]
+                    
+                    global_values['Average_neg_strength'] = lines[i+2].strip().split('\t')[-1]
+                        
+                        
+                elif split_line[1] == 'clustering' and split_line[2] == 'coefficient' :
                 
-                global_values['Maximum_pos_degree'] = lines[i+1].strip().split('\t')[-1]
+                    print "Found Clustering_coeff value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Clustering_coeff'] = line.strip().split('\t')[-1]
+                    
+                    global_values['Clustering_coeff_pos'] = lines[i+1].strip().split('\t')[-1]
+                    
+                    global_values['Clustering_coeff_neg'] = lines[i+2].strip().split('\t')[-1]
+                    
+                    global_values['Clustering_coeff_weighted'] = line[i+3].strip().split('\t')[-1]
+                    
+                    global_values['Clustering_coeff_weighted_pos'] = lines[i+4].strip().split('\t')[-1]
+                    
+                    global_values['Clustering_coeff_weighted_neg'] = lines[i+5].strip().split('\t')[-1]
                 
-                global_values['Maximum_neg_degree'] = lines[i+2].strip().split('\t')[-1]
+                
+            elif split_line[0] == 'Minimum' :
+            
+                if split_line[1] == 'degree':
+                
+                    print "Found Minimum degree value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Minimum_degree'] = line.strip().split('\t')[-1]
+                    
+                    global_values['Minimum_pos_degree'] = lines[i+1].strip().split('\t')[-1]
+                    
+                    global_values['Minimum_neg_degree'] = lines[i+2].strip().split('\t')[-1]
+                    
+                elif split_line[1] == 'strength':
+                
+                    print "Found Minimum strength value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Minimum_strength'] = line.strip().split('\t')[-1]
+                    
+                    global_values['Minimum_pos_strength'] = lines[i+1].strip().split('\t')[-1]
+                    
+                    global_values['Minimum_neg_strength'] = lines[i+2].strip().split('\t')[-1]
+                    
+            elif split_line[0] == 'Maximum' :
+            
+                if split_line[1] == 'degree':
+                
+                    print "Found Maximum degree value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Maximum_degree'] = line.strip().split('\t')[-1]
+                    
+                    global_values['Maximum_pos_degree'] = lines[i+1].strip().split('\t')[-1]
+                    
+                    global_values['Maximum_neg_degree'] = lines[i+2].strip().split('\t')[-1]
+                    
+                elif split_line[1] == 'strength':
+                
+                    print "Found Maximum strength value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Maximum_strength'] = line.strip().split('\t')[-1]
+                    
+                    global_values['Maximum_pos_strength'] = lines[i+1].strip().split('\t')[-1]
+                    
+                    global_values['Maximum_neg_strength'] = lines[i+2].strip().split('\t')[-1]
                 
             elif split_line[0] == 'Assortativity':
             
@@ -107,8 +201,35 @@ def get_values_from_global_info_file(global_info_file):
                 
                 global_values['Assortativity_neg'] = lines[i+2].strip().split('\t')[-1]
                 
+                print lines[i+3].strip().split('\t')
+                
+                global_values['Assortativity_weighted'] = lines[i+3].strip().split('\t')[-1]
+                
+                global_values['Assortativity_weighted_pos'] = lines[i+4].strip().split('\t')[-1]
+                
+                global_values['Assortativity_weighted_neg'] = lines[i+5].strip().split('\t')[-1]
+                
         return global_values
     
+def get_path_length_from_info_dists_file(info_dists_file):
+    
+    dist_mat = np.loadtxt(info_dists_file)
+    
+    print dist_mat.shape
+    
+    if len(dist_mat.shape) != 2:
+        print "warning, only works with 2d arrays (matrices), now array has {} dimensions".format(len(dist_mat.shape))
+        sys.exit()
+    
+    if dist_mat.shape[0] != dist_mat.shape[1]:
+        print "warning, only works with squred matricesm now array  dimensions {} != {}".format(dist_mat.shape[0],dist_mat.shape[1])
+        sys.exit()
+        
+    triu_dist_mat = dist_mat[np.triu_indices(dist_mat.shape[0],k = 1)]
+    #np.triu(dist_mat,k = 1)
+    
+    return np.mean(triu_dist_mat),np.max(triu_dist_mat)
+       
     #global_values = {}
     
     #with open(global_info_file,'r') as f:
