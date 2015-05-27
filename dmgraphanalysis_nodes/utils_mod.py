@@ -33,6 +33,136 @@ def get_modularity_value_from_lol_file(modularity_file):
 
 def get_values_from_global_info_file(global_info_file):
     
+    global_values = {}
+    
+    with open(global_info_file,'r') as f:
+        
+        lines = f.readlines()
+        
+        for i,line in enumerate(lines):
+        
+            split_line = line.strip().split(' ')
+            
+            #print split_line
+            
+            
+            if split_line[0] == 'Vertices':
+            
+                print "Found Vertices value line"
+                    
+                print line.strip().split('\t')[-1]
+                    
+                global_values['Vertices'] = line.strip().split('\t')[-1]
+                
+            elif split_line[0] == 'Edges':
+            
+                print "Found Edges value line"
+                    
+                print line.strip().split('\t')[-1]
+                    
+                global_values['Edges'] = line.strip().split('\t')[-1]
+                
+            
+            elif split_line[0] == 'Total' :
+            
+                if split_line[1] == 'degree':
+                
+                    print "Found Total degree value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Total_degree'] = line.strip().split('\t')[-1]
+                    
+                elif split_line[1] == 'strength':
+                    
+                    print "Found Total strength value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Total_strength'] = line.strip().split('\t')[-1]
+                    
+            elif split_line[0] == 'Average':
+            
+                if split_line[1] == 'degree':
+                    
+                    print "Found Average degree value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Average_degree'] = line.strip().split('\t')[-1]
+                    
+                
+                elif split_line[1] == 'strength':
+                    
+                    print "Found Average strength value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Average_strength'] = line.strip().split('\t')[-1]
+                    
+                        
+                elif split_line[1] == 'clustering' and split_line[2] == 'coefficient' :
+                
+                    print "Found Clustering_coeff value line"
+                    
+                    global_values['Clustering_coeff'] = line.strip().split('\t')[-1]
+                    
+                    global_values['Clustering_coeff_weighted'] = lines[i+1].strip().split('\t')[-1]
+                    
+                    print line.strip().split('\t')[-1]
+                    print lines[i+1].strip().split('\t')[-1]
+                                    
+            elif split_line[0] == 'Minimum' :
+            
+                if split_line[1] == 'degree':
+                
+                    print "Found Minimum degree value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Minimum_degree'] = line.strip().split('\t')[-1]
+                    
+                elif split_line[1] == 'strength':
+                
+                    print "Found Minimum strength value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Minimum_strength'] = line.strip().split('\t')[-1]
+                    
+            elif split_line[0] == 'Maximum' :
+            
+                if split_line[1] == 'degree':
+                
+                    print "Found Maximum degree value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Maximum_degree'] = line.strip().split('\t')[-1]
+                    
+                elif split_line[1] == 'strength':
+                
+                    print "Found Maximum strength value line"
+                    
+                    print line.strip().split('\t')[-1]
+                    
+                    global_values['Maximum_strength'] = line.strip().split('\t')[-1]
+                    
+            elif split_line[0] == 'Assortativity':
+            
+                print "Found Assortativity value line"
+                
+                print line.strip().split('\t')[-1]
+                
+                global_values['Assortativity'] = line.strip().split('\t')[-1]
+                
+                print lines[i+1].strip().split('\t')[-1]
+                
+                global_values['Assortativity_weighted'] = lines[i+1].strip().split('\t')[-1]
+                
+        return global_values
+    
+def get_values_from_signed_global_info_file(global_info_file):
     
     global_values = {}
     
@@ -122,8 +252,6 @@ def get_values_from_global_info_file(global_info_file):
                 
                     print "Found Clustering_coeff value line"
                     
-                    print line.strip().split('\t')[-1]
-                    
                     global_values['Clustering_coeff'] = line.strip().split('\t')[-1]
                     
                     global_values['Clustering_coeff_pos'] = lines[i+1].strip().split('\t')[-1]
@@ -136,6 +264,10 @@ def get_values_from_global_info_file(global_info_file):
                     
                     global_values['Clustering_coeff_weighted_neg'] = lines[i+5].strip().split('\t')[-1]
                 
+                    print line.strip().split('\t')[-1],lines[i+1].strip().split('\t')[-1],lines[i+2].strip().split('\t')[-1],line[i+3].strip().split('\t')[-1],lines[i+4].strip().split('\t')[-1],lines[i+5].strip().split('\t')[-1]
+                    
+                    0/0
+                    
                 
             elif split_line[0] == 'Minimum' :
             
@@ -228,7 +360,9 @@ def get_path_length_from_info_dists_file(info_dists_file):
     triu_dist_mat = dist_mat[np.triu_indices(dist_mat.shape[0],k = 1)]
     #np.triu(dist_mat,k = 1)
     
-    return np.mean(triu_dist_mat),np.max(triu_dist_mat)
+    inv_triu_dist_map = 1.0/triu_dist_mat
+    
+    return np.mean(triu_dist_mat),np.max(triu_dist_mat), np.mean(inv_triu_dist_map)
        
     #global_values = {}
     
