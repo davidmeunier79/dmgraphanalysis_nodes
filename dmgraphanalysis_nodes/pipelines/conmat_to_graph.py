@@ -15,7 +15,7 @@ from dmgraphanalysis_nodes.nodes.modularity import CommRada,PlotIGraphModules
 from dmgraphanalysis_nodes.nodes.modularity import NetPropRada
  
  
-def create_pipeline_conmat_to_graph_density(correl_analysis_name,main_path,radatools_path,con_den = 1.0,multi = False):
+def create_pipeline_conmat_to_graph_density(correl_analysis_name,main_path,radatools_path,con_den = 1.0,multi = False,mod = True):
 
     pipeline = pe.Workflow(name=correl_analysis_name)
     pipeline.base_dir = main_path
@@ -39,7 +39,7 @@ def create_pipeline_conmat_to_graph_density(correl_analysis_name,main_path,radat
         pipeline.connect(compute_net_List_den, 'net_List_file', prep_rada_den, 'net_List_file')
         
         
-        if 'mod' in correl_analysis_name.split('_'):
+        if 'mod'==True:
                 
             ### compute community with radatools
             community_rada_den = pe.Node(interface = CommRada(), name='community_rada_den',iterfield = ["Pajek_net_file"])
