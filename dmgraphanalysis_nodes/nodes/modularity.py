@@ -62,24 +62,18 @@ class ComputeNetList(BaseInterface):
         
         print threshold,density
         
-        if density == '<undefined>' and threshold != '<undefined>':
+        if threshold != '<undefined>':
             
             Z_cor_mat[np.abs(Z_cor_mat) < threshold] = 0.0
         
+            Z_list = return_net_list(Z_cor_mat)
         
-        #print 'load coords'
+        else :
         
-        #coords = np.array(np.loadtxt(coords_file),dtype = int)
         
-        ## compute Z_list 
-        
-        print "computing Z_list by thresholding Z_cor_mat"
-        
-        Z_list = return_net_list(Z_cor_mat)
-        
-        if density != '<undefined>':
-            
             print density
+            
+            Z_list = return_net_list(Z_cor_mat)
             print Z_list.shape
             
             N =  int(Z_list.shape[0]*density)
