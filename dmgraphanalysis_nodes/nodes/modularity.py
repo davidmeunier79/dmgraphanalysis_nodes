@@ -16,6 +16,8 @@ from nipype.interfaces.base import traits, File, TraitedSpec, isdefined
     
 from nipype.utils.filemanip import split_filename as split_f
     
+    
+#from enthought.traits.trait_base import Undefined
 ######################################################################################## ComputeNetList ##################################################################################################################
 
 from dmgraphanalysis_nodes.utils_net import return_net_list
@@ -61,16 +63,17 @@ class ComputeNetList(BaseInterface):
         Z_cor_mat = np.load(Z_cor_mat_file)
         
         print threshold,density
-        
-        if threshold != '<undefined>':
+                
+        if threshold != traits.Undefined and density == traits.Undefined:
             
             Z_cor_mat[np.abs(Z_cor_mat) < threshold] = 0.0
         
             Z_list = return_net_list(Z_cor_mat)
         
-        else :
-        
-        
+            print Z_list
+            
+        elif threshold == traits.Undefined and density != traits.Undefined:
+            
             print density
             
             Z_list = return_net_list(Z_cor_mat)
