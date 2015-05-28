@@ -362,6 +362,16 @@ def get_path_length_from_info_dists_file(info_dists_file):
     
     inv_triu_dist_map = 1.0/triu_dist_mat
     
+    print np.mean(inv_triu_dist_map)
+    
+    
+    #if np.isinf(np.mean(triu_dist_mat)):
+        
+        #print np.mean(triu_dist_mat)
+        
+        #print np.mean(inv_triu_dist_map)
+    
+    
     return np.mean(triu_dist_mat),np.max(triu_dist_mat), np.mean(inv_triu_dist_map)
        
     #global_values = {}

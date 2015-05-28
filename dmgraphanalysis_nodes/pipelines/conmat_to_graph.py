@@ -37,19 +37,18 @@ def create_pipeline_conmat_to_graph_density(correl_analysis_name,main_path,radat
         prep_rada.inputs.radatools_path = radatools_path
         
         pipeline.connect(compute_net_List, 'net_List_file', prep_rada, 'net_List_file')
-        
-        
-        if 'mod'==True:
+    
+        if mod == True:
                 
             ### compute community with radatools
-            community_rada = pe.Node(interface = CommRada(), name='community_rada',iterfield = ["Pajek_net_file"])
+            community_rada = pe.Node(interface = CommRada(), name='community_rada')
             #community_rada.inputs.optim_seq = radatools_optim
             community_rada.inputs.radatools_path = radatools_path
             
             pipeline.connect( prep_rada, 'Pajek_net_file',community_rada,'Pajek_net_file')
             
             #### plot_igraph_modules_rada
-            plot_igraph_modules_rada = pe.Node(interface = PlotIGraphModules(),name='plot_igraph_modules_rada',iterfield = ['Pajek_net_file','rada_lol_file'])
+            plot_igraph_modules_rada = pe.Node(interface = PlotIGraphModules(),name='plot_igraph_modules_rada')
             
             pipeline.connect(prep_rada, 'Pajek_net_file',plot_igraph_modules_rada,'Pajek_net_file')
             pipeline.connect(community_rada, 'rada_lol_file',plot_igraph_modules_rada,'rada_lol_file')
@@ -65,8 +64,7 @@ def create_pipeline_conmat_to_graph_density(correl_analysis_name,main_path,radat
         
     else:
         
-                
-        ################################################ density-based graphs
+        ################################################ density-based graphs #################################################
         
         #### net_list
         compute_net_List = pe.MapNode(interface = ComputeNetList(),name='compute_net_List',iterfield = ["Z_cor_mat_file"])
@@ -83,7 +81,7 @@ def create_pipeline_conmat_to_graph_density(correl_analysis_name,main_path,radat
         pipeline.connect(compute_net_List, 'net_List_file', prep_rada, 'net_List_file')
         
         
-        if 'mod' in correl_analysis_name.split('_'):
+        if mod == True:
                 
             ### compute community with radatools
             community_rada = pe.MapNode(interface = CommRada(), name='community_rada',iterfield = ["Pajek_net_file"])
@@ -135,7 +133,7 @@ def create_pipeline_conmat_to_graph_threshold(correl_analysis_name,main_path,rad
         pipeline.connect(compute_net_List, 'net_List_file', prep_rada, 'net_List_file')
         
         
-        if 'mod'==True:
+        if mod == True:
                 
             ### compute community with radatools
             community_rada = pe.Node(interface = CommRada(), name='community_rada',iterfield = ["Pajek_net_file"])
@@ -179,7 +177,7 @@ def create_pipeline_conmat_to_graph_threshold(correl_analysis_name,main_path,rad
         pipeline.connect(compute_net_List, 'net_List_file', prep_rada, 'net_List_file')
         
         
-        if 'mod' in correl_analysis_name.split('_'):
+        if mod == True:
                 
             ### compute community with radatools
             community_rada = pe.MapNode(interface = CommRada(), name='community_rada',iterfield = ["Pajek_net_file"])
