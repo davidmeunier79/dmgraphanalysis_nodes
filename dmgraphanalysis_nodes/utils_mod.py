@@ -266,8 +266,6 @@ def get_values_from_signed_global_info_file(global_info_file):
                 
                     print line.strip().split('\t')[-1],lines[i+1].strip().split('\t')[-1],lines[i+2].strip().split('\t')[-1],line[i+3].strip().split('\t')[-1],lines[i+4].strip().split('\t')[-1],lines[i+5].strip().split('\t')[-1]
                     
-                    0/0
-                    
                 
             elif split_line[0] == 'Minimum' :
             

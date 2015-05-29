@@ -187,7 +187,7 @@ def create_pipeline_conmat_to_graph_threshold(correl_analysis_name,main_path,rad
             pipeline.connect( prep_rada, 'Pajek_net_file',community_rada,'Pajek_net_file')
             
             #### plot_igraph_modules_rada
-            plot_igraph_modules_rada = pe.Node(interface = PlotIGraphModules(),name='plot_igraph_modules_rada',iterfield = ['Pajek_net_file','rada_lol_file'])
+            plot_igraph_modules_rada = pe.MapNode(interface = PlotIGraphModules(),name='plot_igraph_modules_rada',iterfield = ['Pajek_net_file','rada_lol_file'])
             
             pipeline.connect(prep_rada, 'Pajek_net_file',plot_igraph_modules_rada,'Pajek_net_file')
             pipeline.connect(community_rada, 'rada_lol_file',plot_igraph_modules_rada,'rada_lol_file')
