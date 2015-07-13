@@ -110,6 +110,54 @@ def plot_3D_igraph_int_mat_modules(plot_nbs_adj_mat_file,int_matrix,coords = np.
     #ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D.tolist() , vertex_size = vertex_degree,    edge_width = 0.01, edge_curved = True)
     ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D , edge_curved = False)
     
+
+def plot_3D_igraph_bin_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]),labels = []):
+    
+    g = return_base_weighted_graph(int_matrix)
+    
+    print labels
+    
+    if len(labels) == len(g.vs):
+    
+        add_non_null_labels(g,labels)
+        
+    
+    vertex_degree = np.array(g.degree())*0.2
+    
+    
+    
+    if coords.shape[0] != len(g.vs):
+    
+        layout2D = g.layout_fruchterman_reingold()
+    
+    else:
+    
+        layout2D = project2D_np(coords).tolist()
+        
+        
+        
+        
+    print len(g.es)
+    
+    if len(g.es) > 0 :
+        
+        #print g.es['weight']
+        
+        edge_col = []
+        
+        for w in g.es['weight']:
+            
+            edge_col.append('blue')
+           
+        g.es['color'] = edge_col
+        
+        ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D , vertex_size = 0.2,    edge_width =  1)
+        
+    else:
+        ig.plot(g, plot_nbs_adj_mat_file, layout = layout2D , vertex_size = 0.2,    edge_width =  0.01)
+
+
+
     
 def plot_3D_igraph_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]),labels = [], edge_colors = ['Gray','Blue','Red'], node_col_labels = np.array([]),nodes_sizes = np.array([]),view_from = '_from_left'):
     
@@ -134,7 +182,7 @@ def plot_3D_igraph_int_mat(plot_nbs_adj_mat_file,int_matrix,coords = np.array([]
     
         print i,index,len(colored_egde_list)
         
-    print g.es['color']
+        print g.es['color']
     
     if node_col_labels.size == len(g.vs) and nodes_sizes.size == len(g.vs):
         
