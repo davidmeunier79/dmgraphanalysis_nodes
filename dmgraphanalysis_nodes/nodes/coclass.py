@@ -313,7 +313,7 @@ class PlotCoclass(BaseInterface):
 
 from nipype.utils.filemanip import split_filename as split_f
 
-from dmgraphanalysis_nodes.plot_igraph import plot_3D_igraph_int_mat_modules
+from dmgraphanalysis_nodes.plot_igraph import plot_3D_igraph_bin_mat
     
 class PlotIGraphCoclassInputSpec(BaseInterfaceInputSpec):
     
@@ -386,7 +386,7 @@ class PlotIGraphCoclass(BaseInterface):
         
         plot_igraph_3D_coclass_matrix_file = os.path.abspath("plot_3D_signif_coclass_mat.eps")
         
-        plot_3D_igraph_int_mat_modules(plot_igraph_3D_coclass_matrix_file,coclass_matrix,coords = gm_mask_coords,labels = labels)
+        plot_3D_igraph_bin_mat(plot_igraph_3D_coclass_matrix_file,coclass_matrix,coords = gm_mask_coords,labels = labels)
         
         return runtime
         
