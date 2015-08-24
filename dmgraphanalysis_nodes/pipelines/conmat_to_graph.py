@@ -11,7 +11,7 @@ import scipy.sparse as sp
 import nipype.pipeline.engine as pe
     
 from dmgraphanalysis_nodes.nodes.modularity import ComputeNetList,PrepRada
-from dmgraphanalysis_nodes.nodes.modularity import CommRada,PlotIGraphModules
+from dmgraphanalysis_nodes.nodes.modularity import CommRada,PlotIGraphModules,ComputeNodeRoles
 from dmgraphanalysis_nodes.nodes.modularity import NetPropRada
  
  
@@ -47,20 +47,28 @@ def create_pipeline_conmat_to_graph_density(correl_analysis_name,main_path,radat
             
             pipeline.connect( prep_rada, 'Pajek_net_file',community_rada,'Pajek_net_file')
             
+            
+            
+            ### node roles
+            node_roles = pe.Node(interface = ComputeNodeRoles(role_type = "4roles"), name='node_roles')
+            
+            pipeline.connect( prep_rada, 'Pajek_net_file',node_roles,'Pajek_net_file')
+            pipeline.connect( community_rada, 'rada_lol_file',node_roles,'rada_lol_file')
+            
             #### plot_igraph_modules_rada
             plot_igraph_modules_rada = pe.Node(interface = PlotIGraphModules(),name='plot_igraph_modules_rada')
             
             pipeline.connect(prep_rada, 'Pajek_net_file',plot_igraph_modules_rada,'Pajek_net_file')
             pipeline.connect(community_rada, 'rada_lol_file',plot_igraph_modules_rada,'rada_lol_file')
             
-            #pipeline.connect(preproc, 'channel_coords_file',plot_igraph_modules_rada,'coords_file')
-            #pipeline.connect(preproc, 'channel_names_file',plot_igraph_modules_rada,'labels_file')
-            
+            pipeline.connect(node_roles, 'node_roles_file',plot_igraph_modules_rada,'node_roles_file')
+    
         ############ compute network properties with rada
         net_prop = pe.Node(interface = NetPropRada(optim_seq = "A"), name = 'net_prop')
         net_prop.inputs.radatools_path = radatools_path
         
         pipeline.connect(prep_rada, 'Pajek_net_file',net_prop,'Pajek_net_file')
+        
         
     else:
         
@@ -90,15 +98,21 @@ def create_pipeline_conmat_to_graph_density(correl_analysis_name,main_path,radat
             
             pipeline.connect( prep_rada, 'Pajek_net_file',community_rada,'Pajek_net_file')
             
+            ### node roles
+            node_roles = pe.Node(interface = ComputeNodeRoles(role_type = "4roles"), name='node_roles')
+            
+            pipeline.connect( prep_rada, 'Pajek_net_file',node_roles,'Pajek_net_file')
+            pipeline.connect( community_rada, 'rada_lol_file',node_roles,'rada_lol_file')
+            
             #### plot_igraph_modules_rada
-            plot_igraph_modules_rada = pe.Node(interface = PlotIGraphModules(),name='plot_igraph_modules_rada',iterfield = ['Pajek_net_file','rada_lol_file'])
+            plot_igraph_modules_rada = pe.MapNode(interface = PlotIGraphModules(),name='plot_igraph_modules_rada',iterfield = ['Pajek_net_file','rada_lol_file','node_roles_file'])
             
             pipeline.connect(prep_rada, 'Pajek_net_file',plot_igraph_modules_rada,'Pajek_net_file')
             pipeline.connect(community_rada, 'rada_lol_file',plot_igraph_modules_rada,'rada_lol_file')
             
-            #pipeline.connect(preproc, 'channel_coords_file',plot_igraph_modules_rada,'coords_file')
-            #pipeline.connect(preproc, 'channel_names_file',plot_igraph_modules_rada,'labels_file')
+            pipeline.connect(node_roles, 'node_roles_file',plot_igraph_modules_rada,'node_roles_file')
             
+    
         ############ compute network properties with rada
         net_prop = pe.MapNode(interface = NetPropRada(optim_seq = "A"), name = 'net_prop',iterfield = ["Pajek_net_file"])
         net_prop.inputs.radatools_path = radatools_path
