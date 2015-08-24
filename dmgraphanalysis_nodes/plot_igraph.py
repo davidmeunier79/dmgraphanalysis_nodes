@@ -396,7 +396,6 @@ def plot_3D_igraph_all_modules(community_vect,Z_list,node_coords = np.array([]),
 
 def plot_3D_igraph_single_modules(community_vect,coomatrix,node_coords = np.array([]),node_labels = [],nb_min_nodes_by_module = 100):
     
-    
     import collections
     
     dist_com = collections.Counter(community_vect)

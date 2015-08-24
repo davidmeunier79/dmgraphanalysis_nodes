@@ -420,37 +420,49 @@ def add_non_null_labels(g, labels = []):
 def add_node_shapes(g_all,node_roles):
 
     vertex_shape = []
-    
     vertex_size = []
     
-            
     for i,v in enumerate(g_all.vs):
-    
+
         ### node size
         if node_roles[i,0] == 1:
             #vertex_size.append(5.0)
-            v["size"] = 5.0
+            v["size"] = 8.0
+            #v["size"] = 5.0
         elif node_roles[i,0] == 2:
             #vertex_size.append(10.0)
-            v["size"] = 10.0
-            
+            v["size"] = 15.0
+            #v["size"] = 10.0
+
+        
+        ############
+        elif node_roles[i,0] == 0:
+            vertex_size.append(10.0)
+            v["size"] = 1
+            v["shape"] = "cross"
+
+
         ### shape
         if node_roles[i,1] == 1:
             v["shape"] = "circle"
             #vertex_shape.append("circle")
+
             
         elif node_roles[i,1] == 2 or node_roles[i,1] == 5:
             v["shape"] = "rectangle"
             #vertex_shape.append("rectangle")
+
     
         elif node_roles[i,1] ==  3 or node_roles[i,1] == 6:
             v["shape"] = "triangle-up"
             #vertex_shape.append("triangle-up")
+
             
         elif node_roles[i,1] == 4 or node_roles[i,1] == 7:
             v["shape"] = "triangle-down"
             #vertex_shape.append("triangle-down")
+
             
     #g_all.vs["size"] = np.array(vertex_size),   
     #g_all.vs["shape"] = vertex_shape
-    
+
