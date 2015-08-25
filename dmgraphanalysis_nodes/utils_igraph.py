@@ -14,260 +14,48 @@ import cairo as ca
 from utils_dtype_coord import where_in_coords,find_index_in_coords
 import math
 
-nb_igraph_colors = 100
+from dmgraphanalysis_nodes.utils_color import igraph_colors,new_igraph_colors,static_igraph_colors
 
-######################################## generate colors #################################
-
-import matplotlib.cm as cm
-
-def frac_tohex_tuple(val_rgb):
+def add_vertex_colors(g_all,community_vect,list_colors = static_igraph_colors):
     
-    return frac_tohex(val_rgb[0],val_rgb[1],val_rgb[2])
+    ########### threshoding the number of dictictly displayed modules with the number of igraph colors
     
-def frac_tohex(r,g,b):
+    community_vect[community_vect > len(list_colors)-1] = len(list_colors)-1
     
-    return int_tohex(r*255,g*255,b*255)
+    ########### extract edge list (with coords belonging to )
     
-    
-def int_tohex(r,g,b):
-    
-    hexchars = "0123456789ABCDEF"
-    return "#" + hexchars[int(r / 16)] + hexchars[int(r % 16)] + hexchars[int(g / 16)] + hexchars[int(g % 16)] + hexchars[int(b / 16)] + hexchars[int(b % 16)]
-     
-     
-def hex_to_rgb(value):
-    value = value.lstrip('#')
-    lv = len(value)
-    return tuple(int(value[i:i+lv/3], 16) for i in range(0, lv, lv/3))
-
-def hex_to_fracrgb(value):
-    value = value.lstrip('#')
-    lv = len(value)
-    return tuple(float(int(value[i:i+lv/3], 16))/255.0 for i in range(0, lv, lv/3))
-
-def hex_to_fracrgba(value,alpha = 1.0):
-    value = value.lstrip('#')
-    lv = len(value)
-    return tuple([float(int(value[i:i+lv/3], 16))/255.0 for i in range(0, lv, lv/3)] + [alpha])
-
-def generate_RGB_colors(nb_colors):
-
-    import colorsys
-    import matplotlib.cm as cm
-    
-    N = 1000
-    
-    RGB_tuples = cm.get_cmap('rainbow',nb_colors)
-    
-    RGB_colors = []
-    
-    increment = 1
-    val = 0
-    
-    
-    while len(RGB_colors) < nb_colors:
-        
-        color = RGB_tuples(val)
-        
-        if not color in RGB_colors:
-            RGB_colors.append(color)
-            
-        val = val+ 1.0/(float(increment))
-        
-        if (val > 1.0):
-            
-            increment = increment +1
-            
-            val = 1.0/(float(increment))
-            
-    return RGB_colors
-
-    ### ok RGB (couleur pas assez differentes)
-def generate_igraph_colors(nb_colors):
-
-    import colorsys
-    import matplotlib.cm as cm
-    
-    N = 1000
-    
-    #RGB_tuples = cm.get_cmap('rainbow',N)
-    RGB_tuples = cm.get_cmap('spectral',N)
-    
-    print RGB_tuples
-       
-    
-    #RGB_tuples = my_cmap[:N]
-    
-    #print RGB_tuples
-    
-    
-    #print RGB_tuples
-    
-    igraph_colors = []
-    
-    increment = 1
-    
-    val = 0.0
-    
-    list_val = []
-    
-    while len(igraph_colors) < nb_colors:
-        
-        ##print val
-        ##print RGB_tuples[int(val*N)]
-        
-        
-        color = frac_tohex_tuple(RGB_tuples(val))
-        
-        ##print color
-        
-        if not color in igraph_colors:
-            igraph_colors.append(color)
-            
-        
-        val = val+ 1.0/increment
-        
-        if (val > 1.0):
-            
-            increment = increment +1
-            
-            val = 1.0/increment
-            
-            
-        ##print len(igraph_colors)
-
-    return igraph_colors
-
-def generate_new_igraph_colors(nb_colors):
-
-    import colorsys
-    import matplotlib.cm as cm
-    
-    N = 1000
-    
-    #RGB_tuples = cm.get_cmap('rainbow',N)
-    RGB_tuples = cm.get_cmap('spectral',N)
-    
-    print RGB_tuples
-       
-    
-    #RGB_tuples = my_cmap[:N]
-    
-    #print RGB_tuples
-    
-    
-    #print RGB_tuples
-    
-    igraph_colors = []
-    
-    increment = 1
-    
-    val = 0.0
-    
-    list_val = []
-    
-    while len(igraph_colors) < nb_colors:
-        
-        #print val, val*N
-        #print RGB_tuples[int(val*N)]
-        
-        color = frac_tohex_tuple(RGB_tuples(val))
-        
-        #print color
-        
-        if not color in igraph_colors:
-            igraph_colors.append(color)
-            
-        val = val+ 1.0/(3.0*float(increment))
-        
-        if (val > 1.0):
-            
-            increment = increment +1
-            
-            val = 1.0/(3.0*float(increment))
-            
-            
-        #print len(igraph_colors)
-    
-    
-    return igraph_colors
-
-    #OK marche HSV
-#def generate_igraph_colors(nb_colors):
-
-    #import colorsys
-    
-    #N = 1000
-    #HSV_tuples = [(x*1.0/N, 0.5, 0.5) for x in range(N)]
-    #RGB_tuples = map(lambda x: colorsys.hsv_to_rgb(*x), HSV_tuples)
-    
-    ##print RGB_tuples
-    
-    #igraph_colors = []
-    
-    #increment = 1
-    #val = 0
-    
-    
-    #while len(igraph_colors) < nb_colors:
-        
-        ##print val, val*N
-        ##print RGB_tuples[int(val*N)]
-        
-        #color = frac_tohex_tuple(RGB_tuples[int(val*N)])
-        
-        ##print color
-        
-        #if not color in igraph_colors:
-            #igraph_colors.append(color)
-            
-        #val = val+ 1.0/(3.0*float(increment))
-        
-        #if (val >= 1.0):
-            
-            #val = 1.0/(3.0*float(increment))
-            
-            #increment = increment +1
-            
-        ##print len(igraph_colors)
-    
-    
-    #return igraph_colors
-
-igraph_colors = generate_igraph_colors(nb_igraph_colors)
-
-new_igraph_colors = generate_new_igraph_colors(nb_igraph_colors)
-
-RGB_colors = generate_RGB_colors(nb_igraph_colors)
-#igraph_colors = ['red','blue','green','yellow','brown','purple','orange','black']
-
-
-def add_vertex_colors(g_all,community_vect,list_colors = igraph_colors):
+    print np.unique(community_vect)
     
     vertex_col = []
     vertex_label_col = []
     
     for i,v in enumerate(g_all.vs):
         mod_index = community_vect[i]
+        
         if (mod_index != len(list_colors)-1):
             vertex_col.append(list_colors[mod_index])
             vertex_label_col.append(list_colors[mod_index])
         else:
             vertex_col.append("lightgrey")
-            vertex_label_col.append(list_colors[mod_index])
+            vertex_label_col.append("lightgrey")
     
     g_all.vs['color'] = vertex_col
     g_all.vs['label_color'] = vertex_label_col
     
-def  create_module_edge_list(coomatrix,community_vect,list_colors = igraph_colors):
+    return np.unique(np.array(vertex_col,dtype = "str"))
+
+    
+def create_module_edge_list(coomatrix,community_vect,list_colors = static_igraph_colors):
     
     ########### threshoding the number of dictictly displayed modules with the number of igraph colors
     
-    community_vect[community_vect > len(igraph_colors)-1] = len(igraph_colors)-1
+    community_vect[community_vect > len(list_colors)-1] = len(list_colors)-1
     
     ########### extract edge list (with coords belonging to )
     
     print np.unique(community_vect)
+    
+    print len(list_colors)-1
     
     edge_col_inter = []
     edge_list_inter = []
@@ -283,7 +71,7 @@ def  create_module_edge_list(coomatrix,community_vect,list_colors = igraph_color
             
             edge_list_intra.append((u,v))
             edge_weights_intra.append(w)
-            edge_col_intra.append(igraph_colors[community_vect[u]])
+            edge_col_intra.append(list_colors[community_vect[u]])
         else:
             
             edge_list_inter.append((u,v))
@@ -305,8 +93,36 @@ def  create_module_edge_list(coomatrix,community_vect,list_colors = igraph_color
     g_all.es['color'] = edge_col
     #print g_all
     
-    return g_all
+    return g_all,np.unique(np.array(edge_col,dtype = "str"))
+
+def select_edge_list_outside_module(g_sel,coomatrix,community_vect,mod_index):
+
+    edge_mod_id = []
     
+    print g_sel
+    
+    for u,v,w in zip(coomatrix.row,coomatrix.col,coomatrix.data):        
+        if (community_vect[u] != mod_index or community_vect[v] != mod_index):            
+            eid = g_sel.get_eid(u,v)
+            edge_mod_id.append(eid)
+            
+    
+    g_sel.delete_edges(edge_mod_id)
+        
+    #return g_sel
+            
+                                
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                
+
+
+
+
 ######################################## igraph 3D #######################################
      
 def project2D_np(node_coords, angle_alpha = 0.0, angle_beta = 0.0):

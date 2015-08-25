@@ -630,13 +630,13 @@ def compute_roles(community_vect,sparse_mat, role_type = "Amaral_roles"):
 
     all_Z_com_degree = return_all_Z_com_degree(community_vect,bin_dense_mat)
     
-    print all_Z_com_degree
+    #print all_Z_com_degree
     
     ##################################### participation_coeff ###############################
     
     all_participation_coeff = return_all_participation_coeff(community_vect,bin_dense_mat)
     
-    print all_participation_coeff
+    #print all_participation_coeff
     
     if role_type == "Amaral_roles":
         
@@ -645,7 +645,5 @@ def compute_roles(community_vect,sparse_mat, role_type = "Amaral_roles"):
     elif role_type == "4roles":
     
         node_roles = return_4roles(all_Z_com_degree ,all_participation_coeff)
-    
-    
     
     return node_roles,all_Z_com_degree,all_participation_coeff

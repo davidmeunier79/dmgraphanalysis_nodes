@@ -550,8 +550,9 @@ class PlotIGraphModulesInputSpec(BaseInterfaceInputSpec):
     
 class PlotIGraphModulesOutputSpec(TraitedSpec):
     
-    #Z_list_single_modules_files = traits.List(File(exists=True), desc="graphical representation in space of each module independantly")    
+    Z_list_single_modules_files = traits.List(File(exists=True), desc="graphical representation in space of each module independantly")    
     Z_list_all_modules_files = traits.List(File(exists=True), desc="graphical representation in space from different point of view of all modules together")
+    Z_list_all_modules_FR_file = traits.File(exists=True, desc="graphical topological representation of all modules together")
     
 class PlotIGraphModules(BaseInterface):
     
@@ -655,14 +656,15 @@ class PlotIGraphModules(BaseInterface):
             
         #print node_roles 
         
-        print "plotting conf_cor_mat_modules_file with igraph"
+        print "plotting 3D modules with igraph"
         
-        #Z_list_single_modules_files = plot_3D_igraph_single_modules(community_vect,Z_list,node_coords,node_labels,nb_min_nodes_by_module = 3)
+        Z_list_single_modules_files = plot_3D_igraph_single_modules(community_vect,Z_list,node_coords,node_labels,node_roles = node_roles,nb_min_nodes_by_module = 5)
         Z_list_all_modules_files = plot_3D_igraph_all_modules(community_vect,Z_list,node_coords,node_labels,node_roles = node_roles)
-        Z_list_all_modules_files = plot_3D_igraph_all_modules(community_vect,Z_list,node_labels= node_labels,node_roles = node_roles, layout = 'FR')
+        Z_list_all_modules_FR_file = plot_3D_igraph_all_modules(community_vect,Z_list,node_labels= node_labels,node_roles = node_roles, layout = 'FR')
         
-        #self.Z_list_single_modules_files = Z_list_single_modules_files
+        self.Z_list_single_modules_files = Z_list_single_modules_files
         self.Z_list_all_modules_files = Z_list_all_modules_files
+        self.Z_list_all_modules_FR_file = Z_list_all_modules_FR_file
                 
         return runtime
         
@@ -670,7 +672,9 @@ class PlotIGraphModules(BaseInterface):
         
         outputs = self._outputs().get()
         
-        #outputs["Z_list_single_modules_files"] = self.Z_list_single_modules_files
+        outputs["Z_list_single_modules_files"] = self.Z_list_single_modules_files
         outputs["Z_list_all_modules_files"] =self.Z_list_all_modules_files 
+        outputs["Z_list_all_modules_FR_file"] =self.Z_list_all_modules_FR_file 
+        
         
         return outputs

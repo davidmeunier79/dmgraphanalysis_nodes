@@ -4,6 +4,9 @@ import pylab as pl
     
 import numpy as np
 
+
+################################################################### matrices #######################################################
+
 def plot_cormat(plot_file, cor_mat,list_labels = [],label_size =2):
     
     fig1 = plt.figure()
@@ -152,6 +155,8 @@ def plot_int_mat(plot_file, cor_mat,list_labels, fix_full_range,label_size = 2):
     
     return 
     
+################################################################### histogramms #######################################################
+
 def plot_hist(plot_hist_file,data,nb_bins = 100):
     
     #fig2 = figure.Figure()
@@ -166,6 +171,50 @@ def plot_hist(plot_hist_file,data,nb_bins = 100):
     #fig2.close()
     del fig2
     
+################################################################### color bar only #######################################################
+import matplotlib as mpl
+
+def plot_colorbar(plot_colorbar_file,colors):
+    
+    #fig2 = figure.Figure()
+    fig2 = plt.figure(figsize = (8,3))
+    ax2 = fig2.add_axes([0.05, 0.475, 0.9, 0.15])
+    #ax = fig2.add_subplot(1,1,1)
+    
+    
+    cmap = mpl.colors.ListedColormap(colors)
+        
+    cmap.set_over('0.25')
+    cmap.set_under('0.75')
+
+    bounds = range(len(colors))
+    
+    norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+    
+    print bounds
+    
+    print norm
+        
+    cb2 = mpl.colorbar.ColorbarBase(ax2, cmap=cmap,
+                                        norm=norm,
+                                        # to use 'extend', you must
+                                        # specify two extra boundaries:
+                                        boundaries=bounds,
+                                        #extend='both',
+                                        #ticks=bounds, # optional
+                                        spacing='proportional',
+                                        orientation='horizontal')
+    cb2.set_label('Discrete intervals, some other units')
+
+    
+    fig2.savefig(plot_colorbar_file)
+    
+    plt.close(fig2)
+    #fig2.close()
+    del fig2
+    
+################################################################### signals #######################################################
+
 def plot_signals(plot_signals_file,signals_matrix,colors = [], ylim = [], labels = []):
     
     fig2 = plt.figure()
