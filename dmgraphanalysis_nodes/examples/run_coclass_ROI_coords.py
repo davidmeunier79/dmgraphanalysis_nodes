@@ -2500,7 +2500,7 @@ def gather_coclass_excluded_results5():
     
     print core_nodes
     
-    for keep_label in ['pHip.L', 'aHip.R', 'aPHP/Fus.R', 'pPHC.R','pPir.R', 'pOFC.R','aPir/pOFC.L']:
+    for keep_label in ['pHip.L', 'aHip.R', 'aPHC/Fus.R', 'pPHC.R','pPir.R', 'pOFC.R','aPir/pOFC.L']:
         
         if keep_label in labels:
             
