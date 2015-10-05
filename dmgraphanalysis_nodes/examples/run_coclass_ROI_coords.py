@@ -2566,6 +2566,10 @@ def gather_coclass_excluded_results5():
     
     plot_3D_igraph_int_mat(subgraph2_core_coclass_file,subgraph2_coclass_mat, labels = subgraph2_labels, coords = subgraph2_MNI_coords, edge_colors = ["Gray","Blue","Red","Purple","Green","Orange","Black"], view_from = '_from_top')
     
+    subgraph2_core_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'subgraph2_core_coclass5_from_left.eps')
+    
+    plot_3D_igraph_int_mat(subgraph2_core_coclass_file,subgraph2_coclass_mat, labels = subgraph2_labels, coords = subgraph2_MNI_coords, edge_colors = ["Gray","Blue","Red","Purple","Green","Orange","Black"], view_from = '_from_left')
+    
     subgraph2_core_coclass_topo_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'subgraph2_core_coclass5_topo.eps')
     
     plot_3D_igraph_int_mat(subgraph2_core_coclass_topo_file,subgraph2_coclass_mat, labels = subgraph2_labels, edge_colors = ["Gray","Blue","Red","Purple","Green","Orange","Black"])
