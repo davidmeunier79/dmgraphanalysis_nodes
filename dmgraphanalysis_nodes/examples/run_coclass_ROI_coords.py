@@ -2487,6 +2487,91 @@ def gather_coclass_excluded_results5():
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    ######## subgraph2 core for all conditions
+    
+    core_nodes = core_degree != 0
+    
+    print core_nodes
+    
+    0/0
+    
+    subgraph2_labels = [label for i,label in enumerate(labels) if core_nodes[i] == True]
+    print subgraph2_labels
+    
+    subgraph2_MNI_coords = MNI_coords[core_nodes,:]
+    print subgraph2_MNI_coords
+    
+    
+    
+    
+    subgraph2_core_coclass_mat = core_coclass_mat[core_nodes,:][:,core_nodes]
+    print subgraph2_core_coclass_mat
+    
+    subgraph2_odor_signif_coclass_mat = odor_signif_coclass_mat[core_nodes,:][:,core_nodes]
+    print subgraph2_odor_signif_coclass_mat
+    
+    subgraph2_recall_signif_coclass_mat = recall_signif_coclass_mat[core_nodes,:][:,core_nodes]
+    print subgraph2_recall_signif_coclass_mat
+    
+    subgraph2_conj_signif_odor_recall_coclass_mat = conj_signif_odor_recall_coclass_mat[core_nodes,:][:,core_nodes]
+    print subgraph2_conj_signif_odor_recall_coclass_mat
+    
+    subgraph2_coclass_mat = np.zeros(shape = subgraph2_core_coclass_mat.shape, dtype = int)
+    
+    subgraph2_coclass_mat[subgraph2_core_coclass_mat == 1] = 1
+    
+    subgraph2_coclass_mat[np.logical_and(subgraph2_core_coclass_mat == 0,subgraph2_odor_signif_coclass_mat == 1)] = 2
+    
+    subgraph2_coclass_mat[np.logical_and(subgraph2_core_coclass_mat == 0,subgraph2_recall_signif_coclass_mat == 1)] = 3
+    
+    subgraph2_coclass_mat[np.logical_and(subgraph2_core_coclass_mat == 0,subgraph2_conj_signif_odor_recall_coclass_mat == 1)] = 4
+    
+    
+    subgraph2_coclass_mat[np.logical_and(subgraph2_core_coclass_mat == 1,subgraph2_odor_signif_coclass_mat == 1)] = 5
+    
+    subgraph2_coclass_mat[np.logical_and(subgraph2_core_coclass_mat == 1,subgraph2_recall_signif_coclass_mat == 1)] = 6
+    
+    subgraph2_coclass_mat[np.logical_and(subgraph2_core_coclass_mat == 1,subgraph2_conj_signif_odor_recall_coclass_mat == 1)] = 7
+    
+    
+    print subgraph2_coclass_mat
+    
+    subgraph2_core_coclass_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'subgraph2_core_coclass5_from_top.eps')
+    
+    plot_3D_igraph_int_mat(subgraph2_core_coclass_file,subgraph2_coclass_mat, labels = subgraph2_labels, coords = subgraph2_MNI_coords, edge_colors = ["Gray","Blue","Red","Purple","Green","Orange","Black"], view_from = '_from_top')
+    
+    subgraph2_core_coclass_topo_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'subgraph2_core_coclass5_topo.eps')
+    
+    plot_3D_igraph_int_mat(subgraph2_core_coclass_topo_file,subgraph2_coclass_mat, labels = subgraph2_labels, edge_colors = ["Gray","Blue","Red","Purple","Green","Orange","Black"])
+    
+    #conj_signif_odor_recall_coclass_topo_file = os.path.join(nipype_analyses_path,coclass_analysis_name,'conj_signif_odor_recall_core_coclass5_topo.eps')
+    
+    #plot_3D_igraph_int_mat(conj_signif_odor_recall_coclass_topo_file,conj_signif_odor_recall_coclass_mat, labels = labels, edge_colors = ["Purple"],node_col_labels = conj_signif_odor_recall_labels,nodes_sizes = conj_signif_odor_recall_sizes)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     print "Saving degree"
     
     tab_degree = np.column_stack((core_degree,odor_signif_degree,recall_signif_degree,conj_signif_odor_recall_degree))
