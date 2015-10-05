@@ -2496,9 +2496,9 @@ def gather_coclass_excluded_results5():
     
     ######## subgraph2 core for all conditions
     
-    core_nodes = core_degree != 0
+    keep_nodes = core_degree != 0
     
-    print np.sum(core_nodes)
+    print np.sum(keep_nodes)
     
     for keep_label in ['pHip.L', 'aHip.R', 'aPHC/Fus.R', 'pPHC.R','pPir.R', 'pOFC.R','aPir/pOFC.L']:
         
@@ -2508,7 +2508,10 @@ def gather_coclass_excluded_results5():
             
             #print index_sub_node
             
-            core_nodes[index_sub_node] = True
+            if keep_nodes[index_sub_node] == True:
+                print "Area %d (%s) was already in keep_nodes"%(index_sub_node,keep_label)
+                
+            keep_nodes[index_sub_node] = True
             
         else:
             print "Warning, could not find %s in labels"%keep_label
@@ -2516,29 +2519,29 @@ def gather_coclass_excluded_results5():
             
             return
         
-    print np.sum(core_nodes)
+    print np.sum(keep_nodes)
     
     0/0
     
-    subgraph2_labels = [label for i,label in enumerate(labels) if core_nodes[i] == True]
+    subgraph2_labels = [label for i,label in enumerate(labels) if keep_nodes[i] == True]
     print subgraph2_labels
     
-    subgraph2_MNI_coords = MNI_coords[core_nodes,:]
+    subgraph2_MNI_coords = MNI_coords[keep_nodes,:]
     print subgraph2_MNI_coords
     
     
     
     
-    subgraph2_core_coclass_mat = core_coclass_mat[core_nodes,:][:,core_nodes]
+    subgraph2_core_coclass_mat = core_coclass_mat[keep_nodes,:][:,keep_nodes]
     print subgraph2_core_coclass_mat
     
-    subgraph2_odor_signif_coclass_mat = odor_signif_coclass_mat[core_nodes,:][:,core_nodes]
+    subgraph2_odor_signif_coclass_mat = odor_signif_coclass_mat[keep_nodes,:][:,keep_nodes]
     print subgraph2_odor_signif_coclass_mat
     
-    subgraph2_recall_signif_coclass_mat = recall_signif_coclass_mat[core_nodes,:][:,core_nodes]
+    subgraph2_recall_signif_coclass_mat = recall_signif_coclass_mat[keep_nodes,:][:,keep_nodes]
     print subgraph2_recall_signif_coclass_mat
     
-    subgraph2_conj_signif_odor_recall_coclass_mat = conj_signif_odor_recall_coclass_mat[core_nodes,:][:,core_nodes]
+    subgraph2_conj_signif_odor_recall_coclass_mat = conj_signif_odor_recall_coclass_mat[keep_nodes,:][:,keep_nodes]
     print subgraph2_conj_signif_odor_recall_coclass_mat
     
     subgraph2_coclass_mat = np.zeros(shape = subgraph2_core_coclass_mat.shape, dtype = int)
