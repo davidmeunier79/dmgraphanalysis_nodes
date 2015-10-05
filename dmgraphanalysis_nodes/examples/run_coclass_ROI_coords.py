@@ -2521,8 +2521,6 @@ def gather_coclass_excluded_results5():
         
     print np.sum(keep_nodes)
     
-    0/0
-    
     subgraph2_labels = [label for i,label in enumerate(labels) if keep_nodes[i] == True]
     print subgraph2_labels
     
