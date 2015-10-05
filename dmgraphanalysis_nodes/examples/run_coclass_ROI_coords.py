@@ -2500,6 +2500,17 @@ def gather_coclass_excluded_results5():
     
     print core_nodes
     
+    for keep_label in ['pHip.L', 'aHip.R', 'aPHP/Fus.R', 'pPHC.R','pPir.R', 'pOFC.R','aPir/pOFC.L']:
+        
+        if keep_label in labels:
+            
+            index_sub_node = labels.index(keep_label)
+            
+            print index_sub_node
+            
+        else:
+            print "Warning, could not find %s in labels"%keep_label
+            
     0/0
     
     subgraph2_labels = [label for i,label in enumerate(labels) if core_nodes[i] == True]
