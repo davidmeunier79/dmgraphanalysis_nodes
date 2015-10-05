@@ -2510,7 +2510,9 @@ def gather_coclass_excluded_results5():
             
         else:
             print "Warning, could not find %s in labels"%keep_label
+            print labels
             
+            return
     0/0
     
     subgraph2_labels = [label for i,label in enumerate(labels) if core_nodes[i] == True]
