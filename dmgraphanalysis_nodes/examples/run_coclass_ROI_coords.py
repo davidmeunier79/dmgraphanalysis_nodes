@@ -2498,7 +2498,7 @@ def gather_coclass_excluded_results5():
     
     core_nodes = core_degree != 0
     
-    print core_nodes
+    print np.sum(core_nodes)
     
     for keep_label in ['pHip.L', 'aHip.R', 'aPHC/Fus.R', 'pPHC.R','pPir.R', 'pOFC.R','aPir/pOFC.L']:
         
@@ -2506,13 +2506,18 @@ def gather_coclass_excluded_results5():
             
             index_sub_node = labels.index(keep_label)
             
-            print index_sub_node
+            #print index_sub_node
+            
+            core_nodes[index_sub_node] = True
             
         else:
             print "Warning, could not find %s in labels"%keep_label
             print labels
             
             return
+        
+    print np.sum(core_nodes)
+    
     0/0
     
     subgraph2_labels = [label for i,label in enumerate(labels) if core_nodes[i] == True]
