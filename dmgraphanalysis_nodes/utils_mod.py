@@ -30,7 +30,6 @@ def get_modularity_value_from_lol_file(modularity_file):
         
         return -1.0
 
-
 def get_values_from_global_info_file(global_info_file):
     
     global_values = {}
