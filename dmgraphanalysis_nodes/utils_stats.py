@@ -187,7 +187,7 @@ def compute_pairwise_ttest_fdr(X,Y,t_test_thresh_fdr,paired = True):
         
     np_list_diff = np.array(list_diff)
    
-    signif_code = return_signif_code(np_list_diff[:,2],uncor_alpha = 0.001,fdr_alpha = t_test_thresh_fdr, bon_alpha = 0.05)
+    signif_code = return_signif_code(np_list_diff[:,2],uncor_alpha = 0.01,fdr_alpha = t_test_thresh_fdr, bon_alpha = 0.05)
     
     print np.sum(signif_code == 0.0),np.sum(signif_code == 1.0),np.sum(signif_code == 2.0),np.sum(signif_code == 3.0),np.sum(signif_code == 4.0)
     
@@ -214,6 +214,53 @@ def compute_pairwise_ttest_fdr(X,Y,t_test_thresh_fdr,paired = True):
     return signif_signed_adj_mat
 
     
+def compute_pairwise_mannwhitney_fdr(X,Y,t_test_thresh_fdr):
+    
+    # number of nodes
+    N = X.shape[0]
+   
+    list_diff = []
+    
+    for i,j in it.combinations(range(N), 2):
+        
+        #t_stat_zalewski = ttest2(X[i,j,:],Y[i,j,:])
+        
+        u_stat,p_val = stat.mannwhitneyu(X[i,j,:],Y[i,j,:],use_continuity = True)
+        
+        
+        list_diff.append([i,j,p_val,np.sign(np.mean(X[i,j,:])-np.mean(Y[i,j,:]))])
+        
+    #print list_diff
+        
+    np_list_diff = np.array(list_diff)
+   
+    signif_code = return_signif_code(np_list_diff[:,2],uncor_alpha = 0.05,fdr_alpha = t_test_thresh_fdr, bon_alpha = 0.05)
+    
+    print np.sum(signif_code == 0.0),np.sum(signif_code == 1.0),np.sum(signif_code == 2.0),np.sum(signif_code == 3.0),np.sum(signif_code == 4.0)
+    
+    np_list_diff[:,3] = np_list_diff[:,3] * signif_code
+    
+    print np.sum(np_list_diff[:,3] == 0.0)
+    print np.sum(np_list_diff[:,3] == 1.0),np.sum(np_list_diff[:,3] == 2.0),np.sum(np_list_diff[:,3] == 3.0),np.sum(np_list_diff[:,3] == 4.0)
+    print np.sum(np_list_diff[:,3] == -1.0),np.sum(np_list_diff[:,3] == -2.0),np.sum(np_list_diff[:,3] == -3.0),np.sum(np_list_diff[:,3] == -4.0)
+    
+    
+    
+    
+    signif_signed_adj_mat = np.zeros((N,N),dtype = 'int')
+    
+    signif_i = np.array(np_list_diff[:,0],dtype = int)
+    signif_j = np.array(np_list_diff[:,1],dtype = int)
+    
+    signif_sign = np.array(np_list_diff[:,3],dtype = int)
+    
+    signif_signed_adj_mat[signif_i,signif_j] = signif_signed_adj_mat[signif_j,signif_i] = signif_sign
+    
+    #print signif_signed_adj_mat
+    
+    return signif_signed_adj_mat
+
+        
     
     
 def compute_pairwise_binom_fdr(X,Y,conf_interval_binom_fdr):
