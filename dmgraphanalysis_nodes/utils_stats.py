@@ -214,7 +214,7 @@ def compute_pairwise_ttest_fdr(X,Y,t_test_thresh_fdr,paired = True):
     return signif_signed_adj_mat
 
     
-def compute_pairwise_mannwhitney_fdr(X,Y,t_test_thresh_fdr):
+def compute_pairwise_mannwhitney_fdr(X,Y,t_test_thresh_fdr,uncor_alpha = 0.01):
     
     # number of nodes
     N = X.shape[0]
@@ -234,7 +234,7 @@ def compute_pairwise_mannwhitney_fdr(X,Y,t_test_thresh_fdr):
         
     np_list_diff = np.array(list_diff)
    
-    signif_code = return_signif_code(np_list_diff[:,2],uncor_alpha = 0.05,fdr_alpha = t_test_thresh_fdr, bon_alpha = 0.05)
+    signif_code = return_signif_code(np_list_diff[:,2],uncor_alpha = uncor_alpha,fdr_alpha = t_test_thresh_fdr, bon_alpha = 0.05)
     
     print np.sum(signif_code == 0.0),np.sum(signif_code == 1.0),np.sum(signif_code == 2.0),np.sum(signif_code == 3.0),np.sum(signif_code == 4.0)
     
