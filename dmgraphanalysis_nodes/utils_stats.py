@@ -225,7 +225,7 @@ def compute_pairwise_mannwhitney_fdr(X,Y,t_test_thresh_fdr):
         
         #t_stat_zalewski = ttest2(X[i,j,:],Y[i,j,:])
         
-        u_stat,p_val = stat.mannwhitneyu(X[i,j,:],Y[i,j,:],use_continuity = True)
+        u_stat,p_val = stat.mannwhitneyu(X[i,j,:],Y[i,j,:],use_continuity = False)
         
         
         list_diff.append([i,j,p_val,np.sign(np.mean(X[i,j,:])-np.mean(Y[i,j,:]))])
