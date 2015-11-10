@@ -34,7 +34,7 @@ class ExtractTSInputSpec(BaseInterfaceInputSpec):
     
     coord_rois_file = File(exists=True, desc='ROI coordinates', mandatory= False )
     
-    min_BOLD_intensity = traits.Float(desc='BOLD signal below this value will be set to zero',mandatory=True)
+    min_BOLD_intensity = traits.Float(default = 50.0, desc='BOLD signal below this value will be set to zero',mandatory=False,usedefault = True)
 
 class ExtractTSOutputSpec(TraitedSpec):
     
@@ -80,8 +80,8 @@ class ExtractTS(BaseInterface):
         ### loading time series
         orig_ts = nib.load(file_4D).get_data()
         
-        #print "orig_ts shape:"
-        #print orig_ts.shape
+        print "orig_ts shape:"
+        print orig_ts.shape
             
         mean_masked_ts,subj_coord_rois = mean_select_indexed_mask_data(orig_ts,indexed_mask_rois_data,coord_rois,min_BOLD_intensity = 50)
         
