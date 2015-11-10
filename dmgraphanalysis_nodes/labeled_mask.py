@@ -254,14 +254,15 @@ def compute_labelled_mask_from_anat_ROIs(ref_img_file,ROI_dir):
     
     if len(resliced_ROI_files) != len(ROI_files) :
         
-        for ROI_file in ROI_files:
+        for i,ROI_file in enumerate(ROI_files):
         
             ROI_image = nib.load(ROI_file)
         
             ROI_data = ROI_image.get_data()
             
             ROI_data_shape = ROI_data.shape
-            print "Original ROI template shape:"
+            
+            print "Original ROI template %d shape:"%i
             
             print ROI_data.shape
             
@@ -278,7 +279,7 @@ def compute_labelled_mask_from_anat_ROIs(ref_img_file,ROI_dir):
     print resliced_ROI_files
     print len(resliced_ROI_files)
     
-    labels_list = []
+    labels = []
     
     labelled_mask_data = np.zeros(shape = ref_image_data.shape, dtype = 'int')
     
@@ -286,9 +287,11 @@ def compute_labelled_mask_from_anat_ROIs(ref_img_file,ROI_dir):
     
     for i,resliced_ROI_file in enumerate(resliced_ROI_files):
     
+        print i 
+        
         path,fname,ext = split_f(resliced_ROI_file)
     
-        labels_list.append(fname)
+        labels.append(fname)
     
         resliced_ROI_img = nib.load(resliced_ROI_file)
 
@@ -304,7 +307,7 @@ def compute_labelled_mask_from_anat_ROIs(ref_img_file,ROI_dir):
     
     print np.unique(labelled_mask_data).shape
     
-    print len(labels_list)
+    print len(labels)
     
     ### save labeled_mask
     labelled_mask_data_file = os.path.join(ROI_dir,"all_ROIs_labelled_mask.nii")
@@ -314,24 +317,82 @@ def compute_labelled_mask_from_anat_ROIs(ref_img_file,ROI_dir):
     ### save labels
     labels_list_file = os.path.join(ROI_dir,"labels_all_ROIs.txt")
     
-    np.savetxt(labels_list_file,np.array(labels_list,dtype = 'string'),fmt = "%s")
+    np.savetxt(labels_list_file,np.array(labels,dtype = 'string'),fmt = "%s")
     
     return labelled_mask_data_file,labels_list_file
     #nib.load(ref_img_file)
+    
+def compute_MNI_coords_from_indexed_template(indexes_template_file,ROI_dir):
+    
+    """
+    compute MNI coords from an indexed template
+    """
+    
+    ref_image = nib.load(indexes_template_file)
+    
+    ref_image_data = ref_image.get_data()
+    
+    print ref_image_data.shape
+    
+    ref_image_affine = ref_image.affine
+    
+    print ref_image_affine
+    
+    ROI_coords = []
+    
+    ROI_MNI_coords = []
+    
+    for index in np.unique(ref_image_data):
+        
+        i,j,k = np.where(ref_image_data == index)
+        
+        mean_coord_ijk = np.mean(np.array((i,j,k)), axis = 1)
+        
+        print mean_coord_ijk
+        
+        ROI_coords.append(mean_coord_ijk)
+        
+        MNI_coord = np.dot(ref_image_affine,np.append(mean_coord_ijk,1))
+        
+        print MNI_coord
+        
+        ROI_MNI_coords.append(MNI_coord[:3])
+        
+    ROI_coords = np.array(ROI_coords,dtype = float)
+    
+    print ROI_coords
+    
+    ROI_MNI_coords = np.array(ROI_MNI_coords,dtype = float)
+    
+    print ROI_MNI_coords
+    
+    ROI_coords_file = os.path.join(ROI_dir,"ROI_coords.txt")
+    
+    np.savetxt(ROI_coords_file,ROI_coords, fmt = "%.3f %.3f %.3f")
+    
+    
+    ROI_MNI_coords_file = os.path.join(ROI_dir,"ROI_MNI_coords.txt")
+    
+    np.savetxt(ROI_MNI_coords_file,ROI_MNI_coords, fmt = "%.3f %.3f %.3f")
+    
+    
+    return ROI_coords_file,ROI_MNI_coords_file
+    #nib.load(ref_img_file)
+
 
 ################################# preparing HO template by recombining sub and cortical mask + reslicing to image format ##################################
 
 def compute_recombined_HO_template(img_file,ROI_dir,HO_dir = "/usr/share/fsl/data/atlases/"):
 
-    img = nib.load(img_file)
+    #img = nib.load(img_file)
     
-    img_header = img.get_header()
+    #img_header = img.get_header()
     
-    img_affine = img.get_affine()
+    #img_affine = img.get_affine()
     
-    img_shape = img.get_data().shape
+    #img_shape = img.get_data().shape
 
-
+    #print img_shape
     ### cortical
     HO_cortl_img_file = os.path.join(HO_dir,"HarvardOxford/HarvardOxford-cortl-maxprob-thr25-2mm.nii.gz")
     
@@ -348,6 +409,10 @@ def compute_recombined_HO_template(img_file,ROI_dir,HO_dir = "/usr/share/fsl/dat
     
     HO_sub_img = nib.load(HO_sub_img_file)
     
+    HO_sub_img_header = HO_sub_img.get_header()
+    
+    HO_sub_img_affine = HO_sub_img.get_affine()
+     
     HO_sub_data = HO_sub_img.get_data()
     
     print HO_sub_data.shape
@@ -370,19 +435,24 @@ def compute_recombined_HO_template(img_file,ROI_dir,HO_dir = "/usr/share/fsl/dat
         
         #### saving white matter mask
         white_matter_HO_data = np.array(white_matter_HO_data,dtype = 'int')
-        nib.save(nib.Nifti1Image(data = white_matter_HO_data,header = img_header,affine = img_affine),white_matter_HO_img_file)
+        
+        nib.save(nib.Nifti1Image(dataobj = white_matter_HO_data,header = HO_sub_img_header,affine = HO_sub_img_affine),white_matter_HO_img_file)
+        
+    else:
+        
+        white_matter_HO_data = nib.load(white_matter_HO_img_file).get_data()
         
     ###reslicing to ref image
     resliced_white_matter_HO_img_file = os.path.join(ROI_dir, "rHarvard-Oxford-white_matter.nii")
     
     if not os.path.isfile(resliced_white_matter_HO_img_file):
+    
+        reslice_white_matter_HO = spm.Reslice()
+        reslice_white_matter_HO.inputs.in_file = white_matter_HO_img_file
+        reslice_white_matter_HO.inputs.space_defining = img_file
+        reslice_white_matter_HO.inputs.out_file = resliced_white_matter_HO_img_file
         
-        resliced_white_matter_HO_data = white_matter_HO_data[:img_shape[0],:img_shape[1],:img_shape[2]]
-        
-        resliced_white_matter_HO_data = white_matter_HO_data[6:-6,7:-7,10:-13]
-        print resliced_white_matter_HO_data.shape
-        
-        nib.save(nib.Nifti1Image(data = resliced_white_matter_HO_data,header = img_header,affine = img_affine),resliced_white_matter_HO_img_file)
+        reslice_white_matter_HO.run()
         
     ################# grey matter mask
     grey_matter_HO_img_file = os.path.join(ROI_dir, "Harvard-Oxford-grey_matter.nii")
@@ -400,20 +470,24 @@ def compute_recombined_HO_template(img_file,ROI_dir,HO_dir = "/usr/share/fsl/dat
         
         #### saving grey matter mask
         grey_matter_HO_data = np.array(grey_matter_HO_data,dtype = 'int')
-        nib.save(nib.Nifti1Image(data = grey_matter_HO_data,header = img_header,affine = img_affine),grey_matter_HO_img_file)
+        nib.save(nib.Nifti1Image(dataobj = grey_matter_HO_data,header = HO_sub_img_header,affine = HO_sub_img_affine),grey_matter_HO_img_file)
+        
+    else:
+        grey_matter_HO_data = nib.load(grey_matter_HO_img_file).get_data()
         
     ### reslicing to ref image
     resliced_grey_matter_HO_img_file = os.path.join(ROI_dir, "rHarvard-Oxford-grey_matter.nii")
     
     if not os.path.isfile(resliced_grey_matter_HO_img_file):
+    
+        reslice_grey_matter_HO = spm.Reslice()
+        reslice_grey_matter_HO.inputs.in_file = grey_matter_HO_img_file
+        reslice_grey_matter_HO.inputs.space_defining = img_file
+        reslice_grey_matter_HO.inputs.out_file = resliced_grey_matter_HO_img_file
         
-        resliced_grey_matter_HO_data = grey_matter_HO_data[:img_shape[0],:img_shape[1],:img_shape[2]]
+        reslice_grey_matter_HO.run()
         
-        resliced_grey_matter_HO_data = grey_matter_HO_data[6:-6,7:-7,10:-13]
-        print resliced_grey_matter_HO_data.shape
-        
-        nib.save(nib.Nifti1Image(data = resliced_grey_matter_HO_data,header = img_header,affine = img_affine),resliced_grey_matter_HO_img_file)
-        
+    
         
     ######## Ventricule (+ apprently outside the brain) mask
     ventricule_HO_img_file = os.path.join(ROI_dir, "Harvard-Oxford-ventricule.nii")
@@ -431,24 +505,22 @@ def compute_recombined_HO_template(img_file,ROI_dir,HO_dir = "/usr/share/fsl/dat
         
         #### saving white matter mask
         ventricule_HO_data = np.array(ventricule_HO_data,dtype = 'int')
-        nib.save(nib.Nifti1Image(data = ventricule_HO_data,header = img_header,affine = img_affine),ventricule_HO_img_file)
-        
+        nib.save(nib.Nifti1Image(dataobj = ventricule_HO_data,header = HO_sub_img_header,affine = HO_sub_img_affine),ventricule_HO_img_file)
+          
+    else:
+        ventricule_HO_data = nib.load(ventricule_HO_img_file).get_data()
+         
     ### reslicing to ref image
     resliced_ventricule_HO_img_file = os.path.join(ROI_dir, "rHarvard-Oxford-ventricule.nii")
     
     if not os.path.isfile(resliced_ventricule_HO_img_file):
+    
+        reslice_ventricule_HO = spm.Reslice()
+        reslice_ventricule_HO.inputs.in_file = ventricule_HO_img_file
+        reslice_ventricule_HO.inputs.space_defining = img_file
+        reslice_ventricule_HO.inputs.out_file = resliced_ventricule_HO_img_file
         
-        #### reslice SPM mask using HO target
-        #reslice_ventricule_HO = spm.Reslice()
-        #reslice_ventricule_HO.inputs.in_file = ventricule_HO_img_file
-        #reslice_ventricule_HO.inputs.space_defining = spm_contrast_image_file
-        
-        #reslice_ventricule_HO.run()
-
-        resliced_ventricule_HO_data = ventricule_HO_data[6:-6,7:-7,10:-13]
-        print resliced_ventricule_HO_data.shape
-        
-        nib.save(nib.Nifti1Image(data = resliced_ventricule_HO_data,header = img_header,affine = img_affine),resliced_ventricule_HO_img_file)
+        reslice_ventricule_HO.run()
         
     
     ################################ merging data from cortl and sub 
@@ -506,36 +578,49 @@ def compute_recombined_HO_template(img_file,ROI_dir,HO_dir = "/usr/share/fsl/dat
         print "Original HO template shape:"
         print full_HO_data.shape, np.min(full_HO_data),np.max(full_HO_data)
         
-        nib.save(nib.Nifti1Image(data = full_HO_data,header = img_header,affine = img_affine),full_HO_img_file)
+        nib.save(nib.Nifti1Image(dataobj = full_HO_data,header = HO_sub_img_header,affine = HO_sub_img_affine),full_HO_img_file)
         
     else:
         
         full_HO_data = nib.load(full_HO_img_file).get_data()
         
-        
+    print np.unique(full_HO_data)
+     
     #### reslicing to ref image
     resliced_full_HO_img_file = os.path.join(ROI_dir, "rHarvard-Oxford-cortl-sub-recombined-111regions.nii")
     
     print resliced_full_HO_img_file
     
     if not os.path.isfile(resliced_full_HO_img_file):
-            
-        resliced_full_HO_data = full_HO_data[6:-6,7:-7,10:-13]
-        print resliced_full_HO_data.shape
-        
-        nib.save(nib.Nifti1Image(data = resliced_full_HO_data,header = img_header,affine = img_affine),resliced_full_HO_img_file)
-        
-    else: 
     
+        reslice_full_HO = spm.Reslice()
+        reslice_full_HO.inputs.in_file = full_HO_img_file
+        reslice_full_HO.inputs.space_defining = img_file
+        reslice_full_HO.inputs.out_file = resliced_full_HO_img_file
+        #reslice_full_HO.inputs.interp = 0
         
-        ### loading results
-        resliced_full_HO_img = nib.load(resliced_full_HO_img_file)
+        reslice_full_HO.run()
         
-        resliced_full_HO_data = np.array(resliced_full_HO_img.get_data(),dtype = 'int')
-        
-        print "Resliced HO template shape:"
-        print resliced_full_HO_data.shape
-        
+    ### loading results
+    resliced_full_HO_img = nib.load(resliced_full_HO_img_file)
+    
+    resliced_full_HO_data = resliced_full_HO_img.get_data()
+    print resliced_full_HO_data
+    
+    resliced_full_HO_data[np.isnan(resliced_full_HO_data)] = 0.0
+    
+    print np.unique(resliced_full_HO_data)
+    
+    
+    
+    resliced_full_HO_data = np.array(resliced_full_HO_data,dtype = int)
+    
+    print "Resliced HO template shape:"
+    #print resliced_full_HO_data.shape
+    
+    #print resliced_full_HO_data
+    
+    print np.unique(resliced_full_HO_data)
     
     #### reading HO labels and concatenate
     
@@ -650,9 +735,11 @@ def compute_recombined_HO_template(img_file,ROI_dir,HO_dir = "/usr/share/fsl/dat
     
     np_HO_labels = np.array(HO_labels,dtype = 'string')
     
+    print np.unique(resliced_full_HO_data)
+    
     template_indexes = np.unique(resliced_full_HO_data)[1:]
     
-    #print template_indexes
+    print template_indexes
         
     print np_HO_labels.shape,np_HO_abbrev_labels.shape,template_indexes.shape
     
