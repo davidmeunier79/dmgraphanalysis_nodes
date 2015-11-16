@@ -913,7 +913,7 @@ if __name__ =='__main__':
     
     ROI_mask_file = compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file)
     
-    export_dir = os.path.join(ROI_dir,'beta_amplitude3')
+    export_dir = os.path.join(ROI_dir,'beta_amplitude4')
     
     compute_beta_2betas(ROI_path = export_dir,ROI_mask_file = ROI_mask_file,ROI_label_file = ROI_coords_labels_file)
     

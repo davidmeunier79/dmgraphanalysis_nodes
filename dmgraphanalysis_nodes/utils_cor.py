@@ -231,7 +231,7 @@ def mean_select_indexed_mask_data(orig_ts,indexed_mask_rois_data,coord_rois,min_
             
             index_roi_x,index_roi_y,index_roi_z = np.where(indexed_mask_rois_data == roi_index)
             
-            #print index_roi_x,index_roi_y,index_roi_z
+            print index_roi_x,index_roi_y,index_roi_z
             
             all_voxel_roi_ts = orig_ts[index_roi_x,index_roi_y,index_roi_z,:]
             
