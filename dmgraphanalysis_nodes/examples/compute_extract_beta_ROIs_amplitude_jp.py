@@ -911,9 +911,9 @@ if __name__ =='__main__':
     
     ## from a list
     
-    ROI_mask_file = compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file)
+    ROI_mask_file = compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file,neighbourhood = 2)
     
-    export_dir = os.path.join(ROI_dir,'beta_amplitude4')
+    export_dir = os.path.join(ROI_dir,'beta_amplitude4_10')
     
     compute_beta_2betas(ROI_path = export_dir,ROI_mask_file = ROI_mask_file,ROI_label_file = ROI_coords_labels_file)
     
