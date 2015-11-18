@@ -87,7 +87,7 @@ def merge_coord_and_label_files(ROI_coords_dir):
     
     return all_coords_file,all_labels_file
     
-def compute_labelled_mask_from_ROI_coords_files(ref_img_file,MNI_coords_file,neighbourhood = 2):
+def compute_labelled_mask_from_ROI_coords_files(ref_img_file,MNI_coords_file,neighbourhood = 1):
     """
     Compute labeled mask by specifying MNI coordinates and labels 'at hand'
     #"""
@@ -384,6 +384,11 @@ def compute_MNI_coords_from_indexed_template(indexes_template_file,ROI_dir):
 
 def compute_recombined_HO_template(img_file,ROI_dir,HO_dir = "/usr/share/fsl/data/atlases/"):
 
+
+    if not os.path.exists(ROI_dir):
+        
+        os.makedirs(ROI_dir)
+        
     #img = nib.load(img_file)
     
     #img_header = img.get_header()
@@ -728,6 +733,7 @@ def compute_recombined_HO_template(img_file,ROI_dir,HO_dir = "/usr/share/fsl/dat
         HO_abbrev_labels.append(abbrev_label)
         #0/0
             
+    print HO_abbrev_labels
     
     
     #0/0
