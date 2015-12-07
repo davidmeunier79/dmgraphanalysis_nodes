@@ -9,8 +9,6 @@ import os
 
 import igraph as ig
 
-import cairo as ca
-
 import math
 
 from dmgraphanalysis_nodes.utils_igraph import project2D_np
