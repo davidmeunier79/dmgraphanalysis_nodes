@@ -9,8 +9,6 @@ import os
 
 import igraph as ig
 
-import cairo as ca
-
 from utils_dtype_coord import where_in_coords,find_index_in_coords
 import math
 
