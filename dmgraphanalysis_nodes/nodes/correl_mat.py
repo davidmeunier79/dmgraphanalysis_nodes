@@ -565,8 +565,10 @@ class FindSPMRegressorInputSpec(BaseInterfaceInputSpec):
     regressor_name = traits.String(exists=True, desc='Name of the regressor in SPM design matrix to be looked after', mandatory=True)
     
     run_index = traits.Int(1, usedefault = True , desc = "Run (session) index, default is one in SPM")
-    
+     
     only_positive_values = traits.Bool(True, usedefault = True , desc = "Return only positive values of the regressor (negative values are set to 0)")
+    
+    concatenate_runs = traits.Int(None, usedefault = True , desc = "If concatenate runs, how many runs there is (needed to return the part of the regressors that is active for the session only)")
     
 class FindSPMRegressorOutputSpec(TraitedSpec):
     
@@ -595,6 +597,7 @@ class FindSPMRegressor(BaseInterface):
         regressor_name = self.inputs.regressor_name
         run_index = self.inputs.run_index
         only_positive_values = self.inputs.only_positive_values
+        concatenate_runs = self.inputs.concatenate_runs
         
         
         print spm_mat_file
@@ -625,6 +628,28 @@ class FindSPMRegressor(BaseInterface):
         if only_positive_values == True:
             
             regressor_vect[regressor_vect < 0] = 0
+        
+        if not concatenate_runs == None:
+            
+            print concatenate_runs
+            print regressor_vect.shape[0]
+            
+            nb_samples = regressor_vect.shape[0]/concatenate_runs
+            
+            print nb_samples
+            
+            begin_interval = (run_index-1)*nb_samples
+            end_interval = run_index*nb_samples
+            
+            if 0 <= begin_interval and end_interval < regressor_vect.shape[0]:
+            
+                print begin_interval,end_interval
+            
+                regressor_vect = regressor_vect[begin_interval:end_interval]
+            
+            else:
+                
+                print "Warning, error with interval [%d,%d]"%(begin_interval,end_interval)
         
         print "Saving extract_cond"
         regressor_file = os.path.abspath('extract_cond.txt')
