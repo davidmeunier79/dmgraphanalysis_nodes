@@ -629,9 +629,9 @@ class FindSPMRegressor(BaseInterface):
             
             regressor_vect[regressor_vect < 0] = 0
         
-        if not concatenate_runs == None:
+        if concatenate_runs != None:
             
-            print concatenate_runs
+            print run_index,concatenate_runs
             print regressor_vect.shape[0]
             
             nb_samples = regressor_vect.shape[0]/concatenate_runs
@@ -641,7 +641,7 @@ class FindSPMRegressor(BaseInterface):
             begin_interval = (run_index-1)*nb_samples
             end_interval = run_index*nb_samples
             
-            if 0 <= begin_interval and end_interval < regressor_vect.shape[0]:
+            if 0 <= begin_interval and end_interval <= regressor_vect.shape[0]:
             
                 print begin_interval,end_interval
             
@@ -651,6 +651,8 @@ class FindSPMRegressor(BaseInterface):
                 
                 print "Warning, error with interval [%d,%d]"%(begin_interval,end_interval)
         
+            print regressor_vect.shape
+            
         print "Saving extract_cond"
         regressor_file = os.path.abspath('extract_cond.txt')
 
