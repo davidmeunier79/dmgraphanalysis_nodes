@@ -362,32 +362,52 @@ def mean_select_indexed_mask_data(orig_ts,indexed_mask_rois_data,coord_rois,min_
 
 def regress_parameters(data_matrix,covariates):
 
-    import rpy
+    import statsmodels.formula.api as smf
     
-    resid_data_matrix = np.zeros(shape = data_matrix.shape,dtype = 'float')
+    print data_matrix.shape
     
-    for i in range(data_matrix.shape[0]):
+    print covariates.shape
+    
+    resid_data = []
+    
+    data_names = ['Var_' + str(i) for i in range(data_matrix.shape[0])]
+    
+    print data_names
+    
+    covar_names = ['Cov_' + str(i) for i in range(covariates.shape[1])]
+    
+    print np.transpose(data_matrix).shape
+    
+    all_data = np.concatenate((np.transpose(data_matrix),covariates), axis = 1)
+    
+    print all_data.shape
+    
+    col_names = data_names + covar_names
+    
+    df = pd.DataFrame(all_data, columns = col_names)
+    
+    print df
+    
+    
+    for var in data_names:
         
-        rpy.r.assign('r_serie', data_matrix[i,:])
-        rpy.r.assign('r_rp', covariates)
-        
-        r_formula = "r_serie ~"
-        
-        print covariates.shape
-        
-        for cov in range(covariates.shape[1]):
-        
-            r_formula += " r_rp[,"+str(cov+1)+"]"
+        formula = var + " ~ " + " + ".join(covar_names)
             
-            if cov != range(covariates.shape[1])[-1]:
-            
-                r_formula += " +"
-            
-        resid_data_matrix[i,] = rpy.r.lm(rpy.r(r_formula))['residuals']
+        print formula
         
-        print resid_data_matrix[i,]
+        est = smf.ols(formula=formula, data=df).fit()
         
-    print resid_data_matrix
+        ##print est.summary()
+        
+        #print est.resid.values
+        
+        resid = est.resid.values        
+        resid_data.append(est.resid.values)
+        
+
+    resid_data_matrix = np.array(resid_data,dtype = float)
+    
+    print resid_data_matrix.shape
     
     return resid_data_matrix
 
@@ -405,14 +425,13 @@ def regress_filter_normalize_parameters(data_matrix,covariates):
     
     b,a = filt.iirfilter(N = 5, Wn = 0.04, btype = 'highpass')
         
-    print data_matrix
-    
     data_names = ['Var_' + str(i) for i in range(data_matrix.shape[0])]
+    
+    print data_names
+    
     
     covar_names = ['Cov_' + str(i) for i in range(covariates.shape[1])]
     
-    
-    print data_names
     
     print np.transpose(data_matrix).shape
     
