@@ -125,7 +125,7 @@ from dmgraphanalysis_nodes.nodes.modularity import NetPropRada
 
 ################################################ threshold-based graphs
     
-def create_pipeline_intmat_to_graph_threshold(analysis_name,main_path,radatools_path,threshold = 50):
+def create_pipeline_intmat_to_graph_threshold(analysis_name,main_path,radatools_path,threshold = 50, plot = False):
 
     pipeline = pe.Workflow(name=analysis_name)
     pipeline.base_dir = main_path
@@ -159,13 +159,15 @@ def create_pipeline_intmat_to_graph_threshold(analysis_name,main_path,radatools_
     pipeline.connect( prep_rada, 'Pajek_net_file',node_roles,'Pajek_net_file')
     pipeline.connect( community_rada, 'rada_lol_file',node_roles,'rada_lol_file')
     
-    #### plot_igraph_modules_rada
-    plot_igraph_modules_rada = pe.Node(interface = PlotIGraphModules(),name='plot_igraph_modules_rada')
-    
-    pipeline.connect(prep_rada, 'Pajek_net_file',plot_igraph_modules_rada,'Pajek_net_file')
-    pipeline.connect(community_rada, 'rada_lol_file',plot_igraph_modules_rada,'rada_lol_file')
-    
-    pipeline.connect(node_roles, 'node_roles_file',plot_igraph_modules_rada,'node_roles_file')
+    if plot == True:
+            
+        #### plot_igraph_modules_rada
+        plot_igraph_modules_rada = pe.Node(interface = PlotIGraphModules(),name='plot_igraph_modules_rada')
+        
+        pipeline.connect(prep_rada, 'Pajek_net_file',plot_igraph_modules_rada,'Pajek_net_file')
+        pipeline.connect(community_rada, 'rada_lol_file',plot_igraph_modules_rada,'rada_lol_file')
+        
+        pipeline.connect(node_roles, 'node_roles_file',plot_igraph_modules_rada,'node_roles_file')
 
 
     ############################################ compute network properties with rada ############################################
