@@ -12,9 +12,20 @@ import nipype.pipeline.engine as pe
     
 from dmgraphanalysis_nodes.nodes.modularity import ComputeIntNetList
 
-from dmgraphanalysis_nodes.nodes.modularity import PrepRada,CommRada,PlotIGraphModules,ComputeNodeRoles
+from dmgraphanalysis_nodes.nodes.modularity import PrepRada,CommRada,ComputeNodeRoles
 from dmgraphanalysis_nodes.nodes.modularity import NetPropRada
  
+import imp
+
+try:
+    imp.find_module('igraph')
+    can_plot_igraph = True
+    from dmgraphanalysis_nodes.nodes.igraph_plots import PlotIGraphModules
+
+except ImportError:
+    can_plot_igraph = False
+    
+    
  
 #def create_pipeline_conmat_to_graph_density(correl_analysis_name,main_path,radatools_path,con_den = 1.0,multi = False,mod = True):
 
@@ -131,6 +142,11 @@ def create_pipeline_intmat_to_graph_threshold(analysis_name,main_path,radatools_
     pipeline.base_dir = main_path
 
 
+    if plot==True and can_plot_igraph==False:
+        
+        plot = False
+        
+        
     ### compute Z_list from coclass matrix
     compute_list_norm_coclass = pe.Node(interface = ComputeIntNetList(),name='compute_list_norm_coclass')
     compute_list_norm_coclass.inputs.threshold = threshold

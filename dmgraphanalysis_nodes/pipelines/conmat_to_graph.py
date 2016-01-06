@@ -11,7 +11,17 @@ import scipy.sparse as sp
 import nipype.pipeline.engine as pe
     
 from dmgraphanalysis_nodes.nodes.modularity import ComputeNetList,PrepRada
-from dmgraphanalysis_nodes.nodes.modularity import CommRada,PlotIGraphModules,ComputeNodeRoles
+from dmgraphanalysis_nodes.nodes.modularity import CommRada,ComputeNodeRoles
+
+import imp
+try:
+    imp.find_module('igraph')
+    can_plot_igraph = True
+    from dmgraphanalysis_nodes.nodes.igraph_plots import PlotIGraphModules
+
+except ImportError:
+    can_plot_igraph = False
+    
 from dmgraphanalysis_nodes.nodes.modularity import NetPropRada
  
  
@@ -20,6 +30,10 @@ def create_pipeline_conmat_to_graph_density(correl_analysis_name,main_path,radat
     pipeline = pe.Workflow(name=correl_analysis_name)
     pipeline.base_dir = main_path
     
+    if plot==True and can_plot_igraph==False:
+        
+        plot = False
+        
     if multi == False:
         
         ################################################ density-based graphs
@@ -132,6 +146,10 @@ def create_pipeline_conmat_to_graph_threshold(correl_analysis_name,main_path,rad
     pipeline = pe.Workflow(name=correl_analysis_name)
     pipeline.base_dir = main_path
     
+    if plot==True and can_plot_igraph==False:
+        
+        plot = False
+        
     if multi == False:
         
         ################################################ density-based graphs
