@@ -162,26 +162,41 @@ def compute_pairwise_binom(X,Y,conf_interval_binom):
     return ADJ
 
     
-def compute_pairwise_ttest_fdr(X,Y,t_test_thresh_fdr,paired = True):
+def compute_pairwise_ttest_fdr(X,Y,t_test_thresh_fdr = 0.05,paired = True):
     
     # number of nodes
     N = X.shape[0]
    
+   
+    #print X.shape
+    
     list_diff = []
     
     for i,j in it.combinations(range(N), 2):
         
-        #t_stat_zalewski = ttest2(X[i,j,:],Y[i,j,:])
+        X_nonan = X[i,j,np.logical_not(np.isnan(X[i,j,:]))]
+        Y_nonan = Y[i,j,np.logical_not(np.isnan(Y[i,j,:]))]
+            
+        #print len(X_nonan),len(Y_nonan)
+        
+        #if len(X_nonan) < 2 or len(Y_nonan) < 2:
+        if len(X_nonan) < 1 or len(Y_nonan) < 1:
+            list_diff.append([i,j,1.0,0.0])
+            continue
         
         if paired == True:
-            t_stat,p_val = stat.ttest_rel(X[i,j,:],Y[i,j,:])
+            
+            t_stat,p_val = stat.ttest_rel(X_nonan,Y_nonan)
+            
+            ## pas encore present (version scipy 0.18)
+            #t_stat,p_val = stat.ttest_rel(X[i,j,:],Y[i,j,:],nan_policy = 'omit')
         
         else:
-            t_stat,p_val = stat.ttest_ind(X[i,j,:],Y[i,j,:])
+            t_stat,p_val = stat.ttest_ind(X_nonan,Y_nonan)
         
         #print t_stat,p_val
         
-        list_diff.append([i,j,p_val,np.sign(np.mean(X[i,j,:])-np.mean(Y[i,j,:]))])
+        list_diff.append([i,j,p_val,np.sign(np.mean(X_nonan)-np.mean(Y_nonan))])
         
     #print list_diff
         
@@ -196,8 +211,6 @@ def compute_pairwise_ttest_fdr(X,Y,t_test_thresh_fdr,paired = True):
     print np.sum(np_list_diff[:,3] == 0.0)
     print np.sum(np_list_diff[:,3] == 1.0),np.sum(np_list_diff[:,3] == 2.0),np.sum(np_list_diff[:,3] == 3.0),np.sum(np_list_diff[:,3] == 4.0)
     print np.sum(np_list_diff[:,3] == -1.0),np.sum(np_list_diff[:,3] == -2.0),np.sum(np_list_diff[:,3] == -3.0),np.sum(np_list_diff[:,3] == -4.0)
-    
-    
     
     
     signif_signed_adj_mat = np.zeros((N,N),dtype = 'int')
