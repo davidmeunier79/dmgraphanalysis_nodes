@@ -33,6 +33,8 @@ def return_signif_code(p_values,uncor_alpha = 0.05,fdr_alpha = 0.05,bon_alpha = 
 
     #print p_values
     
+    print uncor_alpha,fdr_alpha,bon_alpha
+    
     N = p_values.shape[0]
     
     order =  p_values.argsort()
@@ -49,6 +51,13 @@ def return_signif_code(p_values,uncor_alpha = 0.05,fdr_alpha = 0.05,bon_alpha = 
     ################ uncor #############################
     ### code = 0 for all correlation below uncor_alpha
     signif_code[p_values > uncor_alpha] = 0
+    
+    print p_values[p_values > uncor_alpha]
+    
+    #print p_values < uncor_alpha
+    #print p_values == uncor_alpha
+    
+    ##print signif_code
     
     ################ FPcor #############################
     
@@ -68,6 +77,9 @@ def return_signif_code(p_values,uncor_alpha = 0.05,fdr_alpha = 0.05,bon_alpha = 
     ################# bonferroni #######################
     
     signif_code[p_values < bon_alpha/N] = 4
+    
+    print signif_code
+    
     
     return signif_code
     
@@ -162,7 +174,7 @@ def compute_pairwise_binom(X,Y,conf_interval_binom):
     return ADJ
 
     
-def compute_pairwise_ttest_fdr(X,Y,t_test_thresh_fdr = 0.05,paired = True):
+def compute_pairwise_ttest_fdr(X,Y, cor_alpha, uncor_alpha, paired = True):
     
     # number of nodes
     N = X.shape[0]
@@ -179,15 +191,22 @@ def compute_pairwise_ttest_fdr(X,Y,t_test_thresh_fdr = 0.05,paired = True):
             
         #print len(X_nonan),len(Y_nonan)
         
-        #if len(X_nonan) < 2 or len(Y_nonan) < 2:
-        if len(X_nonan) < 1 or len(Y_nonan) < 1:
-            list_diff.append([i,j,1.0,0.0])
+        if len(X_nonan) < 2 or len(Y_nonan) < 2:
+        #if len(X_nonan) < 1 or len(Y_nonan) < 1:
+            #list_diff.append([i,j,1.0,0.0])
             continue
         
         if paired == True:
             
             t_stat,p_val = stat.ttest_rel(X_nonan,Y_nonan)
             
+            if np.isnan(p_val):
+                
+                print "Warning, unable to compute T-test: "
+                print t_stat,p_val,X_nonan,Y_nonan
+                
+                
+           
             ## pas encore present (version scipy 0.18)
             #t_stat,p_val = stat.ttest_rel(X[i,j,:],Y[i,j,:],nan_policy = 'omit')
         
@@ -202,7 +221,9 @@ def compute_pairwise_ttest_fdr(X,Y,t_test_thresh_fdr = 0.05,paired = True):
         
     np_list_diff = np.array(list_diff)
    
-    signif_code = return_signif_code(np_list_diff[:,2],uncor_alpha = 0.01,fdr_alpha = t_test_thresh_fdr, bon_alpha = 0.05)
+    print np_list_diff
+    
+    signif_code = return_signif_code(np_list_diff[:,2],uncor_alpha = uncor_alpha,fdr_alpha = cor_alpha, bon_alpha = cor_alpha)
     
     print np.sum(signif_code == 0.0),np.sum(signif_code == 1.0),np.sum(signif_code == 2.0),np.sum(signif_code == 3.0),np.sum(signif_code == 4.0)
     
