@@ -37,7 +37,7 @@ import scipy.spatial.distance as dist
 ########################################### Activation peaks ROI template (computed once before the pipeline) ################################################
 
 ### scan toutes les possibilités dans le cube, et ne retourne que les ROIs dont le nombre de voxels dans le voisinage appartienant à AAL et au mask est supérieur à min_nb_voxels_in_neigh 
-def return_indexed_mask_neigh_within_binary_template(peak_position,neighbourhood,resliced_template_template_data,orig_peak_coords_dt):
+def return_indexed_mask_neigh_within_binary_template(peak_position,neighbourhood,resliced_template_template_data,orig_peak_coords_dt,min_nb_voxels_in_neigh):
     
     peak_x,peak_y,peak_z = np.array(peak_position,dtype = 'int')
     
@@ -46,6 +46,9 @@ def return_indexed_mask_neigh_within_binary_template(peak_position,neighbourhood
     list_neigh_coords = []
     
     peak_template_roi_index = resliced_template_template_data[peak_x,peak_y,peak_z]
+    
+    print peak_template_roi_index
+    
     
     #print "template index = " + str(peak_template_roi_index)
     
@@ -71,12 +74,132 @@ def return_indexed_mask_neigh_within_binary_template(peak_position,neighbourhood
                 
                 count_neigh_in_orig_mask = count_neigh_in_orig_mask +1
                 
+        print list_neigh_coords
+        
         if min_nb_voxels_in_neigh <= len(list_neigh_coords):
             
             return list_neigh_coords,peak_template_roi_index
             
     return [],0
+
+def return_indexed_mask_cube_size_within_binary_template(peak_position,cube_size,resliced_template_template_data,orig_peak_coords_dt,min_nb_voxels_in_neigh):
     
+    peak_x,peak_y,peak_z = np.array(peak_position,dtype = 'int')
+    
+    list_neigh_coords = []
+    
+    peak_template_roi_index = resliced_template_template_data[peak_x,peak_y,peak_z]
+    
+    print peak_template_roi_index
+    
+    
+    #print "template index = " + str(peak_template_roi_index)
+    
+    count_neigh_in_orig_mask = 0
+        
+    if peak_template_roi_index != 0:
+        
+        for relative_coord in iter.product(range(cube_size), repeat=3):
+
+            neigh_x,neigh_y,neigh_z = peak_position + relative_coord
+
+            neigh_coord_dt = convert_np_coords_to_coords_dt(np.array([[neigh_x,neigh_y,neigh_z]]))
+            #neigh_coord_dt = np.array([(neigh_x,neigh_y,neigh_z), ], dtype = coord_dt)
+            
+            neigh_template_roi_index = resliced_template_template_data[neigh_x,neigh_y,neigh_z]
+            
+            #print type(orig_peak_coords_dt),orig_peak_coords_dt.dtype,orig_peak_coords_dt.shape
+    
+            #if neigh_template_roi_index == peak_template_roi_index and np.in1d(neigh_coord_dt,orig_peak_coords_dt):
+            if neigh_template_roi_index != 0 and neigh_coord_dt in orig_peak_coords_dt:
+            
+                list_neigh_coords.append(np.array([neigh_x,neigh_y,neigh_z],dtype = 'int16'))
+                
+                count_neigh_in_orig_mask = count_neigh_in_orig_mask +1
+                
+        print list_neigh_coords
+        
+        0/0
+        
+        if min_nb_voxels_in_neigh <= len(list_neigh_coords):
+            
+            return list_neigh_coords,peak_template_roi_index
+            
+    return [],0
+
+def return_neigh_within_same_region(peak_position,neighbourhood,resliced_template_template_data,min_nb_voxels_in_neigh):
+    
+    peak_x,peak_y,peak_z = np.array(peak_position,dtype = 'int')
+    
+    neigh_range = range(-neighbourhood,neighbourhood+1)
+    
+    list_neigh_coords = []
+    
+    peak_template_roi_index = int(resliced_template_template_data[peak_x,peak_y,peak_z])
+    
+    #print peak_template_roi_index
+    
+    
+    #print "template index = " + str(peak_template_roi_index)
+    
+    count_neigh_in_orig_mask = 0
+        
+    if peak_template_roi_index != 0:
+        
+        for relative_coord in iter.product(neigh_range, repeat=3):
+
+            neigh_x,neigh_y,neigh_z = peak_position + relative_coord
+
+            neigh_coord_dt = convert_np_coords_to_coords_dt(np.array([[neigh_x,neigh_y,neigh_z]]))
+            #neigh_coord_dt = np.array([(neigh_x,neigh_y,neigh_z), ], dtype = coord_dt)
+            
+            neigh_template_roi_index = resliced_template_template_data[neigh_x,neigh_y,neigh_z]
+            
+            #print type(orig_peak_coords_dt),orig_peak_coords_dt.dtype,orig_peak_coords_dt.shape
+    
+            if neigh_template_roi_index == peak_template_roi_index :
+            
+                list_neigh_coords.append(np.array([neigh_x,neigh_y,neigh_z],dtype = 'int16'))
+                
+                count_neigh_in_orig_mask = count_neigh_in_orig_mask +1
+                
+        #print list_neigh_coords
+        
+        if min_nb_voxels_in_neigh <= len(list_neigh_coords):
+            
+            return list_neigh_coords,peak_template_roi_index
+            
+    return [],0
+
+def return_voxels_within_same_region(peak_position,ROI_cube_size,template_data,min_nb_voxels_in_neigh):
+    
+    template_roi_index = int(template_data[peak_position[0],peak_position[1],peak_position[2]])
+    
+    if template_roi_index != 0:
+        
+        list_voxel_coords = []
+    
+        for relative_coord in iter.product(range(ROI_cube_size), repeat=3):
+
+            neigh_x,neigh_y,neigh_z = peak_position + relative_coord
+
+            if np.all(peak_position + relative_coord < np.array(template_data.shape)):
+            
+                if template_data[neigh_x,neigh_y,neigh_z] == template_roi_index :
+                
+                    list_voxel_coords.append(np.array([neigh_x,neigh_y,neigh_z],dtype = 'int16'))
+             
+        #list_voxel_coords = [[peak_position[0] + relative_coord[0],peak_position[1] + relative_coord[1],peak_position[2] + relative_coord[2]] for relative_coord in iter.product(range(ROI_cube_size), repeat=3) if np.all(peak_position + relative_coord < np.array(template_data.shape)) and  template_data[peak_position[0] + relative_coord[0],peak_position[1] + relative_coord[1],peak_position[2] + relative_coord[2]] == template_roi_index]
+        
+        
+        if min_nb_voxels_in_neigh <= len(list_voxel_coords):
+            
+            return list_voxel_coords,template_roi_index
+            
+    return [],0
+
+#########################################################################################################
+
 def remove_close_peaks(list_orig_peak_coords,min_dist = 2.0 * np.sqrt(3)):
     
     list_selected_peaks_coords = []
@@ -257,114 +380,6 @@ def remove_close_peaks_neigh_in_template(list_orig_peak_coords,template_data,tem
         print len(list_selected_peaks_coords)
         
     return list_selected_peaks_coords,indexed_mask_rois_data,label_rois
-    
-### labeled mask, constrained with HO template
-def compute_labelled_mask_from_HO():
-    
-    write_dir = os.path.join(nipype_analyses_path,peak_activation_mask_analysis_name)
-    
-    if not os.path.exists(write_dir):
-        os.makedirs(write_dir)
-
-        
-    
-    # prepare the data
-    img = load(spm_contrast_image_file)
-    
-    img_header = img.get_header()
-    img_affine = img.get_affine()
-    img_shape = img.shape
-    
-    print img_shape
-    
-    img_data = img.get_data()
-    
-    
-    ########################## Computing combined HO areas 
-    
-    resliced_full_HO_data,np_HO_labels,np_HO_abbrev_labels = compute_recombined_HO_template(img_header,img_affine,img_shape)
-    
-    #np.savetxt(info_template_file,info_rois, fmt = '%s %s %s %s %s %s')
-      
-      
-      
-    #### get peaks (avec la fonction stat_map.get_3d_peaks)
-    
-    peaks =  stat_map.get_3d_peaks(image=img,mask=None, threshold = threshold,nn = cluster_nbvoxels)
-    
-    print len(peaks)
-    
-    list_orig_peak_coords = [peak['ijk'] for peak in peaks]
-    list_orig_peak_MNI_coords = [peak['pos'] for peak in peaks]
-    
-    
-    print len(list_orig_peak_coords)
-    
-    #print list_orig_peak_MNI_coords
-    #print len(list_orig_peak_MNI_coords)
-        
-    #### selectionne les pics sur leur distance entre eux et sur leur appatenance au template HO
-    #list_selected_peaks_coords,indexed_mask_rois_data,label_rois = remove_close_peaks_neigh_in_template(list_orig_peak_coords,resliced_full_HO_data,HO_labels,min_dist = ROI_cube_size * 3 * np.sqrt(3.0))
-    #list_selected_peaks_coords,indexed_mask_rois_data,label_rois = remove_close_peaks_neigh_in_binary_template(list_orig_peak_coords,resliced_full_HO_data,HO_labels,min_dist = min_dist_between_ROIs)
-    #list_selected_peaks_coords,indexed_mask_rois_data,label_rois,list_rois_MNI_coords = remove_close_peaks_neigh_in_binary_template_labels(list_orig_peak_coords,list_orig_peak_MNI_coords,resliced_full_HO_data,HO_abbrev_labels,min_dist_between_ROIs)
-    list_selected_peaks_coords,indexed_mask_rois_data,list_selected_peaks_indexes = remove_close_peaks_neigh_in_binary_template(list_orig_peak_coords,resliced_full_HO_data,min_dist_between_ROIs)
-    
-    print list_selected_peaks_indexes
-    print len(list_selected_peaks_indexes)
-    
-    #for coord in list_selected_peaks_coords:
-    
-        #print coord
-    ##template_indexes = 
-        #print resliced_full_HO_data[coord[0],coord[1],coord[2]]
-    
-    template_indexes = np.array([resliced_full_HO_data[coord[0],coord[1],coord[2]] for coord in list_selected_peaks_coords],dtype = 'int64')
-    
-    print template_indexes-1
-    
-    label_rois = np_HO_abbrev_labels[template_indexes-1]
-    full_label_rois = np_HO_labels[template_indexes-1]
-    
-    #print label_rois2
-    
-    print label_rois
-    
-    #### exporting Rois image with different indexes 
-    print np.unique(indexed_mask_rois_data)[1:].shape
-    nib.save(nib.Nifti1Image(data = indexed_mask_rois_data,header = img_header,affine = img_affine),indexed_mask_rois_file)
-    
-    #### saving ROI coords as textfile
-    np.savetxt(coord_rois_file,np.array(list_selected_peaks_coords,dtype = int), fmt = '%d')
-    
-    #### saving MNI coords as textfile
-    list_rois_MNI_coords = [list_orig_peak_MNI_coords[index] for index in list_selected_peaks_indexes]
-    
-    print list_rois_MNI_coords
-    
-    rois_MNI_coords = np.array(list_rois_MNI_coords,dtype = int)
-    np.savetxt(MNI_coord_rois_file,rois_MNI_coords, fmt = '%d')
-    
-    
-    #### saving labels 
-    np.savetxt(label_rois_file,label_rois, fmt = '%s')
-    
-    ### saving all together for infosource
-    np_label_rois = np.array(label_rois,dtype = 'string').reshape(len(label_rois),1)
-    np_full_label_rois = np.array(full_label_rois,dtype = 'string').reshape(len(full_label_rois),1)
-    
-    print np_label_rois.shape
-    print rois_MNI_coords.shape
-    
-    #info_rois = np.hstack((np.unique(indexed_mask_rois_data)[1:].reshape(len(label_rois),1),np_full_label_rois,np_label_rois,rois_MNI_coords))
-    #info_rois = np.hstack((np.unique(indexed_mask_rois_data)[1:].reshape(len(label_rois),1),rois_MNI_coords))
-    info_rois = np.hstack((np.unique(indexed_mask_rois_data)[1:].reshape(len(label_rois),1),np_full_label_rois,np_label_rois,rois_MNI_coords))
-    
-    print info_rois
-   
-    np.savetxt(info_rois_file,info_rois, fmt = '%s %s %s %s %s %s')
-    
-    
-    return indexed_mask_rois_file,coord_rois_file
     
     
 def compute_labelled_mask_from_HO_all_signif_contrasts():

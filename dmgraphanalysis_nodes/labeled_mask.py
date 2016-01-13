@@ -833,3 +833,149 @@ def compute_labelled_mask_from_HO_sub(resliced_full_HO_img_file,info_template_fi
         
     return ROI_mask_file,ROI_mask_labels_file
     
+def segment_atlas_in_cubes(ROI_dir,ROI_cube_size,min_nb_voxels_in_neigh):
+    
+    from dmgraphanalysis_nodes.peak_labelled_mask import return_indexed_mask_neigh_within_binary_template
+    
+    resliced_atlas_file = os.path.join(ROI_dir,"rHarvard-Oxford-cortl-sub-recombined-111regions.nii")
+    
+    resliced_atlas_labels_file = os.path.join(ROI_dir,"info-Harvard-Oxford-reorg.txt")
+    
+    
+    if not os.path.exists(resliced_atlas_file) or not os.path.exists(resliced_atlas_labels_file):
+        
+        print "Warning, missing atals: " + resliced_atlas_file
+        
+        return
+        
+    resliced_atlas = nib.load(resliced_atlas_file)
+    
+    resliced_atlas_data = resliced_atlas.get_data()
+    
+    reslice_atlas_header = resliced_atlas.get_header()
+    
+    reslice_atlas_affine = resliced_atlas.get_affine()
+    
+    
+    print resliced_atlas_data.shape
+    
+    
+    labels = [line.strip().split(' ')[-1] for line in open(resliced_atlas_labels_file)]
+    
+    np_labels = np.array(labels,dtype = 'string')
+    
+    print labels
+    
+    ############################ computing #####################################################
+    
+    list_selected_peaks_coords,indexed_mask_rois_data,label_rois = generate_continuous_mask_in_atlas(resliced_atlas_data,labels,ROI_cube_size,min_nb_voxels_in_neigh)
+
+    print len(label_rois)
+    
+    template_indexes = np.array([resliced_atlas_data[coord[0],coord[1],coord[2]] for coord in list_selected_peaks_coords],dtype = 'int64')
+    
+    print template_indexes-1
+    
+    #label_rois = np_HO_abbrev_labels[template_indexes-1]
+    full_label_rois = np_labels[template_indexes-1]
+    
+    #print label_rois2
+    
+    print label_rois
+    
+    #### exporting Rois image with different indexes 
+    print np.unique(indexed_mask_rois_data)[1:].shape
+    
+    ROI_mask_prefix = "template-ROI_cube_size_" + str(ROI_cube_size)
+    
+    indexed_mask_rois_file = os.path.join(ROI_dir, "indexed_mask-" + ROI_mask_prefix + ".nii")
+    
+    nib.save(nib.Nifti1Image(dataobj = indexed_mask_rois_data,header = reslice_atlas_header,affine = reslice_atlas_affine),indexed_mask_rois_file)
+    
+    #### saving ROI coords as textfile
+    
+    coord_rois_file =  os.path.join(ROI_dir, "coords-" + ROI_mask_prefix + ".txt")
+
+    np.savetxt(coord_rois_file,np.array(list_selected_peaks_coords,dtype = int), fmt = '%d')
+    
+    
+    #### saving labels
+    label_rois_file = os.path.join(ROI_dir,"labels-" + ROI_mask_prefix + ".txt")
+    
+    np_full_label_rois = np.array(full_label_rois,dtype = 'string').reshape(len(full_label_rois),1)
+    
+    print np_full_label_rois.shape
+    
+    np.savetxt(label_rois_file,np_full_label_rois, fmt = '%s')
+    
+    #info_rois = np.hstack((np.unique(indexed_mask_rois_data)[1:].reshape(len(label_rois),1),np_full_label_rois,np_label_rois,rois_MNI_coords))
+    #info_rois = np.hstack((np.unique(indexed_mask_rois_data)[1:].reshape(len(label_rois),1),rois_MNI_coords))
+    info_rois = np.hstack((np.unique(indexed_mask_rois_data)[1:].reshape(len(full_label_rois),1),np.array(list_selected_peaks_coords,dtype = int),np_full_label_rois))
+    
+    print info_rois
+    info_rois_file = os.path.join(ROI_dir,"info-" + ROI_mask_prefix + ".txt")
+   
+    np.savetxt(info_rois_file,info_rois, fmt = '%s %s %s %s %s')
+    
+    
+    return indexed_mask_rois_file,coord_rois_file
+    
+def generate_peaks(ROI_cube_size,mask_shape):
+    
+    from itertools import product
+    
+    ijk_list = [range(0,shape_i,ROI_cube_size) for shape_i in mask_shape]
+    
+    print ijk_list
+    
+    
+    list_orig_peaks = [[i,j,k] for i,j,k in product(*ijk_list)]
+    
+    print list_orig_peaks
+    
+    return list_orig_peaks
+
+    
+def generate_continuous_mask_in_atlas(template_data,template_labels,ROI_cube_size,min_nb_voxels_in_neigh):
+    
+    from dmgraphanalysis_nodes.utils_dtype_coord import convert_np_coords_to_coords_dt
+    from dmgraphanalysis_nodes.peak_labelled_mask import return_voxels_within_same_region
+
+    template_data_shape = template_data.shape
+    
+    indexed_mask_rois_data = np.zeros(template_data_shape,dtype = 'int64') -1
+    
+    print indexed_mask_rois_data.shape
+    
+    list_orig_peak_coords = generate_peaks(ROI_cube_size,template_data_shape)
+    
+    label_rois = []
+    
+    list_selected_peaks_coords = []
+    
+    for orig_peak_coord in list_orig_peak_coords:
+        
+        print orig_peak_coord
+        
+        orig_peak_coord_np = np.array(orig_peak_coord)
+        
+        print orig_peak_coord_np
+        
+        list_voxel_coords,peak_template_roi_index = return_voxels_within_same_region(orig_peak_coord_np,ROI_cube_size,template_data,min_nb_voxels_in_neigh)
+        
+        print peak_template_roi_index
+        
+        if peak_template_roi_index > 0:
+            
+            neigh_coords = np.array(list_voxel_coords,dtype = 'int16')
+    
+            indexed_mask_rois_data[neigh_coords[:,0],neigh_coords[:,1],neigh_coords[:,2]] = len(list_selected_peaks_coords)
+        
+            label_rois.append(template_labels[peak_template_roi_index-1])
+            
+            list_selected_peaks_coords.append(orig_peak_coord_np)
+                
+            print len(list_selected_peaks_coords)
+        
+    return list_selected_peaks_coords,indexed_mask_rois_data,label_rois
+    
