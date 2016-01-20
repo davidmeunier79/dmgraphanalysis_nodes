@@ -322,13 +322,22 @@ def compute_labelled_mask_from_anat_ROIs(ref_img_file,ROI_dir):
     return labelled_mask_data_file,labels_list_file
     #nib.load(ref_img_file)
     
-def compute_MNI_coords_from_indexed_template(indexes_template_file,ROI_dir):
+def compute_MNI_coords_from_indexed_template(indexed_template_file,ROI_dir):
     
     """
     compute MNI coords from an indexed template
     """
     
-    ref_image = nib.load(indexes_template_file)
+    path, base,ext = split_f(indexed_template_file)
+    
+    print base
+    
+    if len(base.split("-")) > 1:
+        base_name = base.split("-")[1]
+    else:
+        base_name = base
+          
+    ref_image = nib.load(indexed_template_file)
     
     ref_image_data = ref_image.get_data()
     
@@ -366,12 +375,12 @@ def compute_MNI_coords_from_indexed_template(indexes_template_file,ROI_dir):
     
     print ROI_MNI_coords
     
-    ROI_coords_file = os.path.join(ROI_dir,"ROI_coords.txt")
+    ROI_coords_file = os.path.join(ROI_dir,"ROI_coords-" + base_name + ".txt")
     
     np.savetxt(ROI_coords_file,ROI_coords, fmt = "%.3f %.3f %.3f")
     
     
-    ROI_MNI_coords_file = os.path.join(ROI_dir,"ROI_MNI_coords.txt")
+    ROI_MNI_coords_file = os.path.join(ROI_dir,"ROI_MNI_coords-" + base_name + ".txt")
     
     np.savetxt(ROI_MNI_coords_file,ROI_MNI_coords, fmt = "%.3f %.3f %.3f")
     
@@ -886,7 +895,7 @@ def segment_atlas_in_cubes(ROI_dir,ROI_cube_size,min_nb_voxels_in_neigh):
     #### exporting Rois image with different indexes 
     print np.unique(indexed_mask_rois_data)[1:].shape
     
-    ROI_mask_prefix = "template-ROI_cube_size_" + str(ROI_cube_size)
+    ROI_mask_prefix = "template_ROI_cube_size_" + str(ROI_cube_size)
     
     indexed_mask_rois_file = os.path.join(ROI_dir, "indexed_mask-" + ROI_mask_prefix + ".nii")
     

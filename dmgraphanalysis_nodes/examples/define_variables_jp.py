@@ -496,13 +496,15 @@ info_template_file  =  os.path.join(nipype_analyses_path,peak_activation_mask_an
 
 ## clusters
 
-ROI_dir = os.path.join(nipype_analyses_path,"Coord_ROI")
+#ROI_dir = os.path.join(nipype_analyses_path,"Coord_ROI")
 
-ROI_mask_file = os.path.join(ROI_dir,"ROI_coords_mask4.nii")
-ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s)4.txt")
-ROI_coords_labels_file =  os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s)_Names4.txt")
+#ROI_mask_file = os.path.join(ROI_dir,"ROI_coords_mask4.nii")
+#ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s)4.txt")
+#ROI_coords_labels_file =  os.path.join(ROI_dir,"CLUSTERS_AMPLI-d1_(-10s)_Names4.txt")
 
+### ROI single nifti file
 
+ROI_dir = os.path.join(nipype_analyses_path,"Package6_David")
 
 
 ### correlation

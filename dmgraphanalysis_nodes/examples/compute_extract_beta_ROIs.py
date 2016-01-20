@@ -903,7 +903,7 @@ if __name__ =='__main__':
     ### from a list of VOI single files
     #compute_ROI_nii_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file,ROI_coords_labels_file,neighbourhood = neighbourhood)
     
-    #ROI_mask_file,ROI_label_file = compute_labelled_mask_from_anat_ROIs(resliced_full_HO_img_file,ROI_dir)
+    ROI_mask_file,ROI_label_file = compute_labelled_mask_from_anat_ROIs(resliced_full_HO_img_file,ROI_dir)
     
     ##compute_beta_2betas(ROI_dir,ROI_mask_file,ROI_label_file)
     #compute_beta_2betas_by_ROI(ROI_dir,ROI_mask_file,ROI_label_file)
@@ -911,9 +911,9 @@ if __name__ =='__main__':
     
     ## from a list
     
-    ROI_mask_file = compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file)
+    #ROI_mask_file = compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file)
     
-    compute_beta_2betas(ROI_dir,ROI_mask_file,ROI_coords_labels_file)
+    #compute_beta_2betas(ROI_dir,ROI_mask_file,ROI_coords_labels_file)
     
     
     
