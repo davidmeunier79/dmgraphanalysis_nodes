@@ -118,6 +118,159 @@ class ExtractTS(BaseInterface):
     
         return outputs
 
+
+######################################################################################## IntersectMask ##################################################################################################################
+
+from dmgraphanalysis_nodes.utils_cor import mean_select_indexed_mask_data
+
+class IntersectMaskInputSpec(BaseInterfaceInputSpec):
+    
+    
+    indexed_rois_file = File(exists=True, desc='nii file with indexed mask where all voxels belonging to the same ROI have the same value (! starting from 1)', mandatory=True)
+    filter_mask_file = File(exists=True, desc='nii file with (binary) mask - e.g. grey matter mask', mandatory=True)
+    
+    coords_rois_file = File(exists=True, desc='ijk coords txt file', mandatory=False)
+    labels_rois_file = File(exists=True, desc='labels txt file', mandatory=False)
+    MNI_coords_rois_file = File(exists=True, desc='MNI coords txt file', mandatory=False)
+    #filter_thr = traits.Float(0.999, usedefault = True, desc='Value to threshold filter_mask')
+    filter_thr = traits.Float(0.9,  desc='Value to threshold filter_mask',mandatory = False,usedefault = True)
+                          
+class IntersectMaskOutputSpec(TraitedSpec):
+    
+    filtered_indexed_rois_file = File(exists=True, desc='nii file with indexed mask where all voxels belonging to the same ROI have the same value (! starting from 1)')
+    
+    filtered_coords_rois_file = File(exists=True, desc='filtered ijk coords txt file')
+    filtered_ROI_labels_file = File(exists=True, desc='filtered labels txt file')
+    filtered_MNI_coords_rois_file = File(exists=True, desc='filtered MNI coords txt file')
+    
+    
+
+
+class IntersectMask(BaseInterface):
+    
+    """
+    Keep only values of indexed mask where filtermask is present
+    Optionnally, keep only ijk_coords, MNI_coords and labels that are kept in filtered mask
+    """
+
+    input_spec = IntersectMaskInputSpec
+    output_spec = IntersectMaskOutputSpec
+
+    def _run_interface(self, runtime):
+            
+        #import os
+        #import numpy as np
+        import nibabel as nib
+        
+        import nipype.interfaces.spm as spm
+
+        #from dmgraphanalysis.utils_plot import plot_signals
+        
+        indexed_rois_file = self.inputs.indexed_rois_file
+        filter_mask_file = self.inputs.filter_mask_file
+        coords_rois_file = self.inputs.coords_rois_file
+        labels_rois_file = self.inputs.labels_rois_file
+        MNI_coords_rois_file = self.inputs.MNI_coords_rois_file
+        filter_thr = self.inputs.filter_thr 
+        
+        print filter_thr
+        
+        ## loading ROI indexed mask
+        indexed_rois_img = nib.load(indexed_rois_file)
+        
+        indexed_rois_data = indexed_rois_img.get_data()
+        
+        print "indexed_rois_data: "
+        print indexed_rois_data.shape
+        
+        ### loading time series
+        filter_mask_data = nib.load(filter_mask_file).get_data()
+        
+        print "filter_mask_data shape:"
+        print filter_mask_data.shape
+            
+        if filter_mask_data.shape != indexed_rois_data.shape:
+            
+            print "reslicing filtered_mask"
+            
+            
+            reslice_filter_mask = spm.Reslice()
+            reslice_filter_mask.inputs.in_file = filter_mask_file
+            reslice_filter_mask.inputs.space_defining = indexed_rois_file
+            #reslice_filter_mask.inputs.out_file = os.path.abspath("resliced_filter_mask.nii")
+            
+            resliced_filter_mask_file =  reslice_filter_mask.run().outputs.out_file
+
+            filter_mask_data = nib.load(resliced_filter_mask_file).get_data()
+        
+        print filter_mask_data.shape
+        
+        print np.unique(filter_mask_data)
+        
+        filter_mask_data[filter_mask_data > filter_thr] = 1.0
+        filter_mask_data[filter_mask_data <= filter_thr] = 0.0
+        
+        #print np.unique(filter_mask_data)
+        
+        print len(np.unique(indexed_rois_data))
+        
+        filtered_indexed_rois_data = filter_mask_data * indexed_rois_data.copy()
+        
+        print len(np.unique(filtered_indexed_rois_data))
+        
+        filtered_indexed_rois_img_file = os.path.abspath("filtered_indexed_rois.nii")
+        nib.save(nib.Nifti1Image(filtered_indexed_rois_data,indexed_rois_img.get_affine(),indexed_rois_img.get_header()),filtered_indexed_rois_img_file)
+    
+        0/0
+        
+    
+        ## loading ROI coordinates
+        coords_rois = np.loadtxt(coords_rois_file)
+        
+        print "coords_rois: " 
+        print coords_rois.shape
+        
+        
+            
+            
+            
+        mean_masked_ts,subj_coord_rois = mean_select_indexed_mask_data(orig_ts,indexed_mask_rois_data,coord_rois,min_BOLD_intensity = 50)
+        
+        mean_masked_ts = np.array(mean_masked_ts,dtype = 'f')
+        subj_coord_rois = np.array(subj_coord_rois,dtype = 'float')
+        
+        print mean_masked_ts.shape
+            
+        ### saving time series
+        mean_masked_ts_file = os.path.abspath("mean_masked_ts.txt")
+        np.savetxt(mean_masked_ts_file,mean_masked_ts,fmt = '%.3f')
+        
+        ### saving subject ROIs
+        subj_coord_rois_file = os.path.abspath("subj_coord_rois.txt")
+        np.savetxt(subj_coord_rois_file,subj_coord_rois,fmt = '%.3f')
+        
+        
+        print "plotting mean_masked_ts"
+        
+        plot_mean_masked_ts_file = os.path.abspath('mean_masked_ts.eps')    
+        
+        plot_signals(plot_mean_masked_ts_file,mean_masked_ts)
+        
+        return runtime
+        
+        #return mean_masked_ts_file,subj_coord_rois_file
+        
+    def _list_outputs(self):
+        
+        outputs = self._outputs().get()
+        
+        outputs["mean_masked_ts_file"] = os.path.abspath("mean_masked_ts.txt")
+        outputs["subj_coord_rois_file"] = os.path.abspath("subj_coord_rois.txt")
+    
+        return outputs
+
+
+
 ############################################################################################### ExtractMeanTS #####################################################################################################
 
 from dmgraphanalysis_nodes.utils_cor import mean_select_mask_data
