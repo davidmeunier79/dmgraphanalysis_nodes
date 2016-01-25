@@ -523,5 +523,16 @@ ROI_dir = os.path.join(nipype_analyses_path,"Package6_David")
 
 #cor_mat_analysis_name = "Correl_analyses-filtered-ROI_coords2-amplitude_noA26-retest"
 
+
+### 3eme jeu de ROI pour 
+ROI_dir = os.path.join(nipype_analyses_path,"FunctConnectivity-Coords3")
+
+ROI_mask_file =  os.path.join(ROI_dir,"All_labelled_ROI-neigh_"+str(neighbourhood)+".nii")
+ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"Correlations3_Coordinates.txt")
+ROI_coords_labels_file =  os.path.join(ROI_dir,"Correlations3_Names.txt")
+
+cor_mat_analysis_name = "Correl_analyses-filtered-ROI_coords2-amplitude_noA26"
+
+
 conf_interval_prob = 0.05
     
