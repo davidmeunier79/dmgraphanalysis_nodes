@@ -509,25 +509,25 @@ def gather_correl_values_by_pair():
     
 if __name__ =='__main__':
     
-    #if not os.path.isfile(ROI_mask_file):
+    if not os.path.isfile(ROI_mask_file):
         
-        ##compute_labelled_mask_from_HO()
-        #### compute ROI mask HO()
-        #compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file)
+        #compute_labelled_mask_from_HO()
+        ### compute ROI mask HO()
+        compute_labelled_mask_from_ROI_coords_files(resliced_full_HO_img_file,ROI_coords_MNI_coords_file)
             
-    ##### compute preprocessing for weighted correlation matrices
-    #main_workflow = create_correl_mat_by_session_workflow()
+    #### compute preprocessing for weighted correlation matrices
+    main_workflow = create_correl_mat_by_session_workflow()
     
-    ###main_workflow.write_graph(cor_mat_analysis_name + '_graph.dot',graph2use='flat', format = 'svg')
-    #main_workflow.config['execution'] = {'remove_unnecessary_outputs':'false'}
+    ##main_workflow.write_graph(cor_mat_analysis_name + '_graph.dot',graph2use='flat', format = 'svg')
+    main_workflow.config['execution'] = {'remove_unnecessary_outputs':'false'}
     
-    ################################ Attention, il ne semble pas que ca marche avec le multiprocess - semble de venir de l'utilisation des MapNodes avec Rpy..... ############################
-    ################################################ Ca bouffe toute la mémoire !!!!!!!!!!!!!!!!! ######################################################################
-    ##################################################################### Utilisé le run sequentiel de preferences ############################
+    ############################### Attention, il ne semble pas que ca marche avec le multiprocess - semble de venir de l'utilisation des MapNodes avec Rpy..... ############################
+    ############################################### Ca bouffe toute la mémoire !!!!!!!!!!!!!!!!! ######################################################################
+    #################################################################### Utilisé le run sequentiel de preferences ############################
     
-    ##main_workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 8})
+    #main_workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 8})
     
-    #main_workflow.run()
+    main_workflow.run()
         
     
     #gather_correl_values()
