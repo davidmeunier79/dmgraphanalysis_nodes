@@ -252,7 +252,8 @@ def gather_Z_correl_values():
             
             df_all_Z_cor_values = pd.DataFrame(np_all_Z_cor_values,columns = labels_pairs,index = behav_subject_ids_noA26)
             
-            df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values_" + sess + '_' + cond +'.txt')
+            df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values3_" + sess + '_' + cond +'.txt')
+            #df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values_" + sess + '_' + cond +'.txt')
             #df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values2_" + sess + '_' + cond +'.txt')
             
             df_all_Z_cor_values.to_csv(df_all_Z_cor_values_file)
@@ -344,7 +345,8 @@ def gather_Z_correl_values_by_pair():
             
         df_all_Z_cor_values = pd.DataFrame(np.transpose(pair_data),columns = sess_cond_names,index = behav_subject_ids_noA26)
         
-        df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values_" + label +'.txt')
+        #df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values_" + label +'.txt')
+        df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values3_" + label +'.txt')
         #df_all_Z_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"Z_cor_values2_" + label +'.txt')
         
         df_all_Z_cor_values.to_csv(df_all_Z_cor_values_file)
@@ -416,8 +418,9 @@ def gather_correl_values():
             
             df_all_cor_values = pd.DataFrame(np_all_cor_values,columns = labels_pairs,index = behav_subject_ids_noA26)
             
+            df_all_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"cor_values3_" + sess + '_' + cond +'.txt')
             #df_all_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"cor_values2_" + sess + '_' + cond +'.txt')
-            df_all_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"cor_values_" + sess + '_' + cond +'.txt')
+            #df_all_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"cor_values_" + sess + '_' + cond +'.txt')
             
             df_all_cor_values.to_csv(df_all_cor_values_file)
             
@@ -497,8 +500,9 @@ def gather_correl_values_by_pair():
         pair_data = np.reshape(np_all_cor_values[:,:,:,i],(-1,np_all_cor_values.shape[2]))
         
         df_all_cor_values = pd.DataFrame(np.transpose(pair_data),columns = sess_cond_names,index = behav_subject_ids_noA26)
+        df_all_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"cor_values3_" + label +'.txt')
         #df_all_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"cor_values2_" + label +'.txt')
-        df_all_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"cor_values_" + label +'.txt')
+        #df_all_cor_values_file = os.path.join(nipype_analyses_path,cor_mat_analysis_name,"cor_values_" + label +'.txt')
         df_all_cor_values.to_csv(df_all_cor_values_file)
         
     print labels_pairs

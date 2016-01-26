@@ -532,7 +532,7 @@ ROI_mask_file =  os.path.join(ROI_dir,"All_labelled_ROI-neigh_"+str(neighbourhoo
 ROI_coords_MNI_coords_file = os.path.join(ROI_dir,"Correlations3_Coordinates.txt")
 ROI_coords_labels_file =  os.path.join(ROI_dir,"Correlations3_Names.txt")
 
-cor_mat_analysis_name = "Correl_analyses-filtered-ROI_coords2-amplitude_noA26"
+cor_mat_analysis_name = "Correl_analyses-filtered-ROI_coords3-amplitude_noA26"
 
 
 conf_interval_prob = 0.05

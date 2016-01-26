@@ -132,8 +132,8 @@ class IntersectMaskInputSpec(BaseInterfaceInputSpec):
     coords_rois_file = File(exists=True, desc='ijk coords txt file', mandatory=False)
     labels_rois_file = File(exists=True, desc='labels txt file', mandatory=False)
     MNI_coords_rois_file = File(exists=True, desc='MNI coords txt file', mandatory=False)
-    #filter_thr = traits.Float(0.999, usedefault = True, desc='Value to threshold filter_mask')
-    filter_thr = traits.Float(0.9,  desc='Value to threshold filter_mask',mandatory = False,usedefault = True)
+    filter_thr = traits.Float(0.99, usedefault = True, desc='Value to threshold filter_mask')
+    #filter_thr = traits.Float(0.9,  desc='Value to threshold filter_mask',mandatory = False,usedefault = True)
                           
 class IntersectMaskOutputSpec(TraitedSpec):
     
@@ -211,15 +211,40 @@ class IntersectMask(BaseInterface):
         filter_mask_data[filter_mask_data <= filter_thr] = 0.0
         
         #print np.unique(filter_mask_data)
+        print np.unique(indexed_rois_data)
         
         print len(np.unique(indexed_rois_data))
         
-        filtered_indexed_rois_data = filter_mask_data * indexed_rois_data.copy()
+        filtered_indexed_rois_data = filter_mask_data * (indexed_rois_data.copy()+1)
         
         print len(np.unique(filtered_indexed_rois_data))
-        
+            
         filtered_indexed_rois_img_file = os.path.abspath("filtered_indexed_rois.nii")
         nib.save(nib.Nifti1Image(filtered_indexed_rois_data,indexed_rois_img.get_affine(),indexed_rois_img.get_header()),filtered_indexed_rois_img_file)
+    
+        print np.unique(filtered_indexed_rois_data)
+        
+        #index_corres = np.unique(filtered_indexed_rois_data)[:-1]
+        index_corres = np.unique(filtered_indexed_rois_data)[1:]
+        
+        print index_corres
+        
+        0/0
+        
+        reorder_indexed_rois_data = np.zeros(shape = filtered_indexed_rois_data.shape) - 1
+        
+        for i,index in enumerate(index_corres):
+            
+            if np.sum(np.array(filtered_indexed_rois_data == index,dtype = int)) == 0:
+                
+                print "Warning could not find value %d in filtered_indexed_rois_data"%index
+                continue
+            reorder_indexed_rois_data[filtered_indexed_rois_data == index] = i
+                                       
+        print np.unique(reorder_indexed_rois_data)                               
+    
+        reorder_indexed_rois_img_file = os.path.abspath("reorder_indexed_rois.nii")
+        nib.save(nib.Nifti1Image(reorder_indexed_rois_data,indexed_rois_img.get_affine(),indexed_rois_img.get_header()),reorder_indexed_rois_img_file)
     
         0/0
         
