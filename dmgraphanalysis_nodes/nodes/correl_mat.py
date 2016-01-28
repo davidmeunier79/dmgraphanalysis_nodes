@@ -139,9 +139,9 @@ class IntersectMaskOutputSpec(TraitedSpec):
     
     filtered_indexed_rois_file = File(exists=True, desc='nii file with indexed mask where all voxels belonging to the same ROI have the same value (! starting from 1)')
     
-    filtered_coords_rois_file = File(exists=True, desc='filtered ijk coords txt file')
-    filtered_ROI_labels_file = File(exists=True, desc='filtered labels txt file')
-    filtered_MNI_coords_rois_file = File(exists=True, desc='filtered MNI coords txt file')
+    filtered_coords_rois_file = File(exists=False, desc='filtered ijk coords txt file')
+    filtered_labels_rois_file = File(exists=False, desc='filtered labels txt file')
+    filtered_MNI_coords_rois_file = File(exists=False, desc='filtered MNI coords txt file')
     
     
 
@@ -211,76 +211,98 @@ class IntersectMask(BaseInterface):
         filter_mask_data[filter_mask_data <= filter_thr] = 0.0
         
         #print np.unique(filter_mask_data)
+        print "indexed_rois_data:"
         print np.unique(indexed_rois_data)
         
         print len(np.unique(indexed_rois_data))
         
-        filtered_indexed_rois_data = filter_mask_data * (indexed_rois_data.copy()+1)
+        filtered_indexed_rois_data = np.array(filter_mask_data * (indexed_rois_data.copy()+1) -1,dtype = 'int64')
         
+        print "filtered_indexed_rois_data:"
+        print np.unique(filtered_indexed_rois_data)
         print len(np.unique(filtered_indexed_rois_data))
             
         filtered_indexed_rois_img_file = os.path.abspath("filtered_indexed_rois.nii")
         nib.save(nib.Nifti1Image(filtered_indexed_rois_data,indexed_rois_img.get_affine(),indexed_rois_img.get_header()),filtered_indexed_rois_img_file)
     
-        print np.unique(filtered_indexed_rois_data)
-        
+        print "index_corres:"
         #index_corres = np.unique(filtered_indexed_rois_data)[:-1]
         index_corres = np.unique(filtered_indexed_rois_data)[1:]
         
         print index_corres
+        print len(index_corres)
         
-        0/0
-        
+        print "reorder_indexed_rois:"
         reorder_indexed_rois_data = np.zeros(shape = filtered_indexed_rois_data.shape) - 1
         
         for i,index in enumerate(index_corres):
             
-            if np.sum(np.array(filtered_indexed_rois_data == index,dtype = int)) == 0:
+            #print i,index
+            
+            if np.sum(np.array(filtered_indexed_rois_data == index,dtype = int)) != 0:
                 
+                reorder_indexed_rois_data[filtered_indexed_rois_data == index] = i
+            else:
                 print "Warning could not find value %d in filtered_indexed_rois_data"%index
-                continue
-            reorder_indexed_rois_data[filtered_indexed_rois_data == index] = i
+            
                                        
         print np.unique(reorder_indexed_rois_data)                               
     
-        reorder_indexed_rois_img_file = os.path.abspath("reorder_indexed_rois.nii")
+        reorder_indexed_rois_img_file = os.path.abspath("reorder_filtered_indexed_rois.nii")
         nib.save(nib.Nifti1Image(reorder_indexed_rois_data,indexed_rois_img.get_affine(),indexed_rois_img.get_header()),reorder_indexed_rois_img_file)
     
-        0/0
-        
     
-        ## loading ROI coordinates
-        coords_rois = np.loadtxt(coords_rois_file)
-        
-        print "coords_rois: " 
-        print coords_rois.shape
-        
-        
+        if os.path.exists(coords_rois_file):
             
+            ## loading ROI coordinates
+            coords_rois = np.loadtxt(coords_rois_file)
             
+            print "coords_rois: " 
+            print coords_rois.shape
             
-        mean_masked_ts,subj_coord_rois = mean_select_indexed_mask_data(orig_ts,indexed_mask_rois_data,coord_rois,min_BOLD_intensity = 50)
-        
-        mean_masked_ts = np.array(mean_masked_ts,dtype = 'f')
-        subj_coord_rois = np.array(subj_coord_rois,dtype = 'float')
-        
-        print mean_masked_ts.shape
+            filtered_coords_rois = coords_rois[index_corres,:]
             
-        ### saving time series
-        mean_masked_ts_file = os.path.abspath("mean_masked_ts.txt")
-        np.savetxt(mean_masked_ts_file,mean_masked_ts,fmt = '%.3f')
-        
-        ### saving subject ROIs
-        subj_coord_rois_file = os.path.abspath("subj_coord_rois.txt")
-        np.savetxt(subj_coord_rois_file,subj_coord_rois,fmt = '%.3f')
-        
-        
-        print "plotting mean_masked_ts"
-        
-        plot_mean_masked_ts_file = os.path.abspath('mean_masked_ts.eps')    
-        
-        plot_signals(plot_mean_masked_ts_file,mean_masked_ts)
-        
+            print "filtered_coords_rois: " 
+            print filtered_coords_rois
+            
+            filtered_coords_rois_file = os.path.abspath("filtered_coords_rois.txt")
+            np.savetxt(filtered_coords_rois_file,filtered_coords_rois, fmt = "%d")
+            
+        if os.path.exists(MNI_coords_rois_file):
+            
+            ## loading ROI coordinates
+            MNI_coords_rois = np.loadtxt(MNI_coords_rois_file)
+            
+            print "MNI_coords_rois: " 
+            print MNI_coords_rois.shape
+            
+            filtered_MNI_coords_rois = MNI_coords_rois[index_corres,:]
+            
+            print "filtered_MNI_coords_rois: " 
+            print filtered_MNI_coords_rois
+            
+            filtered_MNI_coords_rois_file = os.path.abspath("filtered_MNI_coords_rois.txt")
+            np.savetxt(filtered_MNI_coords_rois_file,filtered_MNI_coords_rois, fmt = "%f")
+            
+        if os.path.exists(labels_rois_file):
+    
+    
+            print 'extracting node labels'
+                
+            labels_rois = [line.strip() for line in open(labels_rois_file)]
+            print labels_rois
+            
+            np_labels_rois = np.array(labels_rois,dtype = 'str')
+            
+                
+            filtered_labels_rois = np_labels_rois[index_corres]
+            
+            print "filtered_coords_rois: " 
+            print filtered_coords_rois
+            
+            filtered_labels_rois_file = os.path.abspath("filtered_labels_rois.txt")
+            np.savetxt(filtered_labels_rois_file,filtered_labels_rois, fmt = "%s")
+            
         return runtime
         
         #return mean_masked_ts_file,subj_coord_rois_file
@@ -289,8 +311,11 @@ class IntersectMask(BaseInterface):
         
         outputs = self._outputs().get()
         
-        outputs["mean_masked_ts_file"] = os.path.abspath("mean_masked_ts.txt")
-        outputs["subj_coord_rois_file"] = os.path.abspath("subj_coord_rois.txt")
+        outputs["filtered_indexed_rois_file"] = os.path.abspath("reorder_filtered_indexed_rois.nii")
+    
+        outputs["filtered_MNI_coords_rois_file"] = os.path.abspath("filtered_MNI_coords_rois.txt")
+        outputs["filtered_coords_rois_file"] = os.path.abspath("filtered_coords_rois.txt")
+        outputs["filtered_labels_rois_file"] = os.path.abspath("filtered_labels_rois.txt")
     
         return outputs
 
@@ -301,7 +326,11 @@ class IntersectMask(BaseInterface):
 from dmgraphanalysis_nodes.utils_cor import mean_select_mask_data
 
 class ExtractMeanTSInputSpec(BaseInterfaceInputSpec):
-    mask_file = File(exists=True, desc='mask file where all voxels belonging to the selected region have index 1', mandatory=True)
+    mask_file = File(xor = ['filter_mask_file'], exists=True, desc='mask file where all voxels belonging to the selected region have index 1', mandatory=True)
+    
+    filter_mask_file = File(xor = ['mask_file'],requires = ['filter_thr'], exists=True, desc='mask file where all voxels belonging to the selected region have values higher than threshold', mandatory=True)
+    
+    filter_thr = traits.Float(0.99, usedefault = True, desc='Value to threshold filter_mask')
     
     file_4D = File(exists=True, desc='4D volume to be extracted', mandatory=True)
     
@@ -327,7 +356,8 @@ class ExtractMeanTS(BaseInterface):
         
         file_4D = self.inputs.file_4D
         mask_file = self.inputs.mask_file
-        
+        filter_mask_file = self.inputs.filter_mask_file
+        filter_thr = self.inputs.filter_thr
         
         if isdefined(self.inputs.suffix):
             suffix = self.inputs.suffix
@@ -344,17 +374,31 @@ class ExtractMeanTS(BaseInterface):
         print img_data.shape
 
         
-        print "loading mask data " + mask_file
-
         ### Reading 4D volume file to extract time series
-        mask_data = nib.load(mask_file).get_data()
+        if isdefined(mask_file):
         
-        print mask_data.shape
+            print "loading mask data " + mask_file
 
+            mask_data = nib.load(mask_file).get_data()
+            
+        elif isdefined(filter_mask_file):
+            print "loading filter mask data " + filter_mask_file
+
+            filter_mask_data = nib.load(filter_mask_file).get_data()
+            mask_data = np.zeros(shape = filter_mask_data.shape, dtype = 'int')
+            
+            mask_data[filter_mask_data > filter_thr] = 1
+            
+        print np.unique(mask_data)
+        print mask_data.shape
+        
         print "mean_select_mask_data"
         
         ### Retaining only time series who are within the mask + non_zero
         mean_masked_ts = mean_select_mask_data(img_data,mask_data)
+        
+        print mean_masked_ts
+        print mean_masked_ts.shape
         
         print "saving mean_masked_ts"
         mean_masked_ts_file = os.path.abspath('mean_' + suffix + '_ts.txt')    
