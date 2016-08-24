@@ -99,6 +99,10 @@ class ComputeNetList(BaseInterface):
             Z_list = Z_list[sorted_indexes,:]
             
             print Z_list
+        else:
+            
+            Z_list = return_net_list(Z_cor_mat)
+        
             
         ## Z correl_mat as list of edges
         
